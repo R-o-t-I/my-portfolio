@@ -1,0 +1,54 @@
+$bg-primary: #05070d;
+$bg-accent-start: #1a1b3d; // Фиолетовый оттенок для градиента
+$bg-accent-end: #0f1123; // Темно-синий оттенок для градиента
+
+.wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: $min-height-viewport;
+
+  // Фоновый градиент (создает эффект глубокого космоса/темной темы)
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba($bg-accent-start, 0.6) 0%,
+    $bg-primary 70%
+  );
+
+  // Декоративные "световые пятна" (Ambient Glow)
+  // Создаем псевдо-элементы для эффекта размытых огней за карточками
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(
+      circle,
+      rgba(88, 86, 214, 0.15) 0%,
+      transparent 70%
+    );
+    filter: blur(80px); // Сильное размытие для мягкого свечения
+    pointer-events: none; // Чтобы не мешать кликам
+    z-index: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 70%;
+    height: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(154, 108, 219, 0.1) 0%,
+      transparent 70%
+    );
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+}

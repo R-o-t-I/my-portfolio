@@ -1,0 +1,21 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: $padding-section;
+  scroll-margin-top: calc($navbar-height + $padding-section-y);
+
+  .header {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    .middle {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+  }
+}

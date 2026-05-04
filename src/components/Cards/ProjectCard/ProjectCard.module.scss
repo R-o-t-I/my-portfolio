@@ -1,0 +1,63 @@
+.card {
+  @include glass-effect($padding: 4px);
+  cursor: pointer;
+
+  .snippet_wrapper {
+    position: relative;
+    aspect-ratio: 16 / 9;
+
+    .snippet {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .category_wrapper {
+      position: absolute;
+      @include glass-effect($radius: 10px);
+      top: 6px;
+      left: 6px;
+    }
+  }
+
+  .middle {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .header {
+      display: flex;
+      align-items: center;
+      align-content: center;
+      gap: 12px;
+
+      .logo_wrapper {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        flex-shrink: 0;
+        @include glass-effect($padding: 2px);
+
+        overflow: hidden;
+
+        .logo {
+          border-radius: 14px;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .title {
+        @include text-truncate($lines: 2);
+      }
+    }
+
+    .description {
+      @include text-truncate($lines: 3);
+    }
+  }
+}

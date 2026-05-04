@@ -1,0 +1,39 @@
+.title {
+  font-family: $font-title;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+  text-wrap: pretty;
+
+  //Размер текста
+  &.size_sm {
+    font-size: 16px;
+  }
+
+  &.size_md {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  &.size_lg {
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 100%;
+  }
+
+  //Выравнивание
+  &.align_left {
+    text-align: left;
+  }
+
+  &.align_center {
+    text-align: center;
+  }
+
+  &.align_right {
+    text-align: right;
+  }
+
+  &.uppercase {
+    text-transform: uppercase;
+  }
+}

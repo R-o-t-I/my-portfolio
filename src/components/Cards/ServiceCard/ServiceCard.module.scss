@@ -1,0 +1,95 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  @include glass-effect($padding: 24px);
+
+  // Настройка 3D
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg))
+    scale3d(1, 1, 1);
+  transition:
+    transform 0.2s ease-out,
+    box-shadow 0.3s ease;
+  will-change: transform;
+
+  // 1. Светящаяся рамка (через маску)
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1.5px; // Толщина рамки
+    border-radius: 16px;
+    background: radial-gradient(
+      350px circle at var(--mouse-x) var(--mouse-y),
+      rgba(120, 140, 255, 0.5),
+      transparent 80%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 2;
+  }
+
+  // 2. Внутренний блик
+  .glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      500px circle at var(--mouse-x) var(--mouse-y),
+      rgba(120, 140, 255, 0.08),
+      transparent 40%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+  }
+
+  &:hover {
+    transform: rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg))
+      scale3d(1.03, 1.03, 1.03);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+    &::before,
+    .glow {
+      opacity: 1;
+    }
+  }
+
+  .content {
+    position: relative;
+    z-index: 3;
+    // Эффект всплытия контента в 3D
+    transform: translateZ(40px);
+    pointer-events: none;
+
+    .icon_box {
+      width: 48px;
+      height: 48px;
+      @include glass-effect;
+      @include flex-center;
+      margin-bottom: 20px;
+      background: var(--bg-glow);
+    }
+
+    .middle {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .title {
+      }
+
+      .description {
+      }
+    }
+  }
+}

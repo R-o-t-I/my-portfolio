@@ -1,0 +1,59 @@
+/* Фоны (background) */
+$background-primary: var(--background-primary);
+
+/* Текста (text) */
+$color-text-primary: var(--color-text-primary);
+$color-text-secondary: var(--color-text-secondary);
+$color-text-accent: var(--color-text-accent);
+$color-text-accent-gradient: var(--color-text-accent-gradient);
+
+/* Кнопки (Button) */
+// Фоны кнопок
+$background-button-primary: var(--background-button-primary);
+$background-button-primary--hover: var(--background-button-primary--hover);
+$background-button-primary--focus: var(--background-button-primary--focus);
+
+$background-button-secondary: var(--background-button-secondary);
+$background-button-secondary--hover: var(--background-button-secondary--hover);
+$background-button-secondary--focus: var(--background-button-secondary--focus);
+
+// Текста кнопок
+$color-text-button-primary: var(--color-text-button-primary);
+$color-text-button-primary--hover: var(--color-text-button-primary--hover);
+$color-text-button-primary--focus: var(--color-text-button-primary--focus);
+
+$color-text-button-secondary: var(--color-text-button-secondary);
+$color-text-button-secondary--hover: var(--color-text-button-secondary--hover);
+$color-text-button-secondary--focus: var(--color-text-button-secondary--focus);
+
+// Тени кнопки
+$shadow-button-primary: var(--shadow-button-primary);
+$shadow-button-primary--hover: var(--shadow-button-primary--hover);
+$shadow-button-primary--focus: var(--shadow-button-primary--focus);
+
+$shadow-button-secondary: var(--shadow-button-secondary);
+$shadow-button-secondary--hover: var(--shadow-button-secondary--hover);
+$shadow-button-secondary--focus: var(--shadow-button-secondary--focus);
+
+/* Адаптивность (Медиа-запросы) */
+$width-mobile-s: 320px;
+$width-mobile-m: 480px;
+$width-mobile-l: 768px;
+$width-tablet: 992px;
+$width-laptop-s: 1024px;
+$width-laptop-m: 1200px;
+$width-laptop-l: 1440px;
+
+/* Высота */
+$min-height-viewport: 100svh; // высота видимого окна
+$navbar-height: var(--navbar-height); // высота Navbar
+
+/* Шрифты */
+$font-title: "Manrope", sans-serif; // шрифт заголовков (Title)
+$font-text: "Inter", sans-serif; // шрифт текста (Text)
+$font-button: "Inter", sans-serif; // шрифт кнопок (Button)
+
+/* Отступы (padding, margin) */
+$padding-section-x: 48px;
+$padding-section-y: 24px;
+$padding-section: $padding-section-y $padding-section-x;

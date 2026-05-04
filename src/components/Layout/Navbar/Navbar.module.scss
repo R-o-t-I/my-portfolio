@@ -1,0 +1,55 @@
+.navbar {
+  position: fixed;
+  top: $padding-section-y;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  align-content: center;
+  gap: 60px;
+  justify-content: space-between;
+  z-index: 5;
+  margin: 0px $padding-section-x;
+  @include glass-effect;
+
+  .before {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    gap: 48px;
+
+    .logo_wrapper {
+      @include flex-center;
+      @include glass-effect;
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      aspect-ratio: 1 / 1;
+
+      // // Градиент
+      // background: $color-text-accent-gradient;
+
+      // // Анимация
+      // background-size: 200% 200%;
+      // animation: gradientShift 4s ease infinite;
+
+      // // Анимация для градиента
+      // @keyframes gradientShift {
+      //   0% {
+      //     background-position: 0% 50%;
+      //   }
+      //   50% {
+      //     background-position: 100% 50%;
+      //   }
+      //   100% {
+      //     background-position: 0% 50%;
+      //   }
+      // }
+    }
+
+    .nav_list {
+      display: flex;
+      gap: 24px;
+    }
+  }
+}

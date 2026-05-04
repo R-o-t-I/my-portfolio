@@ -1,0 +1,83 @@
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+  gap: 8px;
+  border-radius: 16px;
+  cursor: pointer;
+  text-wrap: nowrap;
+  padding: 12px 16px;
+
+  /* Mode */
+  &.mode_primary {
+    background: $background-button-primary;
+    color: $color-text-button-primary;
+    box-shadow: $shadow-button-primary;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: $background-button-primary--hover;
+        color: $color-text-button-primary--hover;
+        box-shadow: $shadow-button-primary--hover;
+      }
+    }
+
+    &:focus-visible {
+      background: $background-button-primary--focus;
+      color: $color-text-button-primary--focus;
+      box-shadow: $shadow-button-primary--focus;
+    }
+  }
+
+  &.mode_secondary {
+    background: $background-button-secondary;
+    color: $color-text-button-secondary;
+    box-shadow: $shadow-button-secondary;
+    backdrop-filter: blur(12px); // Размытие заднего фона (самое важное)
+    -webkit-backdrop-filter: blur(12px); // Поддержка Safari
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: $background-button-secondary--hover;
+        color: $color-text-button-secondary--hover;
+        box-shadow: $shadow-button-secondary--hover;
+      }
+    }
+
+    &:focus-visible {
+      background: $background-button-secondary--focus;
+      color: $color-text-button-secondary--focus;
+      box-shadow: $shadow-button-secondary--focus;
+    }
+  }
+  /* End Mode */
+
+  &.stretched {
+    flex-grow: 1;
+    width: 100%;
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  .children {
+    text-wrap: nowrap;
+    white-space: nowrap;
+
+    .text {
+      font-family: $font-button !important;
+    }
+  }
+
+  .before {
+  }
+
+  .link {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+  }
+}

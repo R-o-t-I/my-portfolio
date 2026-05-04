@@ -1,0 +1,160 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap");
+
+// :root {
+//   /* Фоны (backgrounds) */
+//   --background-primary: #05070d;
+
+//   /* Текста (text) */
+//   --color-text-primary: #ffffff;
+
+//   /* Кнопки (Button) */
+//   // Фоны кнопок
+//   --background-button-primary: linear-gradient(
+//     135deg,
+//     #5b8cff 0%,
+//     #7aa2ff 100%
+//   );
+//   --background-button-primary--hover: "";
+//   // Текста кнопок
+//   --color-text-button-primary: "";
+//   --color-text-button-primary--hover: "";
+// }
+
+// @media (prefers-color-scheme: dark) {
+:root {
+  /* Фоны (backgrounds) */
+  --background-primary: #070b14;
+
+  /* Текста (text) */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c6c6c6;
+  --color-text-accent: #7731da;
+  --color-text-accent-gradient: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+
+  /* Кнопки (Button) */
+  // Фоны кнопок
+  --background-button-primary: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+  --background-button-primary--hover: "";
+  --background-button-primary--focus: "";
+
+  --background-button-secondary: linear-gradient(
+    135deg,
+    rgba(20, 40, 80, 0.6),
+    rgba(20, 30, 50, 0.5)
+  );
+  --background-button-secondary--hover: "";
+  --background-button-secondary--focus: "";
+  // Текста кнопок
+  --color-text-button-primary: #ffffff;
+  --color-text-button-primary--hover: "";
+  --color-text-button-primary--focus: "";
+
+  --color-text-button-secondary: #ffffff;
+  --color-text-button-secondary--hover: "";
+  --color-text-button-secondary--focus: "";
+
+  // Тени кнопки
+  --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
+  --shadow-button-primary--hover: "";
+  --shadow-button-primary--focus: "";
+
+  --shadow-button-secondary:
+    inset 0 0 0 1px rgba(120, 140, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 0 12px rgba(120, 140, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --shadow-button-secondary--hover: "";
+  --shadow-button-secondary--focus: "";
+}
+// }
+
+html,
+body {
+  color: $color-text-primary;
+  background: $background-primary;
+
+  scroll-behavior: smooth;
+  height: 100%;
+  min-height: 100%;
+
+  margin: 0;
+
+  -webkit-font-smoothing: antialiased; // Более четкие шрифты на Mac
+  -moz-osx-font-smoothing: grayscale;
+
+  overflow-x: hidden;
+
+  font-family: "Inter", sans-serif;
+}
+
+#root {
+  min-height: $min-height-viewport;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+
+  color-scheme: light dark;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box; // Чтобы padding не раздувал ширину элементов
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+
+  &.underline {
+    text-decoration: underline;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
+  &:active {
+    opacity: 0.6;
+  }
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,19 @@
+.icon {
+  @include flex-center;
+  flex-shrink: 0;
+  vertical-align: middle;
+
+  & > svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+
+  path,
+  circle,
+  rect,
+  ellipse {
+    stroke: currentColor;
+    fill: currentColor;
+  }
+}

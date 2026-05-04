@@ -1,0 +1,24 @@
+.wrapper {
+  &.direction_row {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &.direction_column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &.gap_s {
+    gap: 8px;
+  }
+
+  &.gap_m {
+    gap: 12px;
+  }
+
+  &.stretched {
+    width: 100%;
+    flex-grow: 1;
+  }
+}
