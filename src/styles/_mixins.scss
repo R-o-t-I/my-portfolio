@@ -88,4 +88,6 @@
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.4),
     inset 0 0 12px rgba(120, 140, 255, 0.15); // Легкое свечение/тень для объема
+  transform: translateZ(0); /* Принудительно включаем GPU */
+  will-change: filter, backdrop-filter;
 }
