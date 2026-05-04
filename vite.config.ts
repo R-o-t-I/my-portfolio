@@ -31,5 +31,9 @@ export default defineConfig({
         `,
       },
     },
+    transformer: "postcss",
+  },
+  build: {
+    cssMinify: "esbuild", // Или 'cssnano', если esbuild вырезает стили
   },
 });

@@ -82,8 +82,10 @@
     rgba(20, 40, 80, $bg-opacity-start),
     rgba(20, 30, 50, $bg-opacity-end)
   ); // Полупрозрачный фон
+  /* autoprefixer: off */
   backdrop-filter: blur($blur) brightness(1.1) saturate(130%);
   -webkit-backdrop-filter: blur($blur) brightness(1.1) saturate(130%);
+  /* autoprefixer: on */
 
   // Добавление изоляции, чтобы избежать конфликтов наложения слоев
   isolation: isolate;
