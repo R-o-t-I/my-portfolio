@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 
+import { useTranslation } from "react-i18next";
+
 import { supabase } from "../../../utils/supabase";
 
 import styles from "./ProjectsSection.module.scss";
@@ -11,6 +13,7 @@ interface ProjectsSectionProps {
 }
 
 export const ProjectsSection = ({ id }: ProjectsSectionProps) => {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,9 +36,9 @@ export const ProjectsSection = ({ id }: ProjectsSectionProps) => {
   return (
     <Section
       id={id}
-      title="Проекты"
-      subtitle="Последние работы"
-      after="Все проекты"
+      title={t("section.projects.title")}
+      subtitle={t("section.projects.subtitle")}
+      after={t("section.projects.after")}
       className={styles.wrapper}
     >
       <div className={styles.projects_grid}>

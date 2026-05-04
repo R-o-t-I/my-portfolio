@@ -14,6 +14,7 @@ type ButtonProps = {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   className?: string;
   href?: string;
+  size?: "s" | "m" | "l";
 };
 
 export const Button = ({
@@ -26,6 +27,7 @@ export const Button = ({
   onClick,
   className = "",
   href,
+  size = "m",
 }: ButtonProps): React.ReactNode => {
   return (
     <button
@@ -33,6 +35,7 @@ export const Button = ({
       className={`
         ${styles.button}
         ${mode && styles[`mode_${mode}`]}
+        ${size && styles[`size_${size}`]}
         ${stretched && styles.stretched}
         ${disabled && styles.disabled}
         ${className}

@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Trans, useTranslation } from "react-i18next";
+
 import styles from "./AboutSection.module.scss";
 
 import {
@@ -21,78 +23,85 @@ import {
 
 import myPhoto from "../../../assets/image/me.jpg";
 
-const info = [
-  {
-    title: "Лет опыта",
-    content: "6",
-  },
-  {
-    title: "Проектов",
-    content: "50",
-  },
-  {
-    title: "Выпитого кофе",
-    content: "∞",
-  },
-];
-
-const social = [
-  {
-    icon: <IconLogoTelegram />,
-    href: "https://t.me/alexander_tihonovich",
-    label: "Telegram",
-  },
-  {
-    icon: <IconLogoInstagram />,
-    href: "https://www.instagram.com/alexander_tihonovich",
-    label: "Instagram",
-  },
-  {
-    icon: <IconLogoThreads />,
-    href: "https://www.threads.com/@alexander_tihonovich",
-    label: "Threads",
-  },
-  {
-    icon: <IconLogoVK />,
-    href: "https://vk.com/alexander_tihonovich",
-    label: "ВКонтакте",
-  },
-  {
-    icon: <IconLogoGitHub />,
-    href: "https://github.com/R-o-t-I",
-    label: "GitHub",
-  },
-];
-
 interface AboutSectionProps {
   id?: string;
 }
 
 export const AboutSection = ({ id }: AboutSectionProps) => {
+  const { t } = useTranslation();
+
+  const info = [
+    {
+      title: t("section.about.info.experience"),
+      content: "6",
+    },
+    {
+      title: t("section.about.info.projects"),
+      content: "50",
+    },
+    {
+      title: t("section.about.info.coffee"),
+      content: "∞",
+    },
+  ];
+
+  const social = [
+    {
+      icon: <IconLogoTelegram />,
+      href: "https://t.me/alexander_tihonovich",
+      label: t("aria_label.social.telegram"),
+    },
+    {
+      icon: <IconLogoInstagram />,
+      href: "https://www.instagram.com/alexander_tihonovich",
+      label: t("aria_label.social.instagram"),
+    },
+    {
+      icon: <IconLogoThreads />,
+      href: "https://www.threads.com/@alexander_tihonovich",
+      label: t("aria_label.social.threads"),
+    },
+    {
+      icon: <IconLogoVK />,
+      href: "https://vk.com/alexander_tihonovich",
+      label: t("aria_label.social.vk"),
+    },
+    {
+      icon: <IconLogoGitHub />,
+      href: "https://github.com/R-o-t-I",
+      label: t("aria_label.social.github"),
+    },
+  ];
+
   return (
     <Section id={id} className={styles.wrapper}>
       <div className={styles.about_wrapper}>
-        <div className={styles.greeting}>
-          <Text variant="span" size="sm">
-            <span className={styles.wave}>👋</span> Привет! Я
-          </Text>
-        </div>
+        <Text className={styles.greeting} variant="span" size="sm">
+          <span className={styles.wave}>👋</span>
+          {t("section.about.greeting")}
+        </Text>
         <div className={styles.middle}>
           <Title variant="span" size="lg" className={styles.name}>
-            Александр
+            {t("section.about.first_name")}
             <br />
-            <span>Тихонович</span>
+            <span>{t("section.about.last_name")}</span>
           </Title>
           <Text variant="p" mode="secondary">
-            Веб-разработчик, дизайнер и основатель{" "}
-            <a
-              className="underline"
-              href="https://vk.com/skyreglis"
-              target="_blank"
-            >
-              SkyReglis Studio
-            </a>
-            . Создаю современные сайты и приложения.
+            <Trans
+              t={t}
+              i18nKey="section.about.description"
+              components={[
+                <a
+                  key="0"
+                  className="underline"
+                  href="https://vk.com/skyreglis"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  SkyReglis Studio
+                </a>,
+              ]}
+            />
           </Text>
           <ButtonGroup stretched>
             <Button
@@ -103,7 +112,7 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
                 element?.scrollIntoView({ behavior: "smooth" });
               }}
             >
-              Смотреть проекты
+              {t("button.view_projects")}
             </Button>
             <Button
               mode="secondary"
@@ -113,7 +122,7 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
                 element?.scrollIntoView({ behavior: "smooth" });
               }}
             >
-              Связаться со мной
+              {t("button.contact")}
             </Button>
           </ButtonGroup>
         </div>
@@ -135,17 +144,16 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
         <img
           className={styles.image}
           src={myPhoto}
-          alt="Александр Тихонович — веб-разработчик и дизайнер"
+          alt={t("aria_label.photo.me")}
         />
         <div className={styles.bottom_wrapper}>
           <div className={styles.status_wrapper}>
             <Text className={styles.title}>
               <span className={`${styles.status} ${styles.status_available}`} />
-              Доступен для фриланса
+              {t("section.about.status.title")}
             </Text>
             <Text mode="secondary" className={styles.description}>
-              Открыт для новых проектов
-              <br />и интересного сотрудничества
+              {t("section.about.status.description")}
             </Text>
           </div>
           <div className={styles.social_wrapper}>
@@ -155,7 +163,7 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
                   href={item.href}
                   target="_blank"
                   className={styles.icon_wrapper}
-                  aria-label={`${item.label} аккаунт`}
+                  aria-label={`${item.label}`}
                 >
                   {item.icon}
                 </a>

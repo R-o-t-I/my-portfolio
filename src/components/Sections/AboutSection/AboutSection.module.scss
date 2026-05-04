@@ -11,12 +11,11 @@
     gap: 48px;
 
     .greeting {
-      @include flex-center;
+      @include flex-center($direction: row, $gap: 8px);
       @include glass-effect;
 
       padding: 8px 12px;
 
-      border-radius: 16px;
       width: max-content;
 
       .wave {

@@ -1,6 +1,8 @@
-import { StrictMode } from "react";
+import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import "./utils/i18n.tsx";
 
 import "@/styles/global.scss";
 
@@ -10,7 +12,11 @@ import { GlobalError, Home, NotFound, Project } from "@/pages";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <React.Suspense fallback="Loading...">
+        <App />
+      </React.Suspense>
+    ),
     errorElement: <GlobalError />, //доделать её, накинуть стили
     children: [
       {

@@ -4,6 +4,7 @@
   gap: 24px;
   padding: $padding-section;
   scroll-margin-top: calc($navbar-height + $padding-section-y);
+  @include max-width-section;
 
   .header {
     display: flex;

@@ -10,6 +10,29 @@
 
     <title>Веб-разработчик и дизайнер – Александр Тихонович</title>
     <meta name="description" content="Описание" />
+
+    <script>
+      (function () {
+        try {
+          const savedTheme = localStorage.getItem("theme");
+          const systemDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+
+          // Определяем тему: либо сохраненная, либо системная
+          const theme = savedTheme || (systemDark ? "dark" : "light");
+
+          if (theme === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+          } else {
+            document.documentElement.setAttribute("data-theme", "light");
+          }
+        } catch (e) {
+          // На случай, если localStorage заблокирован
+          console.error("Theme initialization failed", e);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -48,6 +48,9 @@ $width-laptop-l: 1440px;
 $min-height-viewport: 100svh; // высота видимого окна
 $navbar-height: var(--navbar-height); // высота Navbar
 
+/* Ширина */
+$max-width-section: 1440px;
+
 /* Шрифты */
 $font-title: "Manrope", sans-serif; // шрифт заголовков (Title)
 $font-text: "Inter", sans-serif; // шрифт текста (Text)

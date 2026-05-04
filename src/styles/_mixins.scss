@@ -1,3 +1,114 @@
+//Темы
+@mixin dark-palette {
+  /* Фоны (backgrounds) */
+  --background-primary: #070b14;
+
+  /* Текста (text) */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c6c6c6;
+  --color-text-accent: #7731da;
+  --color-text-accent-gradient: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+
+  /* Кнопки (Button) */
+  // Фоны кнопок
+  --background-button-primary: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+  --background-button-primary--hover: "";
+  --background-button-primary--focus: "";
+
+  --background-button-secondary: linear-gradient(
+    135deg,
+    rgba(20, 40, 80, 0.6),
+    rgba(20, 30, 50, 0.5)
+  );
+  --background-button-secondary--hover: "";
+  --background-button-secondary--focus: "";
+  // Текста кнопок
+  --color-text-button-primary: #ffffff;
+  --color-text-button-primary--hover: "";
+  --color-text-button-primary--focus: "";
+
+  --color-text-button-secondary: #ffffff;
+  --color-text-button-secondary--hover: "";
+  --color-text-button-secondary--focus: "";
+
+  // Тени кнопки
+  --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
+  --shadow-button-primary--hover: "";
+  --shadow-button-primary--focus: "";
+
+  --shadow-button-secondary:
+    inset 0 0 0 1px rgba(120, 140, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 0 12px rgba(120, 140, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --shadow-button-secondary--hover: "";
+  --shadow-button-secondary--focus: "";
+}
+
+@mixin light-palette {
+  /* Фоны (backgrounds) */
+  --background-primary: #ffffff;
+
+  /* Текста (text) */
+  --color-text-primary: #090909;
+  --color-text-secondary: #000000;
+  --color-text-accent: #7731da;
+  --color-text-accent-gradient: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+
+  /* Кнопки (Button) */
+  // Фоны кнопок
+  --background-button-primary: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+  --background-button-primary--hover: "";
+  --background-button-primary--focus: "";
+
+  --background-button-secondary: linear-gradient(
+    135deg,
+    rgba(20, 40, 80, 0.6),
+    rgba(20, 30, 50, 0.5)
+  );
+  --background-button-secondary--hover: "";
+  --background-button-secondary--focus: "";
+  // Текста кнопок
+  --color-text-button-primary: #ffffff;
+  --color-text-button-primary--hover: "";
+  --color-text-button-primary--focus: "";
+
+  --color-text-button-secondary: #ffffff;
+  --color-text-button-secondary--hover: "";
+  --color-text-button-secondary--focus: "";
+
+  // Тени кнопки
+  --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
+  --shadow-button-primary--hover: "";
+  --shadow-button-primary--focus: "";
+
+  --shadow-button-secondary:
+    inset 0 0 0 1px rgba(120, 140, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4),
+    inset 0 0 12px rgba(120, 140, 255, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --shadow-button-secondary--hover: "";
+  --shadow-button-secondary--focus: "";
+}
+
 // Адаптивность (Медиа-запросы)
 // Позволяет писать: @include tablet { ... }
 @mixin mobile-s {
@@ -50,11 +161,12 @@
 }
 
 // Центрирование элементов
-@mixin flex-center($direction: row) {
+@mixin flex-center($direction: row, $gap: 0) {
   display: flex;
-  flex-direction: $direction;
   justify-content: center;
   align-items: center;
+  flex-direction: $direction;
+  gap: $gap;
 }
 
 // Обрезка текста (Троеточие)
@@ -95,4 +207,10 @@
     inset 0 0 12px rgba(120, 140, 255, 0.15); // Легкое свечение/тень для объема
   transform: translateZ(0); /* Принудительно включаем GPU */
   will-change: filter, backdrop-filter;
+}
+
+@mixin max-width-section($max-width: 1440px, $margin: 0px auto) {
+  max-width: $max-width;
+  width: 100%;
+  margin: $margin;
 }

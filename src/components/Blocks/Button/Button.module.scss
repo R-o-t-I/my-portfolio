@@ -53,6 +53,18 @@
   }
   /* End Mode */
 
+  &.size_s {
+    min-height: 30px;
+  }
+
+  &.size_m {
+    min-height: 36px;
+  }
+
+  &.size_l {
+    min-height: 44px;
+  }
+
   &.stretched {
     flex-grow: 1;
     width: 100%;

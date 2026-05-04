@@ -1,4 +1,7 @@
 .footer {
   @include glass-effect;
-  margin: $padding-section;
+  @include max-width-section(
+    $max-width: calc($max-width-section - #{$padding-section-x * 2})
+  );
+  margin: $padding-section-y auto;
 }

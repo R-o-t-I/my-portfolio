@@ -1,81 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Manrope:wght@200..800&display=swap");
 
-// :root {
-//   /* Фоны (backgrounds) */
-//   --background-primary: #05070d;
-
-//   /* Текста (text) */
-//   --color-text-primary: #ffffff;
-
-//   /* Кнопки (Button) */
-//   // Фоны кнопок
-//   --background-button-primary: linear-gradient(
-//     135deg,
-//     #5b8cff 0%,
-//     #7aa2ff 100%
-//   );
-//   --background-button-primary--hover: "";
-//   // Текста кнопок
-//   --color-text-button-primary: "";
-//   --color-text-button-primary--hover: "";
-// }
-
-// @media (prefers-color-scheme: dark) {
 :root {
-  /* Фоны (backgrounds) */
-  --background-primary: #070b14;
+  @include dark-palette; // Тема по умолчанию
 
-  /* Текста (text) */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #c6c6c6;
-  --color-text-accent: #7731da;
-  --color-text-accent-gradient: linear-gradient(
-    135deg,
-    #403eff 0%,
-    #7731da 50%,
-    #9a6cdb 100%
-  );
+  &[data-theme="light"] {
+    @include light-palette;
+  }
 
-  /* Кнопки (Button) */
-  // Фоны кнопок
-  --background-button-primary: linear-gradient(
-    135deg,
-    #403eff 0%,
-    #7731da 50%,
-    #9a6cdb 100%
-  );
-  --background-button-primary--hover: "";
-  --background-button-primary--focus: "";
+  &[data-theme="dark"] {
+    @include dark-palette;
+  }
 
-  --background-button-secondary: linear-gradient(
-    135deg,
-    rgba(20, 40, 80, 0.6),
-    rgba(20, 30, 50, 0.5)
-  );
-  --background-button-secondary--hover: "";
-  --background-button-secondary--focus: "";
-  // Текста кнопок
-  --color-text-button-primary: #ffffff;
-  --color-text-button-primary--hover: "";
-  --color-text-button-primary--focus: "";
-
-  --color-text-button-secondary: #ffffff;
-  --color-text-button-secondary--hover: "";
-  --color-text-button-secondary--focus: "";
-
-  // Тени кнопки
-  --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
-  --shadow-button-primary--hover: "";
-  --shadow-button-primary--focus: "";
-
-  --shadow-button-secondary:
-    inset 0 0 0 1px rgba(120, 140, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4),
-    inset 0 0 12px rgba(120, 140, 255, 0.15),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  --shadow-button-secondary--hover: "";
-  --shadow-button-secondary--focus: "";
+  // Если атрибута нет, и в системе включено светлое — переключаем
+  @media (prefers-color-scheme: light) {
+    &:not([data-theme="dark"]) {
+      @include light-palette;
+    }
+  }
 }
-// }
 
 html,
 body {

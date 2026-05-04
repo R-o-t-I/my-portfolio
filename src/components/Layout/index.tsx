@@ -1,3 +1,4 @@
+export * from "./Dropdown/Dropdown";
 export * from "./Footer/Footer";
 export * from "./Navbar/Navbar";
 export * from "./Section/Section";

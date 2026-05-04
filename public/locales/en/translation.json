@@ -1,0 +1,90 @@
+{
+  "nav": {
+    "about": "About",
+    "services": "Services",
+    "projects": "Projects",
+    "skills": "Skills",
+    "reviews": "Reviews",
+    "contacts": "Contacts",
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+
+  "button": {
+    "contact": "Contact me",
+    "view_projects": "View projects"
+  },
+
+  "aria_label": {
+    "social": {
+      "telegram": "Telegram account",
+      "instagram": "Instagram account",
+      "threads": "Threads account",
+      "vk": "VK account",
+      "github": "GitHub account"
+    },
+    "photo": {
+      "me": "Alexander Tihonovich - web-developer and designer"
+    }
+  },
+
+  "section": {
+    "about": {
+      "greeting": "Hi! I",
+      "first_name": "Alexander",
+      "last_name": "Tihonovich",
+      "description": "Web-developer, designer and founder <0>SkyReglis Studio</0>. I create modern websites and applications.",
+      "info": {
+        "experience": "Experience",
+        "projects": "Projects",
+        "coffee": "Drinking coffee"
+      },
+      "status": {
+        "title": "Freelance available",
+        "description": "Open to new projects\nand interesting cooperation"
+      }
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "What am I doing",
+      "card": {
+        "code": {
+          "title": "Layout of websites and applications",
+          "description": "I create responsive, fast and cross-browser websites with clean and semantic code."
+        },
+        "design_interface": {
+          "title": "Interface design",
+          "description": "I develop stylish and user-friendly interfaces for web and mobile applications."
+        },
+        "ui_ux": {
+          "title": "UI/UX design",
+          "description": "I design user experiences that solve business problems and make the product convenient for people."
+        },
+        "design_system": {
+          "title": "System design and prototyping",
+          "description": "I create design systems, components and interactive prototypes in Figma."
+        }
+      }
+    },
+    "projects": {
+      "title": "Projects",
+      "subtitle": "Latest works",
+      "after": "All projects"
+    },
+    "skills": {
+      "title": "Skills",
+      "subtitle": "My skills"
+    },
+    "reviews": {
+      "title": "Reviews",
+      "subtitle": "What they say"
+    },
+    "contacts": {
+      "title": "Contacts",
+      "subtitle": "Contact me"
+    }
+  }
+}
