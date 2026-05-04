@@ -72,7 +72,7 @@
   $padding: 12px 16px,
   $bg-opacity-start: 0.6,
   $bg-opacity-end: 0.5,
-  $blur: 8px,
+  $blur: 12px,
   $border-opacity: 0.25
 ) {
   border-radius: $radius;
@@ -82,8 +82,11 @@
     rgba(20, 40, 80, $bg-opacity-start),
     rgba(20, 30, 50, $bg-opacity-end)
   ); // Полупрозрачный фон
-  backdrop-filter: blur($blur); // Размытие заднего фона (самое важное)
-  -webkit-backdrop-filter: blur($blur); // Поддержка Safari
+  backdrop-filter: blur($blur) brightness(1.1) saturate(130%);
+  -webkit-backdrop-filter: blur($blur) brightness(1.1) saturate(130%);
+
+  // Добавление изоляции, чтобы избежать конфликтов наложения слоев
+  isolation: isolate;
   border: 1px solid rgba(120, 140, 255, $border-opacity); // Тонкая светлая граница
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.4),
