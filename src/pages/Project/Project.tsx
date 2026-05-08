@@ -61,7 +61,7 @@ export const Project = () => {
     <Section className={styles.wrapper}>
       {
         isLoading ?
-          <Text>Заглушка</Text>
+          <Text>Загружаем проект</Text>
           // Контент показываем только когда данные есть и загрузка завершена
         : project && (
             <div className={styles.container}>

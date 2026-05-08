@@ -58,16 +58,16 @@ export const Navbar = ({}) => {
 
   const languages = [
     {
-      code: "RU",
+      code: "ru",
       flag: "🇷🇺",
       label: "Русский",
-      onClick: () => i18n.changeLanguage("RU"),
+      onClick: () => i18n.changeLanguage("ru"),
     },
     {
-      code: "EN",
+      code: "en",
       flag: "🇬🇧",
       label: "English",
-      onClick: () => i18n.changeLanguage("EN"),
+      onClick: () => i18n.changeLanguage("en"),
     },
   ];
 
@@ -143,7 +143,7 @@ export const Navbar = ({}) => {
         <div className={styles.controls}>
           <Dropdown
             dropdownContent={(closeMenu) => (
-              <div className="dropdown_content">
+              <React.Fragment>
                 {scheme.map((item) => (
                   <div
                     key={item.value}
@@ -158,7 +158,7 @@ export const Navbar = ({}) => {
                     <Text>{item.label}</Text>
                   </div>
                 ))}
-              </div>
+              </React.Fragment>
             )}
           >
             <div className={styles.dropdown}>
@@ -171,7 +171,7 @@ export const Navbar = ({}) => {
 
           <Dropdown
             dropdownContent={(closeMenu) => (
-              <div className="dropdown_content">
+              <React.Fragment>
                 {languages.map((item, index) => (
                   <React.Fragment key={index}>
                     <div
@@ -187,7 +187,7 @@ export const Navbar = ({}) => {
                     </div>
                   </React.Fragment>
                 ))}
-              </div>
+              </React.Fragment>
             )}
           >
             <div className={styles.dropdown}>

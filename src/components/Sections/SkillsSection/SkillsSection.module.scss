@@ -1,0 +1,42 @@
+.wrapper {
+  // Дополнительные отступы если нужно
+}
+
+.skills_grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); // 2 колонки на мобилках
+  gap: 12px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr); // 4 колонки на десктопе
+    gap: 24px;
+  }
+}
+
+.skill_card {
+  display: flex;
+  align-items: center;
+  @include glass-effect;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .icon_box {
+    @include flex-center;
+    margin-right: 12px;
+  }
+
+  .name {
+    font-size: 16px;
+    font-weight: 500;
+    color: $color-text-primary;
+  }
+}
+
+.loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: $color-text-secondary;
+}

@@ -2,12 +2,12 @@ import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import "./utils/i18n.tsx";
+import "./i18n.tsx";
 
 import "@/styles/global.scss";
 
 import { App } from "./App.tsx";
-import { GlobalError, Home, NotFound, Project } from "@/pages";
+import { GlobalError, Home, NotFound, Project, Projects } from "@/pages";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +22,10 @@ const router = createBrowserRouter([
       {
         index: true, // Это страница по умолчанию (путь "/")
         element: <Home />,
+      },
+      {
+        path: "projects",
+        element: <Projects />,
       },
       {
         path: "project/:id",

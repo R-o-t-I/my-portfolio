@@ -1,13 +1,7 @@
-/* Фоны (background) */
+// 🎨 Фоны (backgrounds)
 $background-primary: var(--background-primary);
 
-/* Текста (text) */
-$color-text-primary: var(--color-text-primary);
-$color-text-secondary: var(--color-text-secondary);
-$color-text-accent: var(--color-text-accent);
-$color-text-accent-gradient: var(--color-text-accent-gradient);
-
-/* Кнопки (Button) */
+// Кнопки (Button)
 // Фоны кнопок
 $background-button-primary: var(--background-button-primary);
 $background-button-primary--hover: var(--background-button-primary--hover);
@@ -17,6 +11,17 @@ $background-button-secondary: var(--background-button-secondary);
 $background-button-secondary--hover: var(--background-button-secondary--hover);
 $background-button-secondary--focus: var(--background-button-secondary--focus);
 
+// Glass-эффект
+$background-glass: var(--background-glass);
+$background-wrapper: var(--background-wrapper);
+
+// 🖋️ Текста (text)
+$color-text-primary: var(--color-text-primary);
+$color-text-secondary: var(--color-text-secondary);
+$color-text-accent: var(--color-text-accent);
+$color-text-accent-gradient: var(--color-text-accent-gradient);
+
+// Кнопки (Button)
 // Текста кнопок
 $color-text-button-primary: var(--color-text-button-primary);
 $color-text-button-primary--hover: var(--color-text-button-primary--hover);
@@ -26,6 +31,11 @@ $color-text-button-secondary: var(--color-text-button-secondary);
 $color-text-button-secondary--hover: var(--color-text-button-secondary--hover);
 $color-text-button-secondary--focus: var(--color-text-button-secondary--focus);
 
+// 🧱 Границы
+// Glass-эффект
+$border-glass: var(--border-glass);
+
+// 🌑 Тени
 // Тени кнопки
 $shadow-button-primary: var(--shadow-button-primary);
 $shadow-button-primary--hover: var(--shadow-button-primary--hover);
@@ -35,7 +45,17 @@ $shadow-button-secondary: var(--shadow-button-secondary);
 $shadow-button-secondary--hover: var(--shadow-button-secondary--hover);
 $shadow-button-secondary--focus: var(--shadow-button-secondary--focus);
 
-/* Адаптивность (Медиа-запросы) */
+// Glass-эффект
+$shadow-glass: var(--shadow-glass);
+
+// 💡 Свечения (Glow) — в формате RGB, чтобы удобно использовать с alpha
+$glow-primary-rgb: var(--glow-primary-rgb); // Сине-фиолетовый
+$glow-primary-alpha: var(--glow-primary-alpha);
+
+$glow-secondary-rgb: var(--glow-secondary-rgb); // Фиолетовый
+$glow-secondary-alpha: var(--glow-secondary-alpha);
+
+// 🌐 Адаптивность (Медиа-запросы)
 $width-mobile-s: 320px;
 $width-mobile-m: 480px;
 $width-mobile-l: 768px;
@@ -44,19 +64,18 @@ $width-laptop-s: 1024px;
 $width-laptop-m: 1200px;
 $width-laptop-l: 1440px;
 
-/* Высота */
+// 📏 Размеры
 $min-height-viewport: 100svh; // высота видимого окна
 $navbar-height: var(--navbar-height); // высота Navbar
 
-/* Ширина */
 $max-width-section: 1440px;
 
-/* Шрифты */
+// ✍️ Шрифты
 $font-title: "Manrope", sans-serif; // шрифт заголовков (Title)
 $font-text: "Inter", sans-serif; // шрифт текста (Text)
 $font-button: "Inter", sans-serif; // шрифт кнопок (Button)
 
-/* Отступы (padding, margin) */
+// 🧩 Отступы (padding, margin)
 $padding-section-x: 48px;
 $padding-section-y: 24px;
 $padding-section: $padding-section-y $padding-section-x;

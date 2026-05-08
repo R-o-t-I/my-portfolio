@@ -12,10 +12,12 @@
       "system": "Системная"
     }
   },
+
   "button": {
     "contact": "Связаться со мной",
     "view_projects": "Смотреть проекты"
   },
+
   "aria_label": {
     "social": {
       "telegram": "Telegram аккаунт",
@@ -28,6 +30,7 @@
       "me": "Александр Тихонович — веб-разработчик и дизайнер"
     }
   },
+
   "section": {
     "about": {
       "greeting": "Привет! Я",
@@ -82,6 +85,12 @@
     "contacts": {
       "title": "Контакты",
       "subtitle": "Связаться со мной"
+    }
+  },
+
+  "page": {
+    "projects": {
+      "title": "Все проекты"
     }
   }
 }

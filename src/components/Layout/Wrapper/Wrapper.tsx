@@ -16,7 +16,7 @@ export const Wrapper = ({ children, className = "" }: WrapperProps) => {
         ${className}
       `}
     >
-      {children}
+      <div className={styles.content}>{children}</div>
     </div>
   );
 };

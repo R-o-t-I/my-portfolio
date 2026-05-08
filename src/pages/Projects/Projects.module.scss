@@ -1,0 +1,10 @@
+.wrapper {
+  flex-grow: 1;
+  margin-top: calc($navbar-height + $padding-section-y);
+
+  .projects_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}

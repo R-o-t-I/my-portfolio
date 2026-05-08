@@ -22,46 +22,70 @@
     #7731da 50%,
     #9a6cdb 100%
   );
-  --background-button-primary--hover: "";
-  --background-button-primary--focus: "";
+  --background-button-primary--hover: null;
+  --background-button-primary--focus: null;
 
   --background-button-secondary: linear-gradient(
     135deg,
     rgba(20, 40, 80, 0.6),
     rgba(20, 30, 50, 0.5)
   );
-  --background-button-secondary--hover: "";
-  --background-button-secondary--focus: "";
+  --background-button-secondary--hover: null;
+  --background-button-secondary--focus: null;
   // Текста кнопок
   --color-text-button-primary: #ffffff;
-  --color-text-button-primary--hover: "";
-  --color-text-button-primary--focus: "";
+  --color-text-button-primary--hover: null;
+  --color-text-button-primary--focus: null;
 
   --color-text-button-secondary: #ffffff;
-  --color-text-button-secondary--hover: "";
-  --color-text-button-secondary--focus: "";
+  --color-text-button-secondary--hover: null;
+  --color-text-button-secondary--focus: null;
 
   // Тени кнопки
   --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
-  --shadow-button-primary--hover: "";
-  --shadow-button-primary--focus: "";
+  --shadow-button-primary--hover: null;
+  --shadow-button-primary--focus: null;
 
   --shadow-button-secondary:
     inset 0 0 0 1px rgba(120, 140, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4),
     inset 0 0 12px rgba(120, 140, 255, 0.15),
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  --shadow-button-secondary--hover: "";
-  --shadow-button-secondary--focus: "";
+  --shadow-button-secondary--hover: null;
+  --shadow-button-secondary--focus: null;
+
+  --background-glass: linear-gradient(
+    135deg,
+    rgba(20, 40, 80, 0.6),
+    rgba(20, 30, 50, 0.5)
+  );
+  --border-glass: 1px solid rgba(120, 140, 255, 0.25);
+  --shadow-glass:
+    0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(120, 140, 255, 0.15);
+  --glass-brightness: 1.1;
+  --glass-saturate: 130%;
+
+  --background-wrapper: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(26, 27, 61, 0.6) 0%,
+    #05070d 70%
+  );
+
+  // Цвета свечений (в формате RGB, чтобы удобно использовать с alpha)
+  --glow-primary-rgb: 88, 86, 214; // Сине-фиолетовый
+  --glow-primary-alpha: 0.15;
+
+  --glow-secondary-rgb: 154, 108, 219; // Фиолетовый
+  --glow-secondary-alpha: 0.1;
 }
 
 @mixin light-palette {
   /* Фоны (backgrounds) */
-  --background-primary: #ffffff;
+  --background-primary: #f8f9fc; // Мягкий светло-серый фон вместо чисто белого
 
-  /* Текста (text) */
-  --color-text-primary: #090909;
-  --color-text-secondary: #000000;
-  --color-text-accent: #7731da;
+  /* Текст (text) */
+  --color-text-primary: #1a1d2d; // Глубокий тёмно-синий вместо чёрного
+  --color-text-secondary: #5a5f70; // Приглушённый серо-синий
+  --color-text-accent: #7731da; // Тот же акцентный цвет — работает и на светлом
   --color-text-accent-gradient: linear-gradient(
     135deg,
     #403eff 0%,
@@ -77,36 +101,54 @@
     #7731da 50%,
     #9a6cdb 100%
   );
-  --background-button-primary--hover: "";
-  --background-button-primary--focus: "";
+  --background-button-primary--hover: null;
+  --background-button-primary--focus: null;
 
-  --background-button-secondary: linear-gradient(
-    135deg,
-    rgba(20, 40, 80, 0.6),
-    rgba(20, 30, 50, 0.5)
-  );
-  --background-button-secondary--hover: "";
-  --background-button-secondary--focus: "";
+  --background-button-secondary: #e6e8f0; // Светлый серо-синий фон
+  --background-button-secondary--hover: #d0d4e4;
+  --background-button-secondary--focus: #c4c9db;
   // Текста кнопок
   --color-text-button-primary: #ffffff;
-  --color-text-button-primary--hover: "";
-  --color-text-button-primary--focus: "";
+  --color-text-button-primary--hover: null;
+  --color-text-button-primary--focus: null;
 
-  --color-text-button-secondary: #ffffff;
-  --color-text-button-secondary--hover: "";
-  --color-text-button-secondary--focus: "";
+  --color-text-button-secondary: #1a1d2d;
+  --color-text-button-secondary--hover: null;
+  --color-text-button-secondary--focus: null;
 
-  // Тени кнопки
-  --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
-  --shadow-button-primary--hover: "";
-  --shadow-button-primary--focus: "";
+  // Тени кнопок
+  --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.3);
+  --shadow-button-primary--hover: null;
+  --shadow-button-primary--focus: null;
 
   --shadow-button-secondary:
-    inset 0 0 0 1px rgba(120, 140, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.4),
-    inset 0 0 12px rgba(120, 140, 255, 0.15),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  --shadow-button-secondary--hover: "";
-  --shadow-button-secondary--focus: "";
+    inset 0 0 0 1px rgba(120, 140, 255, 0.15), 0 2px 10px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  --shadow-button-secondary--hover: null;
+  --shadow-button-secondary--focus: null;
+
+  --background-glass: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.7),
+    rgba(240, 242, 250, 0.6)
+  );
+  --border-glass: 1px solid rgba(100, 120, 200, 0.15);
+  --shadow-glass:
+    0 4px 20px rgba(0, 0, 0, 0.1), inset 0 0 12px rgba(120, 140, 255, 0.05);
+  --glass-brightness: 1;
+  --glass-saturate: 110%;
+
+  --background-wrapper: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(240, 242, 255, 0.8) 0%,
+    #f8f9fc 70%
+  );
+
+  --glow-primary-rgb: 100, 120, 240; // Мягкий синий
+  --glow-primary-alpha: 0.2;
+
+  --glow-secondary-rgb: 180, 140, 230; // Светлый фиолетовый
+  --glow-secondary-alpha: 0.1;
 }
 
 // Адаптивность (Медиа-запросы)
@@ -179,34 +221,38 @@
 }
 
 // Миксин для эффектна Glassmorphism
-@mixin glass-effect(
-  $radius: 16px,
-  $padding: 12px 16px,
-  $bg-opacity-start: 0.6,
-  $bg-opacity-end: 0.5,
-  $blur: 8px,
-  $border-opacity: 0.25
-) {
+@mixin glass-effect($radius: 16px, $padding: 12px 16px, $blur: 8px) {
   border-radius: $radius;
   padding: $padding;
-  background: linear-gradient(
-    135deg,
-    rgba(20, 40, 80, $bg-opacity-start),
-    rgba(20, 30, 50, $bg-opacity-end)
-  ); // Полупрозрачный фон
+
+  // Используем CSS-переменные для гибкости
+  background: var(--background-glass); // Полупрозрачный фон, зависит от темы
   /* autoprefixer: off */
-  backdrop-filter: blur($blur) brightness(1.1) saturate(130%);
-  -webkit-backdrop-filter: blur($blur) brightness(1.1) saturate(130%);
+  backdrop-filter: blur($blur) brightness(var(--glass-brightness, 1.1))
+    saturate(var(--glass-saturate, 130%));
+  -webkit-backdrop-filter: blur($blur) brightness(var(--glass-brightness, 1.1))
+    saturate(var(--glass-saturate, 130%));
   /* autoprefixer: on */
 
-  // Добавление изоляции, чтобы избежать конфликтов наложения слоев
   isolation: isolate;
-  border: 1px solid rgba(120, 140, 255, $border-opacity); // Тонкая светлая граница
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.4),
-    inset 0 0 12px rgba(120, 140, 255, 0.15); // Легкое свечение/тень для объема
-  transform: translateZ(0); /* Принудительно включаем GPU */
+  border: var(--border-glass); // Градиентная или полупрозрачная граница
+  box-shadow: var(--shadow-glass); // Адаптивная тень
+  transform: translateZ(0);
   will-change: filter, backdrop-filter;
+
+  @supports (backdrop-filter: blur(1px)) {
+    backdrop-filter: blur($blur) brightness(var(--glass-brightness, 1.1))
+      saturate(var(--glass-saturate, 130%));
+    -webkit-backdrop-filter: blur($blur)
+      brightness(var(--glass-brightness, 1.1))
+      saturate(var(--glass-saturate, 130%));
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    // Альтернативный фон без blur
+    background: var(--background-glass-fallback, rgba(255, 255, 255, 0.8));
+    border: 1px solid rgba(200, 200, 255, 0.2);
+  }
 }
 
 @mixin max-width-section($max-width: 1440px, $margin: 0px auto) {

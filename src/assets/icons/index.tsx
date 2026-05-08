@@ -12,6 +12,14 @@ import Prototype from "./IconPrototype.svg";
 import Pen from "./IconPen.svg";
 import Layers from "./IconLayers.svg";
 
+import LogoHtml from "./skills/IconLogoHtml.svg";
+import LogoCss from "./skills/IconLogoCss.svg";
+import LogoJs from "./skills/IconLogoJs.svg";
+import LogoTs from "./skills/IconLogoTs.svg";
+import LogoReact from "./skills/IconLogoReact.svg";
+import LogoNextjs from "./skills/IconLogoNextjs.svg";
+import LogoFigma from "./skills/IconLogoFigma.svg";
+
 interface IconProps {
   size?: number | string;
   color?: string;
@@ -71,5 +79,47 @@ export const IconPen = (props: IconProps) => (
 export const IconLayers = (props: IconProps) => (
   <IconWrapper {...props}>
     <Layers />
+  </IconWrapper>
+);
+
+export const IconLogoHtml = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoHtml />
+  </IconWrapper>
+);
+
+export const IconLogoCss = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoCss />
+  </IconWrapper>
+);
+
+export const IconLogoJs = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoJs />
+  </IconWrapper>
+);
+
+export const IconLogoTs = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoTs />
+  </IconWrapper>
+);
+
+export const IconLogoReact = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoReact />
+  </IconWrapper>
+);
+
+export const IconLogoNextjs = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoNextjs />
+  </IconWrapper>
+);
+
+export const IconLogoFigma = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoFigma />
   </IconWrapper>
 );

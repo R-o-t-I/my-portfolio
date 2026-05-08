@@ -17,7 +17,7 @@ export const Home = ({}) => {
       <AboutSection id="about" />
       <ServicesSection id="services" />
       <ProjectsSection id="projects" />
-      <div>
+      <div style={{ display: "flex" }}>
         <SkillsSection id="skills" />
         <ReviewsSection id="reviews" />
       </div>

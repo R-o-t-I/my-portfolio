@@ -11,6 +11,10 @@
   // Базовая анимация появления сверху вниз
   animation: fadeInDown 0.15s ease-out forwards;
 
+  @include glass-effect($padding: 0);
+
+  overflow: hidden;
+
   // Если меню открывается вверх, меняем анимацию
   &.isUp {
     animation: fadeInUp 0.15s ease-out forwards;

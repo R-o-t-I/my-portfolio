@@ -1,31 +1,34 @@
 import React, { useEffect, useState } from "react";
-
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 
-import { supabase } from "../../../utils/supabase";
+import { supabase } from "../../utils/supabase";
 
-import styles from "./ProjectsSection.module.scss";
+import styles from "./Projects.module.scss";
 
-import { Button, ProjectCard, Section } from "@/components";
+import { ProjectCard, Section, Text, Title } from "@/components";
 
-interface ProjectsSectionProps {
-  id?: string;
+interface IProjects {
+  id: string;
+  title: string;
+  description: string;
+  logo: string;
+  snippet: string;
+  category: string;
 }
 
-export const ProjectsSection = ({ id }: ProjectsSectionProps) => {
+export const Projects = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [projects, setProjects] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     const fetchProjects = async () => {
       const { data, error } = await supabase
         .from("projects")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(6);
+        .order("created_at", { ascending: false });
 
       if (data) setProjects(data);
       if (error) console.error("Ошибка:", error.message);
@@ -36,21 +39,20 @@ export const ProjectsSection = ({ id }: ProjectsSectionProps) => {
   }, []);
 
   return (
-    <Section
-      id={id}
-      title={t("section.projects.title")}
-      subtitle={t("section.projects.subtitle")}
-      after={
-        <Button onClick={() => navigate("/projects")} mode="secondary">
-          {t("section.projects.after")}
-        </Button>
-      }
-      className={styles.wrapper}
-    >
+    <Section className={styles.wrapper}>
+      <div>
+        <Title>{t("page.projects.title")}</Title>
+      </div>
+      <div>
+        <div>Все проекты</div>
+        <div>Сайты</div>
+        <div>Приложения</div>
+      </div>
       <div className={styles.projects_grid}>
         {isLoading ?
-          <p>Загружаем проекты</p>
-        : projects.map((item) => (
+          <Text>Загружаем проекты</Text>
+        : projects &&
+          projects.map((item) => (
             <ProjectCard
               key={item.id}
               slug={item.slug}
