@@ -1,21 +1,22 @@
 import React, { useEffect, useRef, useState } from "react";
-
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useNavbarItems } from "@/hooks";
 
 import styles from "./Navbar.module.scss";
-
 import { NavbarItem } from "./NavbarItem/NavbarItem";
 import { Button, Dropdown, Text } from "@/components";
-
 import { IconCode } from "@/assets/icons";
 
-export const Navbar = ({}) => {
+export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const navRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const navItems = useNavbarItems();
   const { t, i18n } = useTranslation();
+
   const [currentTheme, setCurrentTheme] = useState(
     localStorage.getItem("theme") || "system",
   );
@@ -26,35 +27,7 @@ export const Navbar = ({}) => {
     { value: "system", label: t("nav.theme.system"), icon: "⚙️" },
   ];
 
-  // Находим объект текущей темы для отображения в кнопке
   const activeTheme = scheme.find((s) => s.value === currentTheme) || scheme[0];
-
-  const nav_list = [
-    {
-      title: t("nav.about"),
-      to: "/#about",
-    },
-    {
-      title: t("nav.services"),
-      to: "/#services",
-    },
-    {
-      title: t("nav.projects"),
-      to: "/#projects",
-    },
-    {
-      title: t("nav.skills"),
-      to: "/#skills",
-    },
-    {
-      title: t("nav.reviews"),
-      to: "/#reviews",
-    },
-    {
-      title: t("nav.contacts"),
-      to: "/#contacts",
-    },
-  ];
 
   const languages = [
     {
@@ -71,21 +44,11 @@ export const Navbar = ({}) => {
     },
   ];
 
+  // УПРАВЛЕНИЕ ВЫСОТОЙ И ТЕМОЙ
   useEffect(() => {
-    if (currentTheme === "system") {
-      // Удаляем атрибут, чтобы сработал медиа-запрос (prefers-color-scheme)
-      document.documentElement.removeAttribute("data-theme");
-      localStorage.removeItem("theme");
-    } else {
-      // Устанавливаем атрибут light или dark
-      document.documentElement.setAttribute("data-theme", currentTheme);
-      localStorage.setItem("theme", currentTheme);
-    }
-
     const updateHeight = () => {
       if (navRef.current) {
         const height = navRef.current.offsetHeight;
-        // Записываем реальную высоту в глобальную CSS-переменную
         document.documentElement.style.setProperty(
           "--navbar-height",
           `${height}px`,
@@ -93,34 +56,66 @@ export const Navbar = ({}) => {
       }
     };
 
-    // Замеряем при монтировании
     updateHeight();
-
-    // Следим за ресайзом окна
     window.addEventListener("resize", updateHeight);
+    window.addEventListener("scroll", () => setIsScrolled(window.scrollY > 20));
 
-    // Если высота меняется плавно (transition), можно замерить еще раз через задержку
-    const scrollHandler = () => {
-      setIsScrolled(window.scrollY > 48);
-      updateHeight(); // Перезамеряем, так как паддинги в .scrolled могут менять высоту
-    };
+    if (currentTheme === "system") {
+      document.documentElement.removeAttribute("data-theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", currentTheme);
+    }
 
-    window.addEventListener("scroll", scrollHandler);
-
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-      window.removeEventListener("scroll", scrollHandler);
-    };
+    return () => window.removeEventListener("resize", updateHeight);
   }, [currentTheme]);
 
-  const handleContactClick = () => {
-    if (location.pathname === "/") {
-      const element = document.getElementById("contacts");
-      element?.scrollIntoView({ behavior: "smooth" });
-    } else {
-      navigate("/#contacts");
+  // ОБРАБОТКА ХЕША (Для переходов из других страниц)
+  useEffect(() => {
+    if (location.hash && location.pathname === "/") {
+      const id = location.hash.replace("#", "");
+      // Даем время на рендер контента из Supabase
+      const timer = setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+          setActiveSection(id);
+        }
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  };
+  }, [location.hash, location.pathname]);
+
+  // ОБНОВЛЕНИЕ АКТИВНОЙ СЕКЦИИ ПРИ СКРОЛЛЕ
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      setActiveSection("");
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const id = entry.target.id;
+            setActiveSection(id);
+            // Меняем URL без прыжка скролла
+            window.history.replaceState(null, "", `/#${id}`);
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+        rootMargin: `-${navRef.current?.offsetHeight || 80}px 0px 0px 0px`,
+      },
+    );
+
+    navItems.forEach((item) => {
+      const el = document.getElementById(item.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [location.pathname, navItems]);
 
   return (
     <nav
@@ -128,29 +123,37 @@ export const Navbar = ({}) => {
       className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}
     >
       <div className={styles.before}>
-        <div className={styles.logo_wrapper}>
+        <div
+          className={styles.logo_wrapper}
+          onClick={() => navigate("/")}
+          style={{ cursor: "pointer" }}
+        >
           <IconCode />
         </div>
         <div className={styles.nav_list}>
-          {nav_list.map((item, index) => (
-            <NavbarItem key={index} to={item.to}>
+          {navItems.map((item, index) => (
+            <NavbarItem
+              key={index}
+              to={item.to}
+              isActive={activeSection === item.id}
+            >
               {item.title}
             </NavbarItem>
           ))}
         </div>
       </div>
+
       <div className={styles.after}>
         <div className={styles.controls}>
           <Dropdown
             dropdownContent={(closeMenu) => (
-              <React.Fragment>
+              <>
                 {scheme.map((item) => (
                   <div
                     key={item.value}
                     className={styles.dropdown_item}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentTheme(item.value); // Меняем тему
+                    onClick={() => {
+                      setCurrentTheme(item.value);
                       closeMenu();
                     }}
                   >
@@ -158,7 +161,7 @@ export const Navbar = ({}) => {
                     <Text>{item.label}</Text>
                   </div>
                 ))}
-              </React.Fragment>
+              </>
             )}
           >
             <div className={styles.dropdown}>
@@ -171,41 +174,37 @@ export const Navbar = ({}) => {
 
           <Dropdown
             dropdownContent={(closeMenu) => (
-              <React.Fragment>
-                {languages.map((item, index) => (
-                  <React.Fragment key={index}>
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        item.onClick();
-                        closeMenu(); // Явно закрываем меню после действия
-                      }}
-                      className={styles.dropdown_item}
-                    >
-                      <span>{item.flag}</span>
-                      <Text>{item.label}</Text>
-                    </div>
-                  </React.Fragment>
+              <>
+                {languages.map((item) => (
+                  <div
+                    key={item.code}
+                    className={styles.dropdown_item}
+                    onClick={() => {
+                      item.onClick();
+                      closeMenu();
+                    }}
+                  >
+                    <span>{item.flag}</span>
+                    <Text>{item.label}</Text>
+                  </div>
                 ))}
-              </React.Fragment>
+              </>
             )}
           >
             <div className={styles.dropdown}>
-              {languages.map((item, index) => (
-                <React.Fragment key={index}>
-                  {i18n.language === item.code && (
-                    <div className={styles.title}>
-                      <span>{item.flag}</span>
-                      <Text>{item.label}</Text>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
+              <div className={styles.title}>
+                <span>
+                  {languages.find((l) => l.code === i18n.language)?.flag}
+                </span>
+                <Text>
+                  {languages.find((l) => l.code === i18n.language)?.label}
+                </Text>
+              </div>
             </div>
           </Dropdown>
         </div>
 
-        <Button mode="primary" onClick={handleContactClick}>
+        <Button mode="primary" onClick={() => navigate("/#contacts")}>
           {t("button.contact")}
         </Button>
       </div>

@@ -1,0 +1,16 @@
+.card {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  gap: 12px;
+  @include glass-effect;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .icon_wrapper {
+    @include flex-center;
+  }
+}

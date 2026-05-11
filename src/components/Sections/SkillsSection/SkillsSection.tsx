@@ -1,18 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-
-import styles from "./SkillsSection.module.scss";
-
 import { supabase } from "../../../utils/supabase";
 
-import { Section } from "@/components";
+import styles from "./SkillsSection.module.scss";
+import { Section, SkillCard, Text } from "@/components";
 
-import * as Icons from "../../../assets/icons";
+interface Category {
+  id: string;
+  name_ru: string;
+  name_en?: string;
+  icon?: string;
+  icon_color?: string;
+  display_order: number;
+  [key: string]: any; // Индексатор для name_en / name_ru
+}
 
 interface Skill {
   id: string;
-  name: string;
-  color: string;
+  name_ru: string;
+  name_en?: string;
+  skill_icon?: string;
+  skill_icon_color?: string;
+  display_order: number;
+  category: Category | null; // Категория может быть null
+  [key: string]: any;
 }
 
 interface SkillsSectionProps {
@@ -20,34 +31,61 @@ interface SkillsSectionProps {
 }
 
 export const SkillsSection = ({ id }: SkillsSectionProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const SKILL_ICONS_MAP: Record<string, React.FC<any>> = {
-    HTML: Icons.IconLogoHtml,
-    CSS: Icons.IconLogoCss,
-    JavaScript: Icons.IconLogoJs,
-    TypeScript: Icons.IconLogoTs,
-    React: Icons.IconLogoReact,
-    "Next.js": Icons.IconLogoNextjs,
-    Figma: Icons.IconLogoFigma,
-  };
+  const lang = i18n.language;
+  const nameKey = `name_${lang}`;
 
   useEffect(() => {
     const fetchSkills = async () => {
       const { data, error } = await supabase
         .from("skills")
-        .select("*")
+        .select(
+          `
+          *,
+          category:skill_categories (*)
+        `,
+        )
         .order("display_order", { ascending: true });
 
       if (data) setSkills(data);
-      if (error) console.error("Ошибка при загрузке навыков:", error.message);
+      if (error) console.error("Ошибка загрузки:", error.message);
       setIsLoading(false);
     };
 
     fetchSkills();
   }, []);
+
+  // Группируем навыки по ID категории
+  const groupedSkills = useMemo(() => {
+    return skills.reduce(
+      (acc: Record<string, { info: Category; items: Skill[] }>, skill) => {
+        // Если категория не привязана, пропускаем (защита от null)
+        if (!skill.category) return acc;
+
+        const catId = skill.category.id;
+
+        if (!acc[catId]) {
+          acc[catId] = {
+            info: skill.category,
+            items: [],
+          };
+        }
+        acc[catId].items.push(skill);
+        return acc;
+      },
+      {},
+    );
+  }, [skills]);
+
+  // Сортируем сами категории по их display_order
+  const sortedCategories = useMemo(() => {
+    return Object.values(groupedSkills).sort(
+      (a, b) => a.info.display_order - b.info.display_order,
+    );
+  }, [groupedSkills]);
 
   return (
     <Section
@@ -56,25 +94,44 @@ export const SkillsSection = ({ id }: SkillsSectionProps) => {
       subtitle={t("section.skills.subtitle")}
       className={styles.wrapper}
     >
-      <div className={styles.skills_grid}>
-        {isLoading ?
-          <p className={styles.loading}>{t("common.loading")}</p>
-        : skills.map((skill) => {
-            const IconComponent = SKILL_ICONS_MAP[skill.name];
+      {isLoading ?
+        <p className={styles.loading}>{t("common.loading")}</p>
+      : sortedCategories.map(({ info, items }) => (
+          <div key={info.id} className={styles.category_block}>
+            <div className={styles.category_header}>
+              {info.icon && (
+                <div
+                  className={styles.category_icon_wrapper}
+                  style={{ color: info.icon_color }}
+                  dangerouslySetInnerHTML={{ __html: info.icon }}
+                />
+              )}
+              <Text className={styles.title}>
+                {info[nameKey] || info.name_ru}
+              </Text>
+            </div>
 
-            return (
-              <div key={skill.id} className={styles.skill_card}>
-                <div className={styles.icon_box}>
-                  {IconComponent && (
-                    <IconComponent color={skill.color} size={28} />
-                  )}
-                </div>
-                <span className={styles.name}>{skill.name}</span>
-              </div>
-            );
-          })
-        }
-      </div>
+            <div className={styles.skills_grid}>
+              {items.map((item) => (
+                <SkillCard
+                  key={item.id}
+                  icon={
+                    item.skill_icon ?
+                      <div
+                        className={styles.skill_icon_wrapper}
+                        style={{ color: item.skill_icon_color }}
+                        dangerouslySetInnerHTML={{ __html: item.skill_icon }}
+                      />
+                    : null
+                  }
+                >
+                  {item[nameKey] || item.name_ru}
+                </SkillCard>
+              ))}
+            </div>
+          </div>
+        ))
+      }
     </Section>
   );
 };

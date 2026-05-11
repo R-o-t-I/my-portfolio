@@ -1,6 +1,6 @@
 export { Button, ButtonGroup, IconWrapper, Separator } from "./Blocks";
 
-export { ProjectCard, ServiceCard } from "./Cards";
+export { ProjectCard, ServiceCard, SkillCard } from "./Cards";
 
 export { Dropdown, Footer, Navbar, Section, Wrapper } from "./Layout";
 

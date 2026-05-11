@@ -1,0 +1,7 @@
+.wrapper {
+  &.active {
+    .navbar {
+      color: $color-text-primary;
+    }
+  }
+}

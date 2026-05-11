@@ -1,42 +1,63 @@
 .wrapper {
-  // Дополнительные отступы если нужно
-}
-
-.skills_grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); // 2 колонки на мобилках
-  gap: 12px;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(3, 1fr); // 4 колонки на десктопе
+  .category_block {
+    display: flex;
+    flex-direction: column;
     gap: 24px;
+
+    .category_header {
+      display: flex;
+      align-items: center;
+      align-content: center;
+      gap: 12px;
+
+      .category_icon_wrapper {
+        position: relative;
+        @include flex-center;
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+
+        svg {
+          @include flex-center;
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          flex-shrink: 0;
+        }
+      }
+
+      .title {
+      }
+    }
+
+    .skills_grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 24px;
+
+      .skill_icon_wrapper {
+        position: relative;
+        @include flex-center;
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+
+        svg {
+          @include flex-center;
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          flex-shrink: 0;
+        }
+      }
+    }
   }
-}
 
-.skill_card {
-  display: flex;
-  align-items: center;
-  @include glass-effect;
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
+  .loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: $color-text-secondary;
   }
-
-  .icon_box {
-    @include flex-center;
-    margin-right: 12px;
-  }
-
-  .name {
-    font-size: 16px;
-    font-weight: 500;
-    color: $color-text-primary;
-  }
-}
-
-.loading {
-  grid-column: 1 / -1;
-  text-align: center;
-  color: $color-text-secondary;
 }

@@ -9,35 +9,47 @@ import { Text } from "@/components/Typography";
 interface NavbarItemProps {
   children: React.ReactNode;
   to?: string;
+  isActive?: boolean;
 }
 
-export const NavbarItem = ({ children, to = "/" }: NavbarItemProps) => {
+export const NavbarItem = ({
+  children,
+  to = "/",
+  isActive,
+}: NavbarItemProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
 
-    // Извлекаем ID секции (например, из "/#services" получаем "services")
     const targetId = to.includes("#") ? to.split("#")[1] : null;
 
     if (location.pathname === "/") {
-      // Если мы на главной
       if (targetId) {
         const element = document.getElementById(targetId);
-        element?.scrollIntoView({ behavior: "smooth" });
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+          // Принудительно обновляем URL в строке
+          window.history.pushState(null, "", to);
+        }
       } else {
         window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.pushState(null, "", "/");
       }
     } else {
-      // Если мы на другой странице (например, в проекте)
+      // Если уходим с другой страницы на главную к якорю
       navigate(to);
     }
   };
 
   return (
-    <button onClick={handleClick} className={styles.wrapper}>
-      <Text size="sm" className={styles.navbar}>
+    <button
+      type="button" // Добавляем тип, чтобы избежать случайных отправок форм
+      onClick={handleClick}
+      className={`${styles.wrapper} ${isActive ? styles.active : ""}`}
+    >
+      <Text size="sm" mode="secondary" className={styles.navbar}>
         {children}
       </Text>
     </button>

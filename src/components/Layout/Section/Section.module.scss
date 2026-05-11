@@ -1,7 +1,9 @@
 .section {
   display: flex;
+  justify-content: center;
   flex-direction: column;
   gap: 24px;
+
   padding: $padding-section;
   scroll-margin-top: calc($navbar-height + $padding-section-y);
   @include max-width-section;

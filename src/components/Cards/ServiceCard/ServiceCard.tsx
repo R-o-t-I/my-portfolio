@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 
-import { useSound } from "@/hooks/useSound";
+import { useSound } from "@/hooks";
 
 import styles from "./ServiceCard.module.scss";
 
