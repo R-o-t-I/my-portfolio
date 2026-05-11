@@ -15,7 +15,9 @@
 
   "button": {
     "contact": "Contact me",
-    "view_projects": "View projects"
+    "view_projects": "View projects",
+    "send": "Send",
+    "attach": "Attach"
   },
 
   "aria_label": {
@@ -37,6 +39,7 @@
       "first_name": "Alexander",
       "last_name": "Tihonovich",
       "description": "Web-developer, designer and founder <0>SkyReglis Studio</0>. I create modern websites and applications.",
+      "job": "Web-development and design",
       "info": {
         "experience": "Experience",
         "projects": "Projects",
@@ -91,6 +94,27 @@
   "page": {
     "projects": {
       "title": "All projects"
+    }
+  },
+
+  "form": {
+    "input": {
+      "title": {
+        "name": "Your name",
+        "contact": "Your email address or link"
+      },
+      "placeholder": {
+        "name": "Enter your name",
+        "contact": "Enter your email or link"
+      }
+    },
+    "textarea": {
+      "title": {
+        "message": "Your message"
+      },
+      "placeholder": {
+        "message": "Enter your message"
+      }
     }
   }
 }

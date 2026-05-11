@@ -1,0 +1,38 @@
+.wrapper {
+  position: relative;
+  @include glass-effect($padding: 0);
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: background 0.3s;
+
+  .textarea {
+    flex: 1;
+    width: 100%;
+    padding: 12px;
+    display: block;
+    box-sizing: border-box;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    overflow-x: hidden;
+
+    // Начальное состояние для предотвращения прыжков при загрузке
+    height: 44px;
+    min-height: 44px;
+
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color_text_primary);
+
+    // Плавность только для высоты
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &::placeholder {
+      color: var(--color_text_placeholder);
+    }
+  }
+}

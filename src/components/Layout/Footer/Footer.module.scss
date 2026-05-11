@@ -4,4 +4,85 @@
     $max-width: calc($max-width-section - #{$padding-section-x * 2})
   );
   margin: $padding-section-y auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+  gap: 48px;
+
+  .logo_wrapper {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    gap: 12px;
+
+    .icon_wrapper {
+      @include flex-center;
+      @include glass-effect;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+
+    .middle {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .name {
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 1;
+
+        span {
+          // Градиентный текст
+          background: $color-text-accent-gradient;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          // Мягкое свечение для текста
+          filter: drop-shadow(0 0 30px rgba(119, 49, 218, 0.15));
+
+          // Для поддержки в браузерах без -webkit
+          color: $color-text-accent;
+
+          // Анимация
+          background-size: 200% 200%;
+          animation: gradientShift 4s ease infinite;
+
+          // Анимация для градиента
+          @keyframes gradientShift {
+            0% {
+              background-position: 0% 50%;
+            }
+            50% {
+              background-position: 100% 50%;
+            }
+            100% {
+              background-position: 0% 50%;
+            }
+          }
+        }
+      }
+
+      .subname {
+        font-size: 12px;
+        text-wrap: nowrap;
+      }
+    }
+  }
+
+  .social_list {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 24px;
+
+    .social_item {
+      display: flex;
+      align-items: center;
+      align-content: center;
+      gap: 12px;
+    }
+  }
 }

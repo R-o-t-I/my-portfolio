@@ -1,0 +1,46 @@
+.section {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  min-height: calc($min-height-viewport - $navbar-height - $padding-section-y);
+
+  .wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 48px;
+    margin: auto 0;
+
+    .form_wrapper {
+      @include glass-effect($padding: 24px);
+      display: flex;
+      justify-content: space-between;
+      flex-direction: column;
+      gap: 48px;
+
+      .forms_group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    .bubble_container {
+      display: flex;
+      align-content: center;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 24px;
+
+      .bubble {
+        @include glass-effect;
+        user-select: none; /* Запрещаем выделение текста */
+        transition: all 0.3s ease; /* Плавный переход при наведении */
+
+        &:hover {
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+}
