@@ -18,6 +18,7 @@ $background-wrapper: var(--background-wrapper);
 // 🖋️ Текста (text)
 $color-text-primary: var(--color-text-primary);
 $color-text-secondary: var(--color-text-secondary);
+$color_text_placeholder: var(--color_text_placeholder);
 $color-text-accent: var(--color-text-accent);
 $color-text-accent-gradient: var(--color-text-accent-gradient);
 
@@ -73,7 +74,26 @@ $max-width-section: 1440px;
 // ✍️ Шрифты
 $font-title: "Manrope", sans-serif; // шрифт заголовков (Title)
 $font-text: "Inter", sans-serif; // шрифт текста (Text)
+$font-input: "Inter", sans-serif; // шрифт текста в полях ввода
 $font-button: "Inter", sans-serif; // шрифт кнопок (Button)
+// Размер шрифтов
+$font-size-text-xs: 14px;
+$font-size-text-sm: 16px;
+$font-size-text-md: 18px;
+$font-size-text-lg: 20px;
+
+$font-size-title-sm: 16px;
+$font-size-title-md: 28px;
+$font-size-title-lg: 72px;
+// Жирность шрифтов
+$font-weight-text-xs: 400;
+$font-weight-text-sm: 400;
+$font-weight-text-md: 400;
+$font-weight-text-lg: 600;
+
+$font-weight-title-sm: 600;
+$font-weight-title-md: 700;
+$font-weight-title-lg: 700;
 
 // 🧩 Отступы (padding, margin)
 $padding-section-x: 48px;

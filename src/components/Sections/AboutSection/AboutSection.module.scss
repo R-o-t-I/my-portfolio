@@ -146,10 +146,11 @@
 
       .status_wrapper {
         @include glass-effect;
-        width: max-content;
+        // width: max-content;
         display: flex;
         flex-direction: column;
         gap: 12px;
+        width: 100%;
 
         .title {
           display: flex;
@@ -209,6 +210,7 @@
         @include glass-effect;
         @include flex-center;
         gap: 16px;
+        width: 100%;
 
         .icon_wrapper {
         }

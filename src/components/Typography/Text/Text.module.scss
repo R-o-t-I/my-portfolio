@@ -16,20 +16,23 @@
 
   //Размер текста
   &.size_xs {
-    font-size: 14px;
+    font-size: $font-size-text-xs;
+    font-weight: $font-weight-text-xs;
   }
 
   &.size_sm {
-    font-size: 16px;
+    font-size: $font-size-text-sm;
+    font-weight: $font-weight-text-sm;
   }
 
   &.size_md {
-    font-size: 18px;
+    font-size: $font-size-text-md;
+    font-weight: $font-weight-text-md;
   }
 
   &.size_lg {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: $font-size-text-lg;
+    font-weight: $font-weight-text-lg;
   }
 
   //Выравнивание

@@ -13,6 +13,8 @@ import {
   Textarea,
 } from "@/components";
 
+import { IconAttach } from "@/assets/icons";
+
 interface ContactsSectionProps {
   id?: string;
 }
@@ -41,8 +43,8 @@ export const ContactsSection = ({ id }: ContactsSectionProps) => {
             </FormItem>
           </div>
           <ButtonGroup>
-            <Button before={"button.attach"} mode="secondary" />
             <Button>{t("button.send")}</Button>
+            <Button before={<IconAttach size={20} />} mode="secondary" />
           </ButtonGroup>
         </div>
         <div className={styles.bubble_container}>

@@ -86,6 +86,8 @@
   }
 
   .before {
+    @include flex-center;
+    flex-shrink: 0;
   }
 
   .link {

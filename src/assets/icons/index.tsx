@@ -11,6 +11,7 @@ import Code from "./IconCode.svg";
 import Prototype from "./IconPrototype.svg";
 import Pen from "./IconPen.svg";
 import Layers from "./IconLayers.svg";
+import Attach from "./IconAttach.svg";
 
 interface IconProps {
   size?: number | string;
@@ -71,5 +72,11 @@ export const IconPen = (props: IconProps) => (
 export const IconLayers = (props: IconProps) => (
   <IconWrapper {...props}>
     <Layers />
+  </IconWrapper>
+);
+
+export const IconAttach = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <Attach />
   </IconWrapper>
 );

@@ -21,4 +21,18 @@
     width: 100%;
     flex-grow: 1;
   }
+
+  //Выравнивание
+  &.align_left {
+    margin-right: auto;
+  }
+
+  &.align_center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  &.align_right {
+    margin-left: auto;
+  }
 }

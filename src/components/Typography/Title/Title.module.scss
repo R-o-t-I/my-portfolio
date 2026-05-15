@@ -7,17 +7,18 @@
 
   //Размер текста
   &.size_sm {
-    font-size: 16px;
+    font-size: $font-size-title-sm;
+    font-weight: $font-weight-title-sm;
   }
 
   &.size_md {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: $font-size-title-md;
+    font-weight: $font-weight-title-md;
   }
 
   &.size_lg {
-    font-size: 72px;
-    font-weight: 700;
+    font-size: $font-size-title-lg;
+    font-weight: $font-weight-title-lg;
     line-height: 100%;
   }
 

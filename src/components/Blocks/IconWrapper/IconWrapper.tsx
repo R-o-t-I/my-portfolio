@@ -23,6 +23,7 @@ export const IconWrapper = ({
       height={size}
       viewBox={viewBox}
       strokeWidth={0}
+      preserveAspectRatio="xMidYMid meet"
       className={`${styles.icon} ${className}`}
       style={{ color }}
       xmlns="http://www.w3.org/2000/svg"
