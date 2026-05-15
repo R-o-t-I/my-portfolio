@@ -4,9 +4,18 @@ import { useTranslation } from "react-i18next";
 import { useNavbarItems } from "@/hooks";
 
 import styles from "./Navbar.module.scss";
+
 import { NavbarItem } from "./NavbarItem/NavbarItem";
 import { Button, Dropdown, Text } from "@/components";
-import { IconCode } from "@/assets/icons";
+
+import {
+  IconCode,
+  IconLangEN,
+  IconLangRU,
+  IconMoon,
+  IconSettings,
+  IconSun,
+} from "@/assets/icons";
 
 export const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -22,9 +31,17 @@ export const Navbar = () => {
   );
 
   const scheme = [
-    { value: "light", label: t("nav.theme.light"), icon: "☀️" },
-    { value: "dark", label: t("nav.theme.dark"), icon: "🌑" },
-    { value: "system", label: t("nav.theme.system"), icon: "⚙️" },
+    {
+      value: "light",
+      label: t("nav.theme.light"),
+      icon: <IconSun size={20} />,
+    },
+    { value: "dark", label: t("nav.theme.dark"), icon: <IconMoon size={20} /> },
+    {
+      value: "system",
+      label: t("nav.theme.system"),
+      icon: <IconSettings size={20} />,
+    },
   ];
 
   const activeTheme = scheme.find((s) => s.value === currentTheme) || scheme[0];
@@ -32,13 +49,13 @@ export const Navbar = () => {
   const languages = [
     {
       code: "ru",
-      flag: "🇷🇺",
+      flag: <IconLangRU size={20} />,
       label: "Русский",
       onClick: () => i18n.changeLanguage("ru"),
     },
     {
       code: "en",
-      flag: "🇬🇧",
+      flag: <IconLangEN size={20} />,
       label: "English",
       onClick: () => i18n.changeLanguage("en"),
     },
@@ -157,7 +174,7 @@ export const Navbar = () => {
                       closeMenu();
                     }}
                   >
-                    <span>{item.icon}</span>
+                    <div className={styles.icon}>{item.icon}</div>
                     <Text>{item.label}</Text>
                   </div>
                 ))}
@@ -166,7 +183,7 @@ export const Navbar = () => {
           >
             <div className={styles.dropdown}>
               <div className={styles.title}>
-                <span>{activeTheme.icon}</span>
+                <span className={styles.icon}>{activeTheme.icon}</span>
                 <Text>{activeTheme.label}</Text>
               </div>
             </div>
@@ -184,7 +201,7 @@ export const Navbar = () => {
                       closeMenu();
                     }}
                   >
-                    <span>{item.flag}</span>
+                    <div className={styles.icon}>{item.flag}</div>
                     <Text>{item.label}</Text>
                   </div>
                 ))}
@@ -193,7 +210,7 @@ export const Navbar = () => {
           >
             <div className={styles.dropdown}>
               <div className={styles.title}>
-                <span>
+                <span className={styles.icon}>
                   {languages.find((l) => l.code === i18n.language)?.flag}
                 </span>
                 <Text>

@@ -8,6 +8,8 @@ interface IconWrapperProps {
   className?: string;
   color?: string;
   viewBox?: string;
+  thereColor?: boolean;
+  fill?: string;
 }
 
 export const IconWrapper = ({
@@ -16,15 +18,20 @@ export const IconWrapper = ({
   className = "",
   color = "currentColor",
   viewBox = "0 0 28 28",
+  thereColor = false,
+  fill,
 }: IconWrapperProps) => {
+  const computedViewBox = viewBox || `0 0 ${size} ${size}`;
+
   return (
     <svg
       width={size}
       height={size}
-      viewBox={viewBox}
+      viewBox={computedViewBox}
+      fill={fill}
       strokeWidth={0}
       preserveAspectRatio="xMidYMid meet"
-      className={`${styles.icon} ${className}`}
+      className={`${!thereColor ? styles.icon : ""} ${className}`.trim()}
       style={{ color }}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"

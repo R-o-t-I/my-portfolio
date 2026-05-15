@@ -76,6 +76,10 @@
           align-items: center;
           align-content: center;
           gap: 12px;
+
+          .icon {
+            @include flex-center;
+          }
         }
       }
     }
@@ -89,4 +93,8 @@
   align-items: center;
   align-content: center;
   gap: 12px;
+
+  .icon {
+    @include flex-center;
+  }
 }

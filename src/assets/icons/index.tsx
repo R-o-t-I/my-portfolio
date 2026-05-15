@@ -12,6 +12,11 @@ import Prototype from "./IconPrototype.svg";
 import Pen from "./IconPen.svg";
 import Layers from "./IconLayers.svg";
 import Attach from "./IconAttach.svg";
+import LangRU from "./IconLangRU.svg";
+import LangEN from "./IconLangEN.svg";
+import Moon from "./IconMoon.svg";
+import Sun from "./IconSun.svg";
+import Settings from "./IconSettings.svg";
 
 interface IconProps {
   size?: number | string;
@@ -78,5 +83,35 @@ export const IconLayers = (props: IconProps) => (
 export const IconAttach = (props: IconProps) => (
   <IconWrapper {...props}>
     <Attach />
+  </IconWrapper>
+);
+
+export const IconLangRU = (props: IconProps) => (
+  <IconWrapper thereColor {...props}>
+    <LangRU />
+  </IconWrapper>
+);
+
+export const IconLangEN = (props: IconProps) => (
+  <IconWrapper thereColor {...props}>
+    <LangEN />
+  </IconWrapper>
+);
+
+export const IconMoon = (props: IconProps) => (
+  <IconWrapper thereColor fill="none" {...props}>
+    <Moon />
+  </IconWrapper>
+);
+
+export const IconSun = (props: IconProps) => (
+  <IconWrapper thereColor fill="none" {...props}>
+    <Sun />
+  </IconWrapper>
+);
+
+export const IconSettings = (props: IconProps) => (
+  <IconWrapper thereColor fill="none" {...props}>
+    <Settings />
   </IconWrapper>
 );
