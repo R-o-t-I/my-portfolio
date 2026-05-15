@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "../../utils/supabase";
+import { supabase } from "../../utils";
 
 import styles from "./Project.module.scss";
 

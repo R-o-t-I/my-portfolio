@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  min-height: calc($min-height-viewport - $navbar-height - $padding-section-y);
+  // min-height: calc($min-height-viewport - $navbar-height - $padding-section-y);
 
   .wrapper {
     display: grid;
@@ -20,7 +20,48 @@
       .forms_group {
         display: flex;
         flex-direction: column;
+        gap: 24px;
+
+        .input_group {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          width: 100%;
+
+          .and_or {
+            text-wrap: nowrap;
+            color: $color-text-secondary;
+          }
+        }
+      }
+
+      .file_badge {
+        @include glass-effect;
+        display: flex;
+        align-content: center;
+        align-items: center;
         gap: 12px;
+        width: fit-content;
+
+        .name {
+          @include text-truncate($lines: 2);
+        }
+
+        .remove_file_btn {
+          background: none;
+          border: none;
+          color: $color-text-error;
+          cursor: pointer;
+          padding: 2px 4px;
+
+          &:hover {
+            opacity: 0.8;
+          }
+        }
+      }
+
+      .file_error {
+        color: $color-text-error;
       }
     }
 

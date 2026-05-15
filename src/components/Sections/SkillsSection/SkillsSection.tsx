@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { supabase } from "../../../utils/supabase";
+import { supabase } from "../../../utils";
 
 import styles from "./SkillsSection.module.scss";
+
 import { Section, SkillCard, Text } from "@/components";
 
 interface Category {

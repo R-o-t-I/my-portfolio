@@ -1,4 +1,7 @@
 .wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   flex-grow: 1;
   margin-top: calc($navbar-height + $padding-section-y);
 }

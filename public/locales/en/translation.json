@@ -101,11 +101,12 @@
     "input": {
       "title": {
         "name": "Your name",
-        "contact": "Your email address or link"
+        "contact": "Your email address and/or link"
       },
       "placeholder": {
         "name": "Enter your name",
-        "contact": "Enter your email or link"
+        "email": "Enter your email",
+        "social": "Enter your link"
       }
     },
     "textarea": {
@@ -116,5 +117,10 @@
         "message": "Enter your message"
       }
     }
+  },
+
+  "other": {
+    "and": "and",
+    "or": "or"
   }
 }

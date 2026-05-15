@@ -3,8 +3,12 @@ import React, {
   useRef,
   useState,
   forwardRef,
+  useContext,
+  useImperativeHandle,
   type TextareaHTMLAttributes,
 } from "react";
+
+import { FormItemContext } from "../FormItem/FormItemContext";
 
 import styles from "./Textarea.module.scss";
 
@@ -20,7 +24,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       maxRows = 4,
       error,
       className = "",
-      disabled,
+      id,
+      disabled: externalDisabled,
       value: controlledValue,
       onChange,
       onFocus,
@@ -30,16 +35,24 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     },
     ref,
   ) => {
+    // Подключаем контекст формы
+    const context = useContext(FormItemContext);
+
+    // Приоритет: явные пропсы -> контекст формы -> undefined
+    const finalId = id || context?.id;
+    const finalDisabled = externalDisabled || context?.disabled;
+
     const [internalValue, setInternalValue] = useState("");
     const localRef = useRef<HTMLTextAreaElement>(null);
-    const textareaRef =
-      (ref as React.RefObject<HTMLTextAreaElement>) || localRef;
+
+    // Безопасное объединение внешнего ref и внутреннего localRef
+    useImperativeHandle(ref, () => localRef.current!);
 
     const value = controlledValue ?? internalValue;
     const [focused, setFocused] = useState(false);
 
     const resize = (forceAutoHeight = false) => {
-      const textarea = textareaRef.current;
+      const textarea = localRef.current;
       if (!textarea) return;
 
       if (forceAutoHeight) {
@@ -55,8 +68,6 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       const maxHeight = lineHeight * maxRows + padding;
       const scrollHeight = textarea.scrollHeight;
 
-      // ФИКС: Если поле пустое, игнорируем scrollHeight браузера и ставим базу.
-      // Если не пустое, проверяем порог в 6px, чтобы не прыгала первая строка.
       const isEmpty = value.toString().trim() === "";
 
       const targetHeight =
@@ -84,7 +95,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-      const textarea = textareaRef.current;
+      const textarea = localRef.current;
       if (!textarea) return;
 
       const computed = getComputedStyle(textarea);
@@ -108,19 +119,24 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     return (
       <div
-        className={`${styles.wrapper} ${error ? styles.status_error : ""} ${disabled ? styles.disabled : ""} ${className}`.trim()}
+        className={`${styles.wrapper} ${error ? styles.status_error : ""} ${finalDisabled ? styles.disabled : ""} ${className}`.trim()}
       >
         <textarea
           {...props}
-          ref={textareaRef}
+          id={finalId}
+          ref={localRef}
           value={value}
-          disabled={disabled}
+          disabled={finalDisabled}
           className={styles.textarea}
           onChange={handleChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
           onKeyDown={(e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !disabled) {
+            if (
+              (e.metaKey || e.ctrlKey) &&
+              e.key === "Enter" &&
+              !finalDisabled
+            ) {
               e.preventDefault();
               onSubmit?.();
             }

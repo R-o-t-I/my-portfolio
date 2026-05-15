@@ -1,4 +1,6 @@
-import React, { forwardRef, type InputHTMLAttributes } from "react";
+import React, { forwardRef, type InputHTMLAttributes, useContext } from "react";
+
+import { FormItemContext } from "../FormItem/FormItemContext";
 
 import styles from "./Input.module.scss";
 
@@ -8,17 +10,32 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ isError, className = "", ...props }, ref) => {
+  ({ isError, className = "", id, disabled, ...props }, ref) => {
+    // Получаем значения из контекста FormItem (если инпут обернут в FormItem)
+    const context = useContext(FormItemContext);
+
+    // Приоритет: явный проп из параметров -> значение из контекста -> undefined
+    const finalId = id || context?.id;
+    const finalDisabled = disabled || context?.disabled;
+
     // Собираем массив активных классов
     const inputClasses = [
-      styles.input, // Базовый класс из SCSS
+      styles.input,
       isError ? styles.inputError : "",
-      className, // Внешние классы
+      className,
     ]
       .filter(Boolean)
-      .join(" "); // Убираем пустые строки и соединяем пробелом
+      .join(" ");
 
-    return <input ref={ref} className={inputClasses} {...props} />;
+    return (
+      <input
+        ref={ref}
+        id={finalId}
+        disabled={finalDisabled}
+        className={inputClasses}
+        {...props}
+      />
+    );
   },
 );
 

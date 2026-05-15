@@ -1,7 +1,5 @@
 .wrapper {
   position: relative;
-  display: flex;
-  flex-direction: column;
   min-height: $min-height-viewport;
   background: $background-wrapper;
 
@@ -45,5 +43,9 @@
 
   .content {
     z-index: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: $min-height-viewport;
   }
 }

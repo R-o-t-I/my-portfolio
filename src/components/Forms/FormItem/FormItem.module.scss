@@ -17,4 +17,8 @@
   .bottom {
     opacity: 0.6;
   }
+
+  .error_text {
+    color: $color-text-error !important;
+  }
 }
