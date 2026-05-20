@@ -4,4 +4,51 @@
   justify-content: flex-start;
   flex-grow: 1;
   margin-top: calc($navbar-height + $padding-section-y);
+
+  .container {
+    display: flex;
+    align-items: flex-start;
+    align-content: flex-start;
+    flex-direction: column;
+    gap: 24px;
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 48px;
+      width: 100%;
+
+      .info {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        .category {
+          @include glass-effect;
+          @include flex-center;
+          max-width: max-content;
+        }
+
+        .middle {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+
+      .logo_wrapper {
+        @include glass-effect($padding: 8px);
+        @include flex-center;
+        overflow: hidden;
+        aspect-ratio: 1;
+        width: 400px;
+        height: 400px;
+        flex-shrink: 0;
+
+        .logo {
+          border-radius: 8px;
+        }
+      }
+    }
+  }
 }

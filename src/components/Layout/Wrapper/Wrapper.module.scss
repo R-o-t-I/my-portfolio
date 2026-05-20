@@ -42,6 +42,11 @@
   }
 
   .content {
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: column;
+    flex-grow: 1;
+
     z-index: 1;
     position: relative;
     display: flex;
