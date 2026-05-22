@@ -1,0 +1,154 @@
+.gallery_wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.gallery_container {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 0px;
+  overscroll-behavior-x: contain; // Защита от свайпбека на тачпадах
+}
+
+.gallery_item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  width: max-content;
+  scroll-snap-align: center;
+  scroll-snap-stop: center;
+
+  // Анимации при наведении на карточку
+  &:hover {
+    .image_wrapper img {
+      transform: scale(1.02);
+    }
+
+    .image_title {
+      // Запускаем бесконечную прокрутку текста туда-обратно
+      animation: marqueeText 4s linear infinite alternate;
+      // Временно отключаем маску угасания во время движения, чтобы текст читался полностью
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+  }
+}
+
+.image_wrapper {
+  position: relative;
+  height: 400px;
+  width: auto;
+  display: flex;
+  @include glass-effect($padding: 0);
+  overflow: hidden;
+
+  img {
+    height: 100%;
+    width: auto;
+    display: block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.title_wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+}
+
+.image_title {
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 100%;
+  width: max-content; // Позволяет строке занять её истинную скрытую длину во весь рост
+  min-width: 100%;
+  text-align: center;
+  display: block;
+  transition: transform 0.3s ease-in-out;
+
+  // Эффект плавного угасания текста у правого края
+  -webkit-mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+}
+
+.arrow_btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--bg-main, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-main, #0f172a);
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.5s ease-in-out;
+
+  // Подключаем анимацию плавного появления при рендере
+  animation: fadeInArrow 0.5s ease-in-out forwards;
+
+  &:hover {
+    background-color: var(--bg-hover, #f1f5f9);
+    transform: translateY(-50%) scale(1.05);
+  }
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+}
+
+.arrow_left {
+  left: -22px;
+}
+
+.arrow_right {
+  right: -22px;
+}
+
+// --- КЛЮЧЕВЫЕ КАДРЫ АНИМАЦИЙ ---
+
+@keyframes fadeInArrow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Динамическая бегущая строка без фиксированных пикселей
+@keyframes marqueeText {
+  0% {
+    transform: translateX(0%);
+  }
+  20% {
+    transform: translateX(0%); // Небольшая пауза перед началом скролла
+  }
+  80% {
+    // Сдвигает текст влево ровно на длину излишка букв, не ломая верстку
+    transform: translateX(calc(-100% + 100%));
+  }
+  100% {
+    transform: translateX(
+      calc(-100% + 100%)
+    ); // Пауза в конце перед движением назад
+  }
+}

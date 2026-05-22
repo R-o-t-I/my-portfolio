@@ -4,15 +4,17 @@ import styles from "./Button.module.scss";
 
 import { Text } from "@/components";
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  before?: React.ReactNode;
-  children?: React.ReactNode;
-  after?: React.ReactNode;
-  mode?: "primary" | "secondary";
-  stretched?: boolean;
-  href?: string;
-  size?: "s" | "m" | "l";
-};
+// Объединяем атрибуты кнопки и ссылки, чтобы TypeScript разрешал href, target, rel и т.д.
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+    before?: React.ReactNode;
+    children?: React.ReactNode;
+    after?: React.ReactNode;
+    mode?: "primary" | "secondary";
+    stretched?: boolean;
+    href?: string;
+    size?: "s" | "m" | "l";
+  };
 
 export const Button = ({
   before,
@@ -25,8 +27,10 @@ export const Button = ({
   className = "",
   href,
   size = "m",
-  type = "button", // По умолчанию ставим "button", чтобы кнопка случайно не сабмитила формы
-  ...props // Собираем остальные стандартные пропсы (например, onMouseEnter, id и т.д.)
+  type = "button",
+  target,
+  rel,
+  ...props // Сюда теперь безопасно попадут target, rel и остальные пропсы ссылки
 }: ButtonProps) => {
   // Собираем общие классы для стилизации кнопок и ссылок
   const buttonClasses = `
@@ -38,7 +42,7 @@ export const Button = ({
     ${className}
   `.trim();
 
-  // Содержимое кнопки (иконки и текст) выносим в отдельную переменную, чтобы не дублировать код
+  // Содержимое кнопки (иконки и текст)
   const content = (
     <>
       {before && <div className={styles.before}>{before}</div>}
@@ -57,11 +61,13 @@ export const Button = ({
   if (href) {
     return (
       <a
+        {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)} // Приведение типа для безопасности деструктуризации
         href={disabled ? undefined : href}
+        target={target}
+        rel={rel}
         className={buttonClasses}
-        // Если ссылка отключена, делаем её недоступной для фокуса
         tabIndex={disabled ? -1 : 0}
-        onClick={disabled ? (e) => e.preventDefault() : undefined}
+        onClick={disabled ? (e) => e.preventDefault() : onClick}
       >
         {content}
       </a>
@@ -71,7 +77,7 @@ export const Button = ({
   // Иначе рендерим стандартную кнопку <button>
   return (
     <button
-      {...props} // Прокидываем все стандартные атрибуты
+      {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
       type={type}
       disabled={disabled}
       onClick={onClick}

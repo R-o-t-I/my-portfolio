@@ -1,0 +1,26 @@
+.tabs_container {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  gap: 12px;
+  width: 100%;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  // Управление дочерними элементами через контейнер (layoutFillMode)
+  &.fill_stretched {
+    :global(.inherited_item) {
+      // Используем :global, чтобы дотянуться до модульных классов TabsItem
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  &.fill_shrinked {
+    justify-content: flex-start;
+  }
+}

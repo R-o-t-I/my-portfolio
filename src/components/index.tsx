@@ -1,4 +1,12 @@
-export { Button, ButtonGroup, IconWrapper, Separator } from "./Blocks";
+export {
+  Button,
+  ButtonGroup,
+  Gallery,
+  IconWrapper,
+  Separator,
+  Tabs,
+  TabsItem,
+} from "./Blocks";
 
 export { ProjectCard, ServiceCard, SkillCard } from "./Cards";
 

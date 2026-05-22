@@ -6,12 +6,102 @@ import { supabase } from "../../utils";
 
 import styles from "./Project.module.scss";
 
-import { Section, Text, Title } from "@/components";
+import {
+  Button,
+  ButtonGroup,
+  Gallery,
+  Section,
+  SkillCard,
+  Tabs,
+  TabsItem,
+  Text,
+  Title,
+} from "@/components";
+
+import {
+  IconAttach,
+  IconLogoGitHub,
+  IconLogoTelegram,
+  IconLogoVK,
+} from "@/assets/icons";
 
 // Строгие интерфейсы для TypeScript под JSONB структуру
 interface LocalizedField {
   ru: string;
   en?: string | null;
+}
+
+interface ProjectCategory {
+  id: string;
+  slug: string;
+  name: LocalizedField;
+  icon: LocalizedField;
+}
+
+interface ProjectSkillItem {
+  skill: {
+    id: string;
+    name: LocalizedField;
+    skill_icon: LocalizedField;
+    skill_icon_color: string | null;
+  };
+}
+
+export type LinkType = "website" | "telegram" | "vk" | "ok" | "github";
+
+const LINK_CONFIG: Record<
+  LinkType,
+  {
+    icon: React.ReactNode;
+    defaultText: { ru: string; en: string };
+  }
+> = {
+  website: {
+    icon: <IconAttach />,
+    defaultText: { ru: "Перейти на сайт", en: "Visit Website" },
+  },
+  telegram: {
+    icon: <IconLogoTelegram size={18} />,
+    defaultText: { ru: "Telegram", en: "Telegram" },
+  },
+  vk: {
+    icon: <IconLogoVK size={18} />,
+    defaultText: { ru: "ВКонтакте", en: "VKontakte" },
+  },
+  ok: {
+    icon: <IconLogoVK size={18} />,
+    defaultText: { ru: "Одноклассники", en: "Odnoklassniki" },
+  },
+  github: {
+    icon: <IconLogoGitHub size={18} />,
+    defaultText: { ru: "GitHub", en: "GitHub" },
+  },
+};
+
+export interface ProjectLink {
+  url: string;
+  type: LinkType;
+  text: {
+    ru: string;
+    en?: string | null;
+  };
+}
+
+export interface GalleryCategoryFromDb {
+  id: string;
+  name: {
+    ru: string;
+    en?: string | null;
+  };
+}
+
+export interface GalleryItem {
+  url: string;
+  category: GalleryCategoryFromDb;
+  title: {
+    ru: string;
+    en?: string | null;
+  };
 }
 
 interface ProjectItem {
@@ -22,13 +112,13 @@ interface ProjectItem {
   title: LocalizedField;
   description: LocalizedField;
   description_mini: LocalizedField;
+  history: LocalizedField;
   logo_url: LocalizedField;
   snippet_url: LocalizedField;
-  category_info: {
-    id: string;
-    slug: string;
-    name: LocalizedField;
-  } | null;
+  category: ProjectCategory | null;
+  project_skills: ProjectSkillItem[];
+  links: ProjectLink[] | null;
+  gallery: GalleryItem[] | null;
 }
 
 export const Project = () => {
@@ -38,6 +128,7 @@ export const Project = () => {
 
   const [project, setProject] = useState<ProjectItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   // Вычисляем текущий язык ('ru' или 'en')
   const currentLang = i18n.language.startsWith("ru") ? "ru" : "en";
@@ -52,9 +143,17 @@ export const Project = () => {
           .from("projects")
           .select(
             `
-            *,
-            category_info:projects_categories (*)
-          `,
+              *,
+              category:projects_categories (*),
+              project_skills (
+                skill:skills (
+                  id,
+                  name,
+                  skill_icon,
+                  skill_icon_color
+                )
+              )
+            `,
           )
           .eq("slug", slug)
           .single();
@@ -65,6 +164,7 @@ export const Project = () => {
         }
 
         setProject(data as unknown as ProjectItem);
+        setActiveCategory("all");
       } catch (err) {
         console.error(err);
         navigate("/");
@@ -77,21 +177,100 @@ export const Project = () => {
   }, [slug, navigate]);
 
   // Извлекаем локализованные данные с автоматическим фолбэком на 'ru'
+  // Извлекаем локализованные данные с автоматическим фолбэком на 'ru'
   const projectDetails = useMemo(() => {
     if (!project) return null;
+
+    // 1. Мапим стек технологий, очищая вложенную структуру от Supabase
+    const techStack =
+      project.project_skills
+        ?.map((item) => {
+          if (!item.skill) return null;
+          return {
+            id: item.skill.id,
+            name: item.skill.name[currentLang] || item.skill.name.ru,
+            icon:
+              item.skill.skill_icon[currentLang] || item.skill.skill_icon.ru,
+            color: item.skill.skill_icon_color,
+          };
+        })
+        .filter(Boolean) || [];
+
+    // 2. Мапим ссылки с проверкой наличия кастомного текста в базе данных
+    const links = (project.links || [])
+      .map((link) => {
+        const config = LINK_CONFIG[link.type];
+        if (!config) return null;
+
+        const textFromDb = link.text?.[currentLang] || link.text?.ru;
+        const finalText = textFromDb || config.defaultText[currentLang];
+
+        return {
+          url: link.url,
+          text: finalText,
+          icon: config.icon,
+        };
+      })
+      .filter(Boolean);
+
+    // 3. Мапим массив картинок для галереи, привязывая их к ID категории
+    const rawGallery = project.gallery || [];
+    const gallery = rawGallery.map((item) => ({
+      url: item.url,
+      categoryId: item.category?.id || "other",
+      title: item.title?.[currentLang] || item.title?.ru || "",
+    }));
+
+    // 4. Динамически собираем уникальные категории для табов напрямую из объектов в БД
+    const uniqueCategoriesMap = new Map<string, string>();
+
+    rawGallery.forEach((item) => {
+      if (item.category?.id) {
+        // Локализуем название таба (текущий язык -> фолбэк на русский)
+        const localizedName =
+          item.category.name[currentLang] || item.category.name.ru;
+        uniqueCategoriesMap.set(item.category.id, localizedName);
+      }
+    });
+
+    // Превращаем Map в массив объектов [{ id: 'design', name: 'Дизайн интерфейса' }]
+    const categories = Array.from(uniqueCategoriesMap.entries()).map(
+      ([id, name]) => ({
+        id,
+        name,
+      }),
+    );
+
+    // 5. Форматируем дату один раз внутри useMemo
+    const formattedDate =
+      project.created_at ?
+        new Date(project.created_at).toLocaleDateString(
+          currentLang === "ru" ? "ru-RU" : "en-US",
+          {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          },
+        )
+      : null;
 
     return {
       title: project.title[currentLang] || project.title.ru,
       description: project.description[currentLang] || project.description.ru,
       description_mini:
         project.description_mini[currentLang] || project.description_mini.ru,
+      history: project.history[currentLang] || project.history.ru,
+      created: formattedDate,
       logo: project.logo_url[currentLang] || project.logo_url.ru,
       snippet: project.snippet_url[currentLang] || project.snippet_url.ru,
       categoryName:
-        project.category_info ?
-          project.category_info.name[currentLang] ||
-          project.category_info.name.ru
+        project.category ?
+          project.category.name[currentLang] || project.category.name.ru
         : "",
+      techStack,
+      links,
+      gallery, // Готовый массив картинок для сетки
+      categories, // Готовый массив табов для кнопок фильтрации
     };
   }, [project, currentLang]);
 
@@ -123,34 +302,136 @@ export const Project = () => {
 
             <div className={styles.header}>
               <div className={styles.info}>
-                <span className={styles.category}>
-                  {projectDetails.categoryName}
-                </span>
+                {projectDetails.categoryName && (
+                  <span className={styles.category}>
+                    {projectDetails.categoryName}
+                  </span>
+                )}
                 <div className={styles.middle}>
                   <Title className={styles.title}>{projectDetails.title}</Title>
-                  <Text className={styles.description_mini}>
-                    {projectDetails.description_mini}
-                  </Text>
+                  {projectDetails.description_mini && (
+                    <Text className={styles.description_mini}>
+                      {projectDetails.description_mini}
+                    </Text>
+                  )}
+                  {projectDetails.created && (
+                    <Text size="sm">
+                      {currentLang === "ru" ? "Вышел: " : "Released: "}
+                      {projectDetails.created}
+                    </Text>
+                  )}
                 </div>
-              </div>
-              <div className={styles.logo_wrapper}>
-                {projectDetails.logo && (
-                  <img
-                    src={projectDetails.logo}
-                    alt="Logo"
-                    className={styles.logo}
-                  />
+                {/* Рендеринг кнопок-ссылок */}
+                {projectDetails.links && (
+                  <ButtonGroup className={styles.links_container}>
+                    {projectDetails.links.map((link, index) => (
+                      <Button
+                        before={link?.icon}
+                        key={index}
+                        href={link?.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.project_link}
+                      >
+                        <span>{link?.text}</span>
+                      </Button>
+                    ))}
+                  </ButtonGroup>
                 )}
               </div>
+              {projectDetails.logo && (
+                <div className={styles.logo_wrapper}>
+                  {projectDetails.logo && (
+                    <img
+                      src={projectDetails.logo}
+                      alt={projectDetails.title}
+                      className={styles.logo}
+                    />
+                  )}
+                </div>
+              )}
             </div>
 
             <div className={styles.content}>
-              {projectDetails.snippet && (
-                <img
-                  src={projectDetails.snippet}
-                  alt={projectDetails.title}
-                  className={styles.image}
-                />
+              {projectDetails.description && (
+                <div className={styles.content_item}>
+                  <Title size="sm">О проекте</Title>
+                  <Text>{projectDetails.description}</Text>
+                </div>
+              )}
+
+              {projectDetails.techStack && (
+                <div className={styles.content_item}>
+                  <Title size="sm">
+                    {currentLang === "ru" ?
+                      "Используемые технологии"
+                    : "Tech Stack"}
+                  </Title>
+                  <div className={styles.tech_list}>
+                    {projectDetails.techStack.map((tech: any) => (
+                      <div key={tech.id} className={styles.tech_item}>
+                        <SkillCard
+                          icon={
+                            tech.icon && (
+                              <div
+                                className={styles.tech_icon_wrapper}
+                                style={{ color: tech.color || undefined }}
+                                dangerouslySetInnerHTML={{
+                                  __html: tech.icon,
+                                }}
+                              />
+                            )
+                          }
+                        >
+                          {tech.name}
+                        </SkillCard>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {projectDetails.history && (
+                <div className={styles.content_item}>
+                  <Title size="sm">История проекта</Title>
+                  <Text>{projectDetails.history}</Text>
+                </div>
+              )}
+              {projectDetails.categories && (
+                <div className={styles.content_item}>
+                  <Title size="sm">Галерея</Title>
+
+                  {/* Вкладки переключения категорий (Табы) */}
+                  {projectDetails.categories.length > 1 && (
+                    <Tabs
+                      selectedId={activeCategory}
+                      onSelectedIdChange={(id) => setActiveCategory(id)}
+                      layoutFillMode="auto"
+                      withScrollToSelectedTab
+                    >
+                      <TabsItem id="all">
+                        {currentLang === "ru" ? "Все" : "All"}
+                      </TabsItem>
+
+                      {projectDetails.categories.map((cat) => {
+                        return (
+                          <TabsItem key={cat.id} id={cat.id}>
+                            {cat.name}
+                          </TabsItem>
+                        );
+                      })}
+                    </Tabs>
+                  )}
+
+                  <Gallery
+                    images={projectDetails.gallery.filter(
+                      (img) =>
+                        activeCategory === "all" ||
+                        img.categoryId === activeCategory,
+                    )}
+                    activeCategory={activeCategory}
+                  />
+                </div>
               )}
             </div>
           </div>

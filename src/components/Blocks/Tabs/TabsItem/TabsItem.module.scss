@@ -1,0 +1,38 @@
+.tabs_item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  user-select: none;
+  white-space: nowrap;
+
+  // Стили конкретно под выбранный вариант `mode="accent"`
+  &.mode_accent {
+    padding: 8px 12px;
+    border-radius: 16px;
+    background: red;
+
+    &.item_selected {
+      background: yellow;
+
+      .item_content {
+        color: green;
+      }
+    }
+  }
+
+  &.item_disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &.item_before,
+  &.item_after {
+    display: flex;
+    align-items: center;
+  }
+}
