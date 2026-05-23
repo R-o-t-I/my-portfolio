@@ -11,6 +11,21 @@ $background-button-secondary: var(--background-button-secondary);
 $background-button-secondary--hover: var(--background-button-secondary--hover);
 $background-button-secondary--focus: var(--background-button-secondary--focus);
 
+$background-button-gallery-arrow: var(--background-button-gallery-arrow);
+$background-button-gallery-arrow--hover: var(
+  --background-button-gallery-arrow--hover
+);
+$background-button-gallery-arrow--focus: var(
+  --background-button-gallery-arrow--focus
+);
+
+// Табы (Tabs)
+//Фоны табов
+$background-tab-primary: var(--background-tab-primary);
+$background-tab-primary--active: var(--background-tab-primary--active);
+$background-tab-primary--hover: var(--background-tab-primary--hover);
+$background-tab-primary--focus: var(--background-tab-primary--focus);
+
 // Glass-эффект
 $background-glass: var(--background-glass);
 $background-wrapper: var(--background-wrapper);
@@ -33,9 +48,22 @@ $color-text-button-secondary: var(--color-text-button-secondary);
 $color-text-button-secondary--hover: var(--color-text-button-secondary--hover);
 $color-text-button-secondary--focus: var(--color-text-button-secondary--focus);
 
+$color-button-gallery-arrow: var(--color-button-gallery-arrow);
+$color-button-gallery-arrow--hover: var(--color-button-gallery-arrow--hover);
+$color-button-gallery-arrow--focus: var(--color-button-gallery-arrow--focus);
+
+// Табы (Tabs)
+//Текста  табов
+$color-text-tab-primary: var(--color-text-tab-primary);
+$color-text-tab-primary--active: var(--color-text-tab-primary--active);
+$color-text-tab-primary--hover: var(--color-text-tab-primary--hover);
+$color-text-tab-primary--focus: var(--color-text-tab-primary--focus);
+
 // 🧱 Границы
 // Glass-эффект
 $border-glass: var(--border-glass);
+// Обводки кнопки
+$border-button-gallery-arrow: var(--border-button-gallery-arrow);
 
 // 🌑 Тени
 // Тени кнопки
@@ -46,6 +74,8 @@ $shadow-button-primary--focus: var(--shadow-button-primary--focus);
 $shadow-button-secondary: var(--shadow-button-secondary);
 $shadow-button-secondary--hover: var(--shadow-button-secondary--hover);
 $shadow-button-secondary--focus: var(--shadow-button-secondary--focus);
+
+$shadow-button-gallery-arrow: var(--shadow-button-gallery-arrow);
 
 // Glass-эффект
 $shadow-glass: var(--shadow-glass);

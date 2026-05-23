@@ -19,8 +19,9 @@ import {
 } from "@/components";
 
 import {
-  IconAttach,
+  IconGlobe,
   IconLogoGitHub,
+  IconLogoOK,
   IconLogoTelegram,
   IconLogoVK,
 } from "@/assets/icons";
@@ -57,7 +58,7 @@ const LINK_CONFIG: Record<
   }
 > = {
   website: {
-    icon: <IconAttach />,
+    icon: <IconGlobe />,
     defaultText: { ru: "Перейти на сайт", en: "Visit Website" },
   },
   telegram: {
@@ -69,7 +70,7 @@ const LINK_CONFIG: Record<
     defaultText: { ru: "ВКонтакте", en: "VKontakte" },
   },
   ok: {
-    icon: <IconLogoVK size={18} />,
+    icon: <IconLogoOK size={18} />,
     defaultText: { ru: "Одноклассники", en: "Odnoklassniki" },
   },
   github: {

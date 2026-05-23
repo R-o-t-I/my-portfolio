@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 
 import styles from "./Gallery.module.scss";
 
-import { Text } from "@/components";
-
 export interface GalleryImage {
   url: string;
   categoryId: string;
@@ -80,14 +78,7 @@ export const Gallery = ({ images, activeCategory }: GalleryProps) => {
       >
         {images.map((img, index) => (
           <div key={index} className={styles.gallery_item}>
-            <div className={styles.image_wrapper}>
-              <img src={img.url} alt={img.title} loading="lazy" />
-            </div>
-            {/* {img.title && (
-              <div className={styles.title_wrapper}>
-                <div className={styles.image_title}>{img.title}</div>
-              </div>
-            )} */}
+            <img src={img.url} alt={img.title} loading="lazy" />
           </div>
         ))}
       </div>

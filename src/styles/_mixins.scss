@@ -34,6 +34,22 @@
   );
   --background-button-secondary--hover: null;
   --background-button-secondary--focus: null;
+
+  --background-button-gallery-arrow: linear-gradient(
+    135deg,
+    rgba(20, 35, 70, 0.4),
+    rgba(15, 20, 40, 0.5)
+  );
+  --background-button-gallery-arrow--hover: linear-gradient(
+    135deg,
+    rgba(64, 62, 255, 0.8),
+    rgba(119, 49, 218, 0.9)
+  );
+  --background-button-gallery-arrow--focus: linear-gradient(
+    135deg,
+    rgba(64, 62, 255, 0.9),
+    rgba(119, 49, 218, 1)
+  );
   // Текста кнопок
   --color-text-button-primary: #ffffff;
   --color-text-button-primary--hover: null;
@@ -42,6 +58,10 @@
   --color-text-button-secondary: #ffffff;
   --color-text-button-secondary--hover: null;
   --color-text-button-secondary--focus: null;
+
+  --color-button-gallery-arrow: rgba(255, 255, 255, 0.7);
+  --color-button-gallery-arrow--hover: #ffffff;
+  --color-button-gallery-arrow--focus: #ffffff;
 
   // Тени кнопки
   --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.4);
@@ -55,12 +75,18 @@
   --shadow-button-secondary--hover: null;
   --shadow-button-secondary--focus: null;
 
+  --shadow-button-gallery-arrow:
+    0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(120, 140, 255, 0.1);
+
   --background-glass: linear-gradient(
     135deg,
     rgba(20, 40, 80, 0.6),
     rgba(20, 30, 50, 0.5)
   );
+
   --border-glass: 1px solid rgba(120, 140, 255, 0.25);
+  --border-button-gallery-arrow: 1px solid rgba(120, 140, 255, 0.25);
+
   --shadow-glass:
     0 4px 20px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(120, 140, 255, 0.15);
   --glass-brightness: 1.1;
@@ -71,6 +97,24 @@
     rgba(26, 27, 61, 0.6) 0%,
     #05070d 70%
   );
+
+  // Фоны табов
+  --background-tabs-container: rgba(20, 40, 80, 0.3);
+  --background-tab-primary: transparent;
+  --background-tab-primary--active: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+  --background-tab-primary--hover: rgba(120, 140, 255, 0.1);
+  --background-tab-primary--focus: rgba(120, 140, 255, 0.15);
+
+  // Текста табов
+  --color-text-tab-primary: #c6c6c6;
+  --color-text-tab-primary--active: #ffffff;
+  --color-text-tab-primary--hover: #ffffff;
+  --color-text-tab-primary--focus: #ffffff;
 
   // Цвета свечений (в формате RGB, чтобы удобно использовать с alpha)
   --glow-primary-rgb: 88, 86, 214; // Сине-фиолетовый
@@ -111,6 +155,23 @@
   --background-button-secondary: #e6e8f0; // Светлый серо-синий фон
   --background-button-secondary--hover: #d0d4e4;
   --background-button-secondary--focus: #c4c9db;
+
+  --background-button-gallery-arrow: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.75),
+    rgba(240, 242, 250, 0.65)
+  );
+  --background-button-gallery-arrow--hover: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+  --background-button-gallery-arrow--focus: linear-gradient(
+    135deg,
+    #302eed 0%,
+    #6620ca 100%
+  );
   // Текста кнопок
   --color-text-button-primary: #ffffff;
   --color-text-button-primary--hover: null;
@@ -119,6 +180,10 @@
   --color-text-button-secondary: #1a1d2d;
   --color-text-button-secondary--hover: null;
   --color-text-button-secondary--focus: null;
+
+  --color-button-gallery-arrow: #1a1d2d;
+  --color-button-gallery-arrow--hover: #ffffff;
+  --color-button-gallery-arrow--focus: #ffffff;
 
   // Тени кнопок
   --shadow-button-primary: 0 4px 20px rgba(64, 62, 255, 0.3);
@@ -131,12 +196,18 @@
   --shadow-button-secondary--hover: null;
   --shadow-button-secondary--focus: null;
 
+  --shadow-button-gallery-arrow:
+    0 8px 24px rgba(0, 0, 0, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+
   --background-glass: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.7),
     rgba(240, 242, 250, 0.6)
   );
+
   --border-glass: 1px solid rgba(100, 120, 200, 0.15);
+  --border-button-gallery-arrow: 1px solid rgba(100, 120, 200, 0.2);
+
   --shadow-glass:
     0 4px 20px rgba(0, 0, 0, 0.1), inset 0 0 12px rgba(120, 140, 255, 0.05);
   --glass-brightness: 1;
@@ -147,6 +218,24 @@
     rgba(240, 242, 255, 0.8) 0%,
     #f8f9fc 70%
   );
+
+  // Фоны табов
+  --background-tabs-container: rgba(255, 255, 255, 0.4);
+  --background-tab-primary: transparent;
+  --background-tab-primary--active: linear-gradient(
+    135deg,
+    #403eff 0%,
+    #7731da 50%,
+    #9a6cdb 100%
+  );
+  --background-tab-primary--hover: rgba(100, 120, 200, 0.1);
+  --background-tab-primary--focus: rgba(100, 120, 200, 0.15);
+
+  // Текста табов
+  --color-text-tab-primary: #5a5f70;
+  --color-text-tab-primary--active: #ffffff;
+  --color-text-tab-primary--hover: #1a1d2d;
+  --color-text-tab-primary--focus: #1a1d2d;
 
   --glow-primary-rgb: 100, 120, 240; // Мягкий синий
   --glow-primary-alpha: 0.2;

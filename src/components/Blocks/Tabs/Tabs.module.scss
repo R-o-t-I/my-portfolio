@@ -1,9 +1,18 @@
 .tabs_container {
-  display: flex;
+  display: inline-flex;
   overflow-x: auto;
   white-space: nowrap;
   gap: 12px;
-  width: 100%;
+  width: max-content;
+  border-radius: 20px;
+  padding: 4px;
+  position: relative;
+
+  background: var(--background-tabs-container);
+  border: var(--border-glass);
+
+  backdrop-filter: blur(8px) brightness(var(--glass-brightness))
+    saturate(var(--glass-saturate));
 
   &::-webkit-scrollbar {
     display: none;
@@ -11,10 +20,29 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 
-  // Управление дочерними элементами через контейнер (layoutFillMode)
+  // Обновленный индикатор с эффектом упругой резины (Spring / Jelly effect)
+  .indicator {
+    position: absolute;
+    top: 4px;
+    left: 0;
+    border-radius: 16px;
+    background: var(--background-tab-primary--active);
+    box-shadow: var(--shadow-tabs-active);
+
+    // Использование кастомной пружинной кривой Безье для физичности
+    transition:
+      transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+      width 0.24s cubic-bezier(0.25, 1, 0.5, 1),
+      opacity 0.2s ease;
+
+    will-change: transform, width, transform-origin;
+    z-index: 1;
+    pointer-events: none;
+  }
+
   &.fill_stretched {
+    width: 100%;
     :global(.inherited_item) {
-      // Используем :global, чтобы дотянуться до модульных классов TabsItem
       flex: 1;
       justify-content: center;
     }

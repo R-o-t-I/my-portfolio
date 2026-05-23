@@ -9,18 +9,30 @@
   outline: none;
   user-select: none;
   white-space: nowrap;
+  z-index: 2; // Добавлено: контент должен быть выше плавающего индикатора
 
   // Стили конкретно под выбранный вариант `mode="accent"`
   &.mode_accent {
-    padding: 8px 12px;
+    padding: 8px 16px;
     border-radius: 16px;
-    background: red;
+    background: transparent; // Изменено: базовый фон теперь прозрачный
+    color: var(--color-text-tab-primary);
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+
+    // Ховер эффект только для невыбранных элементов
+    &:hover:not(.item_selected):not(.item_disabled) {
+      background: var(--background-tab-primary--hover);
+      color: var(--color-text-tab-primary--hover);
+    }
 
     &.item_selected {
-      background: yellow;
+      // Изменено: убран background, заменяем цвет текста через переменную темы
+      color: var(--color-text-tab-primary--active);
 
       .item_content {
-        color: green;
+        color: inherit; // Наследует активный цвет родителя
       }
     }
   }
@@ -28,11 +40,13 @@
   &.item_disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    z-index: 1; // Опускаем заблокированный таб, чтобы не мешал
   }
 
   &.item_before,
   &.item_after {
     display: flex;
     align-items: center;
+    color: inherit; // Иконки будут краситься вместе с текстом
   }
 }

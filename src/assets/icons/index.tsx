@@ -17,6 +17,8 @@ import LangEN from "./IconLangEN.svg";
 import Moon from "./IconMoon.svg";
 import Sun from "./IconSun.svg";
 import Settings from "./IconSettings.svg";
+import Globe from "./IconGlobe.svg";
+import LogoOK from "./IconLogoOK.svg";
 
 interface IconProps {
   size?: number | string;
@@ -25,6 +27,12 @@ interface IconProps {
   viewBox?: string;
   strokeWidth?: number;
 }
+
+export const IconGlobe = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <Globe />
+  </IconWrapper>
+);
 
 export const IconLogoTelegram = (props: IconProps) => (
   <IconWrapper {...props}>
@@ -41,6 +49,12 @@ export const IconLogoInstagram = (props: IconProps) => (
 export const IconLogoVK = (props: IconProps) => (
   <IconWrapper {...props}>
     <LogoVK />
+  </IconWrapper>
+);
+
+export const IconLogoOK = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoOK />
   </IconWrapper>
 );
 

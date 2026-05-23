@@ -5,7 +5,14 @@ import { supabase } from "../../utils";
 
 import styles from "./Projects.module.scss";
 
-import { ProjectCard, Section, Text, Title } from "@/components";
+import {
+  ProjectCard,
+  Section,
+  Tabs,
+  TabsItem,
+  Text,
+  Title,
+} from "@/components";
 
 // Строгие интерфейсы для TypeScript под JSONB структуру
 interface LocalizedField {
@@ -98,28 +105,27 @@ export const Projects = () => {
         <Title>{t("page.projects.title")}</Title>
       </div>
 
-      {/* Интерактивный блок фильтрации */}
-      <div className={styles.filters_container}>
-        <button
-          className={`${styles.filter_btn} ${selectedCategorySlug === "all" ? styles.active : ""}`}
-          onClick={() => setSelectedCategorySlug("all")}
+      {categories.length > 0 && (
+        <Tabs
+          selectedId={selectedCategorySlug}
+          onSelectedIdChange={(id) => setSelectedCategorySlug(id)}
+          layoutFillMode="auto"
+          withScrollToSelectedTab
         >
-          {currentLang === "ru" ? "Все проекты" : "All projects"}
-        </button>
+          <TabsItem id="all">
+            {currentLang === "ru" ? "Все проекты" : "All projects"}
+          </TabsItem>
 
-        {categories.map((cat) => {
-          const categoryName = cat.name[currentLang] || cat.name.ru;
-          return (
-            <button
-              key={cat.id}
-              className={`${styles.filter_btn} ${selectedCategorySlug === cat.slug ? styles.active : ""}`}
-              onClick={() => setSelectedCategorySlug(cat.slug)}
-            >
-              {categoryName}
-            </button>
-          );
-        })}
-      </div>
+          {categories.map((cat) => {
+            const categoryName = cat.name[currentLang] || cat.name.ru;
+            return (
+              <TabsItem key={cat.id} id={cat.slug}>
+                {categoryName}
+              </TabsItem>
+            );
+          })}
+        </Tabs>
+      )}
 
       {/* Сетка проектов */}
       <div className={styles.projects_grid}>
