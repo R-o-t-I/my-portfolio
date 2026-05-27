@@ -8,18 +8,27 @@
   align-content: center;
   gap: 60px;
   justify-content: space-between;
-  z-index: 5;
+  z-index: 6;
   margin: 0px $padding-section-x;
   @include glass-effect;
   @include max-width-section(
-    $max-width: calc($max-width-section - #{$padding-section-x * 2})
+    $max-width: calc(#{$max-width-section} - (#{$padding-section-x} * 2)),
+    $width: calc(100% - ($padding-section-x * 2))
   );
+
+  @include respond-to("laptop-l", "laptop-m", "laptop-s") {
+    gap: 48px;
+  }
 
   .before {
     display: flex;
     align-content: center;
     align-items: center;
     gap: 48px;
+
+    @include respond-to("laptop-l", "laptop-m", "laptop-s") {
+      gap: 24px;
+    }
 
     .logo_wrapper {
       @include flex-center;
@@ -53,6 +62,10 @@
     .nav_list {
       display: flex;
       gap: 24px;
+
+      @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+        display: none;
+      }
     }
   }
 
@@ -77,9 +90,90 @@
           align-content: center;
           gap: 12px;
 
+          .text {
+            display: block;
+
+            @include respond-to("laptop-m", "laptop-s") {
+              display: none;
+            }
+          }
+
           .icon {
             @include flex-center;
           }
+        }
+
+        @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+          display: none;
+        }
+      }
+    }
+
+    .button_contact {
+      display: flex;
+
+      @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+        display: none;
+      }
+    }
+
+    .burger_menu {
+      display: none;
+
+      @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+        @include flex-center;
+        @include glass-effect;
+
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+
+        .burger_menu::before,
+        .burger_menu::after {
+          content: "";
+          background: $color-text-primary;
+          position: absolute;
+          width: 24px;
+          height: 1.5px;
+          display: flex;
+          flex-shrink: 0;
+          left: 0px;
+          right: 0px;
+          margin: auto;
+          border-radius: 10px;
+          transition: transform 0.5s ease 0s;
+        }
+
+        span {
+          background: $color-text-primary;
+          position: absolute;
+          width: 24px;
+          height: 1.5px;
+          transition: transform 0.5s ease 0s;
+        }
+
+        .active {
+          span {
+            transform: scale(0);
+          }
+        }
+
+        .burger_menu::before {
+          top: 15.5px;
+        }
+
+        .burger_menu::after {
+          bottom: 15.5px;
+        }
+
+        .active::before {
+          transform: rotate(45deg);
+          top: 22px;
+        }
+
+        .active::after {
+          transform: rotate(-45deg);
+          bottom: 22px;
         }
       }
     }
@@ -96,5 +190,72 @@
 
   .icon {
     @include flex-center;
+  }
+}
+
+.menu_wrapper {
+  display: none;
+
+  @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    position: fixed;
+    overflow: auto;
+    top: 0px;
+    right: -100%;
+    width: 100%;
+    height: 100%;
+    transition: right 1s ease 0s;
+    @include glass-effect($radius: 0, $padding: 48px);
+    z-index: 5;
+    padding-top: calc($navbar-height + ($padding-section-y * 2));
+
+    @include respond-to("desktop-xl", "laptop-l", "laptop-m", "laptop-s") {
+      display: none;
+    }
+
+    &.active {
+      top: 0px;
+      right: 0px;
+    }
+
+    .nav_list {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      gap: 24px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+
+      .dropdown {
+        @include glass-effect;
+
+        .title {
+          display: flex;
+          align-items: center;
+          align-content: center;
+          gap: 12px;
+
+          .text {
+            display: block;
+          }
+
+          .icon {
+            @include flex-center;
+          }
+        }
+      }
+    }
+
+    .button_contact {
+      display: flex;
+      width: 100%;
+    }
   }
 }

@@ -130,8 +130,8 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
           {info.map((item, index) => (
             <React.Fragment key={index}>
               <div className={styles.item}>
-                <Title>{item.content}+</Title>
-                <Text mode="secondary" size="xs">
+                <Title align="center">{item.content}+</Title>
+                <Text mode="secondary" size="xs" align="center">
                   {item.title}
                 </Text>
               </div>
@@ -146,6 +146,36 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
           src={myPhoto}
           alt={t("aria_label.photo.me")}
         />
+        <div className={styles.bottom_wrapper}>
+          <div className={styles.status_wrapper}>
+            <Text className={styles.title}>
+              <span className={`${styles.status} ${styles.status_available}`} />
+              {t("section.about.status.title")}
+            </Text>
+            <Text mode="secondary" className={styles.description}>
+              {t("section.about.status.description")}
+            </Text>
+          </div>
+          <div className={styles.social_wrapper}>
+            {social.map((item, index) => (
+              <React.Fragment key={index}>
+                <a
+                  href={item.href}
+                  target="_blank"
+                  className={styles.icon_wrapper}
+                  aria-label={`${item.label}`}
+                >
+                  {item.icon}
+                </a>
+                {index < social.length - 1 && (
+                  <Separator direction="vertical" />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className={styles.mobile_bottom}>
         <div className={styles.bottom_wrapper}>
           <div className={styles.status_wrapper}>
             <Text className={styles.title}>

@@ -2,4 +2,13 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
+
+  @include respond-to("laptop-m", "laptop-s", "tablet") {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include respond-to("mobile-l", "mobile-m", "mobile-s") {
+    display: flex;
+    flex-direction: column;
+  }
 }

@@ -25,6 +25,7 @@ export const Navbar = () => {
   const location = useLocation();
   const navItems = useNavbarItems();
   const { t, i18n } = useTranslation();
+  const [menuActive, setMenuActive] = useState(false);
 
   const [currentTheme, setCurrentTheme] = useState(
     localStorage.getItem("theme") || "system",
@@ -135,32 +136,130 @@ export const Navbar = () => {
   }, [location.pathname, navItems]);
 
   return (
-    <nav
-      ref={navRef}
-      className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}
-    >
-      <div className={styles.before}>
-        <div
-          className={styles.logo_wrapper}
-          onClick={() => navigate("/")}
-          style={{ cursor: "pointer" }}
-        >
-          <IconCode />
+    <React.Fragment>
+      <nav
+        ref={navRef}
+        className={`${styles.navbar} ${isScrolled ? styles.scrolled : ""}`}
+      >
+        <div className={styles.before}>
+          <div
+            className={styles.logo_wrapper}
+            onClick={() => navigate("/")}
+            style={{ cursor: "pointer" }}
+          >
+            <IconCode />
+          </div>
+          <div className={styles.nav_list}>
+            {navItems.map((item, index) => (
+              <NavbarItem
+                key={index}
+                to={item.to}
+                isActive={activeSection === item.id}
+              >
+                {item.title}
+              </NavbarItem>
+            ))}
+          </div>
         </div>
+
+        <div className={styles.after}>
+          <div className={styles.controls}>
+            <Dropdown
+              dropdownContent={(closeMenu) => (
+                <>
+                  {scheme.map((item) => (
+                    <div
+                      key={item.value}
+                      className={styles.dropdown_item}
+                      onClick={() => {
+                        setCurrentTheme(item.value);
+                        closeMenu();
+                      }}
+                    >
+                      <div className={styles.icon}>{item.icon}</div>
+                      <Text>{item.label}</Text>
+                    </div>
+                  ))}
+                </>
+              )}
+            >
+              <div className={styles.dropdown}>
+                <div className={styles.title}>
+                  <span className={styles.icon}>{activeTheme.icon}</span>
+                  <Text className={styles.text}>{activeTheme.label}</Text>
+                </div>
+              </div>
+            </Dropdown>
+
+            <Dropdown
+              dropdownContent={(closeMenu) => (
+                <>
+                  {languages.map((item) => (
+                    <div
+                      key={item.code}
+                      className={styles.dropdown_item}
+                      onClick={() => {
+                        item.onClick();
+                        closeMenu();
+                      }}
+                    >
+                      <div className={styles.icon}>{item.flag}</div>
+                      <Text>{item.label}</Text>
+                    </div>
+                  ))}
+                </>
+              )}
+            >
+              <div className={styles.dropdown}>
+                <div className={styles.title}>
+                  <span className={styles.icon}>
+                    {languages.find((l) => l.code === i18n.language)?.flag}
+                  </span>
+                  <Text className={styles.text}>
+                    {languages.find((l) => l.code === i18n.language)?.label}
+                  </Text>
+                </div>
+              </div>
+            </Dropdown>
+          </div>
+          <div className={styles.button_contact}>
+            <Button mode="primary" onClick={() => navigate("/#contacts")}>
+              {t("button.contact")}
+            </Button>
+          </div>
+          <div className={styles.burger_menu}>
+            <div
+              className={
+                menuActive === false ?
+                  styles.burger_menu
+                : `${styles.burger_menu} ${styles.active}`
+              }
+              onClick={() => setMenuActive(!menuActive)}
+            >
+              <span />
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div
+        className={
+          menuActive === false ?
+            `${styles.menu_wrapper}`
+          : `${styles.menu_wrapper} ${styles.active}`
+        }
+      >
         <div className={styles.nav_list}>
           {navItems.map((item, index) => (
             <NavbarItem
               key={index}
               to={item.to}
               isActive={activeSection === item.id}
+              onClick={() => setMenuActive(!menuActive)}
             >
               {item.title}
             </NavbarItem>
           ))}
         </div>
-      </div>
-
-      <div className={styles.after}>
         <div className={styles.controls}>
           <Dropdown
             dropdownContent={(closeMenu) => (
@@ -184,7 +283,7 @@ export const Navbar = () => {
             <div className={styles.dropdown}>
               <div className={styles.title}>
                 <span className={styles.icon}>{activeTheme.icon}</span>
-                <Text>{activeTheme.label}</Text>
+                <Text className={styles.text}>{activeTheme.label}</Text>
               </div>
             </div>
           </Dropdown>
@@ -213,18 +312,26 @@ export const Navbar = () => {
                 <span className={styles.icon}>
                   {languages.find((l) => l.code === i18n.language)?.flag}
                 </span>
-                <Text>
+                <Text className={styles.text}>
                   {languages.find((l) => l.code === i18n.language)?.label}
                 </Text>
               </div>
             </div>
           </Dropdown>
         </div>
-
-        <Button mode="primary" onClick={() => navigate("/#contacts")}>
-          {t("button.contact")}
-        </Button>
+        <div className={styles.button_contact}>
+          <Button
+            mode="primary"
+            stretched
+            onClick={() => {
+              navigate("/#contacts");
+              setMenuActive(!menuActive);
+            }}
+          >
+            {t("button.contact")}
+          </Button>
+        </div>
       </div>
-    </nav>
+    </React.Fragment>
   );
 };

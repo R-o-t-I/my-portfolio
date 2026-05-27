@@ -1,14 +1,21 @@
 .footer {
   @include glass-effect;
   @include max-width-section(
-    $max-width: calc($max-width-section - #{$padding-section-x * 2})
+    $max-width: calc(#{$max-width-section} - (#{$padding-section-x} * 2)),
+    $width: calc(100% - ($padding-section-x * 2))
   );
   margin: $padding-section-y auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   align-content: center;
-  gap: 48px;
+  gap: 120px;
+
+  @include respond-to("mobile-l", "mobile-m", "mobile-s") {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
 
   .logo_wrapper {
     display: flex;
@@ -74,9 +81,15 @@
 
   .social_list {
     display: flex;
+    justify-content: flex-end;
     flex-wrap: wrap;
     flex-direction: row;
     gap: 24px;
+
+    @include respond-to("mobile-l", "mobile-m", "mobile-s") {
+      display: flex;
+      justify-content: space-around;
+    }
 
     .social_item {
       display: flex;

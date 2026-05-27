@@ -32,6 +32,7 @@ body {
 
   -webkit-font-smoothing: antialiased; // Более четкие шрифты на Mac
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent; // Убираем синий фон при нажатии на ссылку или кнопку
 
   overflow-x: hidden;
 

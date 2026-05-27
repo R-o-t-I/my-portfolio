@@ -10,12 +10,14 @@ interface NavbarItemProps {
   children: React.ReactNode;
   to?: string;
   isActive?: boolean;
+  onClick?: () => void;
 }
 
 export const NavbarItem = ({
   children,
   to = "/",
   isActive,
+  onClick,
 }: NavbarItemProps) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,10 +48,13 @@ export const NavbarItem = ({
   return (
     <button
       type="button" // Добавляем тип, чтобы избежать случайных отправок форм
-      onClick={handleClick}
+      onClick={(e) => {
+        handleClick(e);
+        onClick();
+      }}
       className={`${styles.wrapper} ${isActive ? styles.active : ""}`}
     >
-      <Text size="sm" mode="secondary" className={styles.navbar}>
+      <Text size="sm" mode="secondary" align="center" className={styles.navbar}>
         {children}
       </Text>
     </button>

@@ -10,6 +10,11 @@
     gap: 48px;
     margin: auto 0;
 
+    @include respond-to("mobile-l", "mobile-m", "mobile-s") {
+      display: flex;
+      flex-direction: column;
+    }
+
     .form_wrapper {
       @include glass-effect($padding: 24px);
       display: flex;
@@ -27,6 +32,18 @@
           align-items: center;
           gap: 6px;
           width: 100%;
+
+          @include respond-to(
+            "laptop-m",
+            "laptop-s",
+            "tablet",
+            "mobile-l",
+            "mobile-m",
+            "mobile-s"
+          ) {
+            align-items: flex-start;
+            flex-direction: column;
+          }
 
           .and_or {
             text-wrap: nowrap;
@@ -72,6 +89,10 @@
       justify-content: center;
       flex-direction: column;
       gap: 24px;
+
+      @include respond-to("mobile-l", "mobile-m", "mobile-s") {
+        display: none;
+      }
 
       .bubble {
         @include glass-effect;

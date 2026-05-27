@@ -23,6 +23,11 @@
       gap: 48px;
       width: 100%;
 
+      @include respond-to("mobile-l", "mobile-m", "mobile-s") {
+        display: flex;
+        flex-direction: column-reverse;
+      }
+
       .info {
         display: flex;
         flex-direction: column;
@@ -46,8 +51,9 @@
         @include flex-center;
         overflow: hidden;
         aspect-ratio: 1;
-        width: 300px;
-        height: 300px;
+        max-width: 300px;
+        width: 100%;
+        height: auto;
         flex-shrink: 0;
 
         .logo {

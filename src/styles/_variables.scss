@@ -96,6 +96,66 @@ $width-laptop-s: 1024px;
 $width-laptop-m: 1200px;
 $width-laptop-l: 1440px;
 
+$breakpoints: (
+  "mobile-s": (
+    max: $width-mobile-s - 1px,
+  ),
+  "mobile-m": (
+    min: $width-mobile-s,
+    max: $width-mobile-m - 1px,
+  ),
+  "mobile-l": (
+    min: $width-mobile-m,
+    max: $width-mobile-l - 1px,
+  ),
+  "tablet": (
+    min: $width-mobile-l,
+    max: $width-tablet - 1px,
+  ),
+  "laptop-s": (
+    min: $width-tablet,
+    max: $width-laptop-s - 1px,
+  ),
+  "laptop-m": (
+    min: $width-laptop-s,
+    max: $width-laptop-m - 1px,
+  ),
+  "laptop-l": (
+    min: $width-laptop-m,
+    max: $width-laptop-l - 1px,
+  ),
+  "desktop-xl": (
+    min: $width-laptop-l + 1px,
+  ),
+);
+
+// Адаптивность (Медиа-запросы)
+@mixin respond-to($media-list...) {
+  @each $media in $media-list {
+    $breakpoint: map-get($breakpoints, $media);
+
+    @if $breakpoint {
+      $min: map-get($breakpoint, min);
+      $max: map-get($breakpoint, max);
+
+      // Генерируем правильный медиа-запрос
+      @if $min and $max {
+        @media (min-width: #{$min}) and (max-width: #{$max}) {
+          @content;
+        }
+      } @else if $min {
+        @media (min-width: #{$min}) {
+          @content;
+        }
+      } @else if $max {
+        @media (max-width: #{$max}) {
+          @content;
+        }
+      }
+    }
+  }
+}
+
 // 📏 Размеры
 $min-height-viewport: 100svh; // высота видимого окна
 $navbar-height: var(--navbar-height); // высота Navbar
@@ -107,15 +167,35 @@ $font-title: "Manrope", sans-serif; // шрифт заголовков (Title)
 $font-text: "Inter", sans-serif; // шрифт текста (Text)
 $font-input: "Inter", sans-serif; // шрифт текста в полях ввода
 $font-button: "Inter", sans-serif; // шрифт кнопок (Button)
-// Размер шрифтов
-$font-size-text-xs: 14px;
-$font-size-text-sm: 16px;
-$font-size-text-md: 18px;
-$font-size-text-lg: 20px;
 
-$font-size-title-sm: 22px;
-$font-size-title-md: 28px;
-$font-size-title-lg: 72px;
+// БАЗОВЫЕ НАСТРОЙКИ (ДЕФОЛТ ДЛЯ ДЕСКТОПА)
+:root {
+  // Динамические шрифты
+  --fs-text-xs: 14px;
+  --fs-text-sm: 16px;
+  --fs-text-md: 18px;
+  --fs-text-lg: 20px;
+
+  --fs-title-sm: 22px;
+  --fs-title-md: 28px;
+  --fs-title-lg: 72px;
+
+  // Динамические отступы
+  --padding-x: 48px;
+  --padding-y: 24px;
+}
+
+// SASS-ПЕРЕМЕННЫЕ (Для использования в компонентах)
+// Ссылаемся на CSS-переменные, чтобы они оставались динамическими
+$font-size-text-xs: var(--fs-text-xs);
+$font-size-text-sm: var(--fs-text-sm);
+$font-size-text-md: var(--fs-text-md);
+$font-size-text-lg: var(--fs-text-lg);
+
+$font-size-title-sm: var(--fs-title-sm);
+$font-size-title-md: var(--fs-title-md);
+$font-size-title-lg: var(--fs-title-lg);
+
 // Жирность шрифтов
 $font-weight-text-xs: 400;
 $font-weight-text-sm: 400;
@@ -126,7 +206,43 @@ $font-weight-title-sm: 700;
 $font-weight-title-md: 700;
 $font-weight-title-lg: 700;
 
-// 🧩 Отступы (padding, margin)
-$padding-section-x: 48px;
-$padding-section-y: 24px;
+// Динамические отступы секций
+$padding-section-x: var(--padding-x);
+$padding-section-y: var(--padding-y);
 $padding-section: $padding-section-y $padding-section-x;
+
+// АДАПТИВНОСТЬ ЧЕРЕЗ МИКСИН RESPOND-TO
+
+// Уменьшаем значения на ноутбуках (laptop-s, laptop-m)
+@include respond-to("laptop-s", "laptop-m") {
+  :root {
+    --fs-title-lg: 56px; // Уменьшили огромный заголовок
+    --fs-title-md: 24px;
+    --padding-x: 32px; // Сузили боковые отступы
+  }
+}
+
+// Уменьшаем для планшетов (tablet)
+@include respond-to("tablet") {
+  :root {
+    --fs-title-lg: 40px;
+    --fs-title-md: 22px;
+    --fs-text-lg: 18px;
+    --padding-x: 24px; // Отступы стали компактнее
+    --padding-y: 20px;
+  }
+}
+
+// Уменьшаем для всех видов мобильных (mobile-l, mobile-m, mobile-s)
+@include respond-to("mobile-l", "mobile-m", "mobile-s") {
+  :root {
+    --fs-title-lg: 32px; // На мобилке 72px превращаются в аккуратные 32px
+    --fs-title-md: 20px;
+    --fs-title-sm: 18px;
+    --fs-text-lg: 16px;
+    --fs-text-md: 15px;
+
+    --padding-x: 16px; // Минимальные отступы для мобильных экранов
+    --padding-y: 16px;
+  }
+}

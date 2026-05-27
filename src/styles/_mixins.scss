@@ -244,57 +244,6 @@
   --glow-secondary-alpha: 0.1;
 }
 
-// Адаптивность (Медиа-запросы)
-// Позволяет писать: @include tablet { ... }
-@mixin mobile-s {
-  @media (max-width: #{$width-mobile-s}) {
-    @content;
-  }
-}
-
-@mixin mobile-m {
-  @media (min-width: #{$width-mobile-s + 1}) and (max-width: #{$width-mobile-m}) {
-    @content;
-  }
-}
-
-@mixin mobile-l {
-  @media (min-width: #{$width-mobile-m + 1}) and (max-width: #{$width-mobile-l}) {
-    @content;
-  }
-}
-
-@mixin tablet {
-  @media (min-width: #{$width-mobile-l + 1}) and (max-width: #{$width-tablet}) {
-    @content;
-  }
-}
-
-@mixin laptop-s {
-  @media (min-width: #{$width-tablet + 1}) and (max-width: #{$width-laptop-s}) {
-    @content;
-  }
-}
-
-@mixin laptop-m {
-  @media (min-width: #{$width-laptop-s + 1}) and (max-width: #{$width-laptop-m}) {
-    @content;
-  }
-}
-
-@mixin laptop-l {
-  @media (min-width: #{$width-laptop-m + 1}) and (max-width: #{$width-laptop-l}) {
-    @content;
-  }
-}
-
-// Отдельный миксин для всего, что больше самого большого ноута
-@mixin desktop-xl {
-  @media (min-width: #{$width-laptop-l + 1}) {
-    @content;
-  }
-}
-
 // Центрирование элементов
 @mixin flex-center($direction: row, $gap: 0) {
   display: flex;
@@ -348,8 +297,8 @@
   }
 }
 
-@mixin max-width-section($max-width: 1440px, $margin: 0px auto) {
+@mixin max-width-section($max-width: 1440px, $width: 100%, $margin: 0px auto) {
   max-width: $max-width;
-  width: 100%;
+  width: $width;
   margin: $margin;
 }
