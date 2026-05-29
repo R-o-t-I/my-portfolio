@@ -98,31 +98,31 @@ $width-laptop-l: 1440px;
 
 $breakpoints: (
   "mobile-s": (
-    max: $width-mobile-s - 1px,
+    max: $width-mobile-s,
   ),
   "mobile-m": (
-    min: $width-mobile-s,
-    max: $width-mobile-m - 1px,
+    min: $width-mobile-s + 1,
+    max: $width-mobile-m,
   ),
   "mobile-l": (
-    min: $width-mobile-m,
-    max: $width-mobile-l - 1px,
+    min: $width-mobile-m + 1,
+    max: $width-mobile-l,
   ),
   "tablet": (
-    min: $width-mobile-l,
-    max: $width-tablet - 1px,
+    min: $width-mobile-l + 1,
+    max: $width-tablet,
   ),
   "laptop-s": (
-    min: $width-tablet,
-    max: $width-laptop-s - 1px,
+    min: $width-tablet + 1,
+    max: $width-laptop-s,
   ),
   "laptop-m": (
-    min: $width-laptop-s,
-    max: $width-laptop-m - 1px,
+    min: $width-laptop-s + 1,
+    max: $width-laptop-m,
   ),
   "laptop-l": (
-    min: $width-laptop-m,
-    max: $width-laptop-l - 1px,
+    min: $width-laptop-m + 1,
+    max: $width-laptop-l,
   ),
   "desktop-xl": (
     min: $width-laptop-l + 1px,

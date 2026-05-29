@@ -2,4 +2,12 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+
+  @include respond-to("mobile-m", "mobile-s") {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @include respond-to("mobile-l", "tablet") {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

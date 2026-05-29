@@ -1,0 +1,53 @@
+.wrapper {
+  flex-grow: 1;
+  padding-top: calc($navbar-height + ($padding-section-y * 2));
+
+  .content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    flex-grow: 1;
+
+    @include respond-to(
+      "laptop-s",
+      "tablet",
+      "mobile-l",
+      "mobile-m",
+      "mobile-s"
+    ) {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .info {
+      @include glass-effect($padding: 36px);
+      display: flex;
+      justify-content: space-between;
+      flex-direction: column;
+      gap: 24px;
+
+      .middle {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+    }
+
+    .image_wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-content: center;
+      width: 100%;
+
+      .image {
+        height: 100%;
+        width: auto;
+        object-fit: cover;
+        -webkit-user-select: none; /* Запрет выделения в Safari/Chrome */
+        user-select: none; /* Запрет выделения текста и фото */
+        -webkit-user-drag: none; /* Запрет перетаскивания в WebKit */
+        pointer-events: none; /* Отключает клики мышкой (запрещает ПКМ) */
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@ import styles from "./Title.module.scss";
 interface TitleProps {
   variant?: "p" | "span" | "label";
   size?: "sm" | "md" | "lg";
-  align?: "left" | "center" | "right";
+  align?: "left" | "center" | "right" | "justify";
   children: React.ReactNode;
   className?: string;
   uppercase?: boolean;

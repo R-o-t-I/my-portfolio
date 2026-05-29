@@ -4,7 +4,7 @@ interface TextProps {
   variant?: "p" | "span" | "label";
   mode?: "primary" | "secondary" | "accent";
   size?: "xs" | "sm" | "md" | "lg";
-  align?: "left" | "center" | "right";
+  align?: "left" | "center" | "right" | "justify";
   children: React.ReactNode;
   className?: string;
   uppercase?: boolean;

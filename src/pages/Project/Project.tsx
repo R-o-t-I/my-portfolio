@@ -113,6 +113,7 @@ interface ProjectItem {
   title: LocalizedField;
   description: LocalizedField;
   description_mini: LocalizedField;
+  role: LocalizedField;
   history: LocalizedField;
   logo_url: LocalizedField;
   snippet_url: LocalizedField;
@@ -262,6 +263,7 @@ export const Project = () => {
         project.description_mini[currentLang] || project.description_mini.ru,
       history: project.history[currentLang] || project.history.ru,
       created: formattedDate,
+      role: project.role[currentLang] || project.role.ru,
       logo: project.logo_url[currentLang] || project.logo_url.ru,
       snippet: project.snippet_url[currentLang] || project.snippet_url.ru,
       categoryName:
@@ -304,14 +306,14 @@ export const Project = () => {
             <div className={styles.header}>
               <div className={styles.info}>
                 {projectDetails.categoryName && (
-                  <span className={styles.category}>
+                  <Text size="sm" className={styles.category}>
                     {projectDetails.categoryName}
-                  </span>
+                  </Text>
                 )}
                 <div className={styles.middle}>
                   <Title className={styles.title}>{projectDetails.title}</Title>
                   {projectDetails.description_mini && (
-                    <Text className={styles.description_mini}>
+                    <Text align="justify" className={styles.description_mini}>
                       {projectDetails.description_mini}
                     </Text>
                   )}
@@ -319,6 +321,12 @@ export const Project = () => {
                     <Text size="sm">
                       {currentLang === "ru" ? "Вышел: " : "Released: "}
                       {projectDetails.created}
+                    </Text>
+                  )}
+                  {projectDetails.role && (
+                    <Text size="sm">
+                      {currentLang === "ru" ? "Моя роль: " : "my role: "}
+                      {projectDetails.role}
                     </Text>
                   )}
                 </div>
@@ -357,7 +365,7 @@ export const Project = () => {
               {projectDetails.description && (
                 <div className={styles.content_item}>
                   <Title size="sm">О проекте</Title>
-                  <Text>{projectDetails.description}</Text>
+                  <Text align="justify">{projectDetails.description}</Text>
                 </div>
               )}
 
@@ -395,7 +403,7 @@ export const Project = () => {
               {projectDetails.history && (
                 <div className={styles.content_item}>
                   <Title size="sm">История проекта</Title>
-                  <Text>{projectDetails.history}</Text>
+                  <Text align="justify">{projectDetails.history}</Text>
                 </div>
               )}
               {projectDetails.categories && (

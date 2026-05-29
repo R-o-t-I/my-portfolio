@@ -29,11 +29,23 @@ interface AboutSectionProps {
 
 export const AboutSection = ({ id }: AboutSectionProps) => {
   const { t } = useTranslation();
+  const startDate = new Date("2019-10-01"); // Замените на нужную дату начала
+  const today = new Date();
+  let yearsExperience = today.getFullYear() - startDate.getFullYear();
+
+  // Корректируем, если в этом году день ещё не наступил (по месяцам и дням)
+  if (
+    today.getMonth() < startDate.getMonth() ||
+    (today.getMonth() === startDate.getMonth() &&
+      today.getDate() < startDate.getDate())
+  ) {
+    yearsExperience -= 1;
+  }
 
   const info = [
     {
       title: t("section.about.info.experience"),
-      content: "6",
+      content: String(yearsExperience),
     },
     {
       title: t("section.about.info.projects"),
