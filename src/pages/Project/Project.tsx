@@ -187,28 +187,34 @@ export const Project = () => {
     const techStack =
       project.project_skills
         ?.map((item) => {
-          if (!item.skill) return null;
+          if (!item?.skill) return null;
+          const name =
+            item.skill.name?.[currentLang] ?? item.skill.name?.ru ?? "";
+          const icon =
+            item.skill.skill_icon?.[currentLang] ??
+            item.skill.skill_icon?.ru ??
+            "";
           return {
             id: item.skill.id,
-            name: item.skill.name[currentLang] || item.skill.name.ru,
-            icon:
-              item.skill.skill_icon[currentLang] || item.skill.skill_icon.ru,
+            name,
+            icon,
             color: item.skill.skill_icon_color,
           };
         })
         .filter(Boolean) || [];
 
     // 2. Мапим ссылки с проверкой наличия кастомного текста в базе данных
-    const links = (project.links || [])
+    const links = (project.links ?? [])
       .map((link) => {
+        if (!link?.type) return null;
         const config = LINK_CONFIG[link.type];
         if (!config) return null;
 
-        const textFromDb = link.text?.[currentLang] || link.text?.ru;
-        const finalText = textFromDb || config.defaultText[currentLang];
+        const textFromDb = link.text?.[currentLang] ?? link.text?.ru ?? null;
+        const finalText = textFromDb ?? config.defaultText[currentLang];
 
         return {
-          url: link.url,
+          url: link.url ?? "",
           text: finalText,
           icon: config.icon,
         };
@@ -216,44 +222,41 @@ export const Project = () => {
       .filter(Boolean);
 
     // 3. Мапим массив картинок для галереи, привязывая их к ID категории
-    const rawGallery = project.gallery || [];
+    const rawGallery = project.gallery ?? [];
     const gallery = rawGallery.map((item) => ({
-      url: item.url,
-      categoryId: item.category?.id || "other",
-      title: item.title?.[currentLang] || item.title?.ru || "",
+      url: item.url ?? "",
+      categoryId: item.category?.id ?? "other",
+      title: item.title?.[currentLang] ?? item.title?.ru ?? "",
     }));
 
     // 4. Динамически собираем уникальные категории для табов напрямую из объектов в БД
     const uniqueCategoriesMap = new Map<string, string>();
-
     rawGallery.forEach((item) => {
       if (item.category?.id) {
-        // Локализуем название таба (текущий язык -> фолбэк на русский)
         const localizedName =
-          item.category.name[currentLang] || item.category.name.ru;
+          item.category.name?.[currentLang] ??
+          item.category.name?.ru ??
+          "Other";
         uniqueCategoriesMap.set(item.category.id, localizedName);
       }
     });
-
-    // Превращаем Map в массив объектов [{ id: 'design', name: 'Дизайн интерфейса' }]
     const categories = Array.from(uniqueCategoriesMap.entries()).map(
-      ([id, name]) => ({
-        id,
-        name,
-      }),
+      ([id, name]) => ({ id, name }),
     );
 
     // 5. Форматируем дату один раз внутри useMemo
     const formattedDate =
       project.created_at ?
-        new Date(project.created_at).toLocaleDateString(
-          currentLang === "ru" ? "ru-RU" : "en-US",
-          {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          },
-        )
+        (() => {
+          try {
+            return new Date(project.created_at).toLocaleDateString(
+              currentLang === "ru" ? "ru-RU" : "en-US",
+              { day: "numeric", month: "long", year: "numeric" },
+            );
+          } catch {
+            return null;
+          }
+        })()
       : null;
 
     return {
@@ -381,15 +384,17 @@ export const Project = () => {
                       <div key={tech.id} className={styles.tech_item}>
                         <SkillCard
                           icon={
-                            tech.icon && (
+                            (
+                              tech.icon &&
+                              typeof tech.icon === "string" &&
+                              tech.icon.trim() !== ""
+                            ) ?
                               <div
                                 className={styles.tech_icon_wrapper}
                                 style={{ color: tech.color || undefined }}
-                                dangerouslySetInnerHTML={{
-                                  __html: tech.icon,
-                                }}
+                                dangerouslySetInnerHTML={{ __html: tech.icon }}
                               />
-                            )
+                            : undefined
                           }
                         >
                           {tech.name}
