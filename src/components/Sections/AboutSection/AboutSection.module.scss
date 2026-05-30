@@ -16,6 +16,10 @@
     flex-direction: column;
     gap: 48px;
 
+    @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+      gap: 24px;
+    }
+
     .greeting {
       @include flex-center($direction: row, $gap: 8px);
       @include glass-effect;
@@ -64,6 +68,10 @@
       gap: 24px;
 
       .name {
+        @include respond-to("tablet", "mobile-l", "mobile-m", "mobile-s") {
+          font-size: clamp(14px, 15vw, 80px);
+        }
+
         span {
           // Градиентный текст
           background: $color-text-accent-gradient;
@@ -103,14 +111,18 @@
 
       @include respond-to("mobile-m", "mobile-s") {
         display: flex;
-        flex-wrap: wrap;
-        flex-direction: row;
       }
 
       .item {
-        width: 100%;
+        width: max-content;
         @include flex-center($direction: column);
-        gap: 12px;
+        gap: 6px;
+        width: 100%;
+        flex-grow: 1;
+
+        .text {
+          text-wrap: wrap;
+        }
       }
     }
   }

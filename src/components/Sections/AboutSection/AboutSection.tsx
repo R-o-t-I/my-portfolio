@@ -143,7 +143,12 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
             <React.Fragment key={index}>
               <div className={styles.item}>
                 <Title align="center">{item.content}+</Title>
-                <Text mode="secondary" size="xs" align="center">
+                <Text
+                  className={styles.text}
+                  mode="secondary"
+                  size="xs"
+                  align="center"
+                >
                   {item.title}
                 </Text>
               </div>
