@@ -16,7 +16,7 @@ import {
 
 // Строгие интерфейсы для TypeScript под JSONB структуру
 interface LocalizedField {
-  ru: string;
+  ru?: string | null; // Сделали опциональным, т.к. из БД может прийти NULL
   en?: string | null;
 }
 
@@ -117,7 +117,7 @@ export const Projects = () => {
           </TabsItem>
 
           {categories.map((cat) => {
-            const categoryName = cat.name[currentLang] || cat.name.ru;
+            const categoryName = cat.name?.[currentLang] ?? cat.name?.ru ?? "";
             return (
               <TabsItem key={cat.id} id={cat.slug}>
                 {categoryName}
@@ -137,17 +137,19 @@ export const Projects = () => {
           </Text>
         : filteredProjects.map((item) => {
             // Безопасное извлечение локализованных данных с фолбэком
-            const title = item.title[currentLang] || item.title.ru;
+            const title = item.title?.[currentLang] ?? item.title?.ru ?? "";
             const description =
-              item.description[currentLang] || item.description.ru;
-            const logo = item.logo_url[currentLang] || item.logo_url.ru;
+              item.description?.[currentLang] ?? item.description?.ru ?? "";
+            const logo =
+              item.logo_url?.[currentLang] ?? item.logo_url?.ru ?? "";
             const snippet =
-              item.snippet_url[currentLang] || item.snippet_url.ru;
+              item.snippet_url?.[currentLang] ?? item.snippet_url?.ru ?? "";
 
             const categoryName =
               item.category_info ?
-                item.category_info.name[currentLang] ||
-                item.category_info.name.ru
+                (item.category_info.name?.[currentLang] ??
+                item.category_info.name?.ru ??
+                "")
               : "";
 
             return (
