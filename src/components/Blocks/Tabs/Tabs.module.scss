@@ -1,12 +1,13 @@
 .tabs_container {
   display: inline-flex;
-  overflow-x: auto;
+  overflow-x: scroll;
   white-space: nowrap;
   gap: 12px;
   width: max-content;
   border-radius: 20px;
   padding: 4px;
   position: relative;
+  max-width: 100%;
 
   background: var(--background-tabs-container);
   border: var(--border-glass);
