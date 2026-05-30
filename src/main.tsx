@@ -7,13 +7,20 @@ import "./i18n.tsx";
 import "@/styles/global.scss";
 
 import { App } from "./App.tsx";
-import { GlobalError, Home, NotFound, Project, Projects } from "@/pages";
+import {
+  GlobalError,
+  Home,
+  Loading,
+  NotFound,
+  Project,
+  Projects,
+} from "@/pages";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <React.Suspense fallback="Loading...">
+      <React.Suspense fallback={<Loading />}>
         <App />
       </React.Suspense>
     ),

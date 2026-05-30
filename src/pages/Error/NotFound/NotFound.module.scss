@@ -20,15 +20,38 @@
 
     .info {
       @include glass-effect($padding: 36px);
+      position: relative;
       display: flex;
       justify-content: space-between;
       flex-direction: column;
       gap: 24px;
 
+      .bg_text {
+        position: absolute;
+        bottom: 5%;
+        right: 5%;
+        opacity: 0.2;
+        line-height: 100%;
+
+        font-size: 8rem;
+        font-family: $font-title;
+        z-index: 0;
+
+        -webkit-user-select: none; /* Запрет выделения в Safari/Chrome */
+        user-select: none; /* Запрет выделения текста и фото */
+        -webkit-user-drag: none; /* Запрет перетаскивания в WebKit */
+        pointer-events: none; /* Отключает клики мышкой (запрещает ПКМ) */
+      }
+
       .middle {
         display: flex;
         flex-direction: column;
         gap: 24px;
+        z-index: 1;
+      }
+
+      .button_wrapper {
+        z-index: 1;
       }
     }
 

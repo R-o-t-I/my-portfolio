@@ -19,13 +19,14 @@ export const NotFound = ({}) => {
     <Section className={styles.wrapper}>
       <div className={styles.content}>
         <div className={styles.info}>
+          <span className={styles.bg_text}>404</span>
           <div className={styles.middle}>
             <Title size="lg">Страница не найдена</Title>
             <Text>
               Такой страницы нет, проверьте корректно ли введена ссылка
             </Text>
           </div>
-          <div>
+          <div className={styles.button_wrapper}>
             <Button onClick={handleClick}>На главную</Button>
           </div>
         </div>
