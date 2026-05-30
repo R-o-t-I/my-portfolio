@@ -28,7 +28,7 @@ import {
 
 // Строгие интерфейсы для TypeScript под JSONB структуру
 interface LocalizedField {
-  ru: string;
+  ru?: string | null; // Сделали опциональным, т.к. из БД может прийти NULL
   en?: string | null;
 }
 
@@ -82,27 +82,18 @@ const LINK_CONFIG: Record<
 export interface ProjectLink {
   url: string;
   type: LinkType;
-  text: {
-    ru: string;
-    en?: string | null;
-  };
+  text: LocalizedField;
 }
 
 export interface GalleryCategoryFromDb {
   id: string;
-  name: {
-    ru: string;
-    en?: string | null;
-  };
+  name: LocalizedField;
 }
 
 export interface GalleryItem {
   url: string;
   category: GalleryCategoryFromDb;
-  title: {
-    ru: string;
-    en?: string | null;
-  };
+  title: LocalizedField;
 }
 
 interface ProjectItem {
@@ -179,7 +170,6 @@ export const Project = () => {
   }, [slug, navigate]);
 
   // Извлекаем локализованные данные с автоматическим фолбэком на 'ru'
-  // Извлекаем локализованные данные с автоматическим фолбэком на 'ru'
   const projectDetails = useMemo(() => {
     if (!project) return null;
 
@@ -189,11 +179,11 @@ export const Project = () => {
         ?.map((item) => {
           if (!item?.skill) return null;
           const name =
-            item.skill.name?.[currentLang] ?? item.skill.name?.ru ?? "";
+            item.skill.name?.[currentLang] ?? item.skill.name?.ru ?? ""; // Защита от null
           const icon =
             item.skill.skill_icon?.[currentLang] ??
             item.skill.skill_icon?.ru ??
-            "";
+            ""; // Защита от null
           return {
             id: item.skill.id,
             name,
@@ -226,7 +216,7 @@ export const Project = () => {
     const gallery = rawGallery.map((item) => ({
       url: item.url ?? "",
       categoryId: item.category?.id ?? "other",
-      title: item.title?.[currentLang] ?? item.title?.ru ?? "",
+      title: item.title?.[currentLang] ?? item.title?.ru ?? "", // Защита от null
     }));
 
     // 4. Динамически собираем уникальные категории для табов напрямую из объектов в БД
@@ -236,7 +226,7 @@ export const Project = () => {
         const localizedName =
           item.category.name?.[currentLang] ??
           item.category.name?.ru ??
-          "Other";
+          "Other"; // Защита от null
         uniqueCategoriesMap.set(item.category.id, localizedName);
       }
     });
@@ -337,7 +327,6 @@ export const Project = () => {
                     </Text>
                   )}
                 </div>
-                {/* Рендеринг кнопок-ссылок */}
                 {projectDetails.links && (
                   <ButtonGroup className={styles.links_container}>
                     {projectDetails.links.map((link, index) => (
@@ -357,13 +346,11 @@ export const Project = () => {
               </div>
               {projectDetails.logo && (
                 <div className={styles.logo_wrapper}>
-                  {projectDetails.logo && (
-                    <img
-                      src={projectDetails.logo}
-                      alt={projectDetails.title}
-                      className={styles.logo}
-                    />
-                  )}
+                  <img
+                    src={projectDetails.logo}
+                    alt={projectDetails.title}
+                    className={styles.logo}
+                  />
                 </div>
               )}
             </div>
@@ -415,11 +402,11 @@ export const Project = () => {
                   <Text align="justify">{projectDetails.history}</Text>
                 </div>
               )}
+
               {projectDetails.gallery?.length > 0 && (
                 <div className={styles.content_item}>
                   <Title size="sm">Галерея</Title>
 
-                  {/* Вкладки переключения категорий (Табы) */}
                   {projectDetails.categories.length > 1 && (
                     <Tabs
                       selectedId={activeCategory}
@@ -431,13 +418,11 @@ export const Project = () => {
                         {currentLang === "ru" ? "Все" : "All"}
                       </TabsItem>
 
-                      {projectDetails.categories.map((cat) => {
-                        return (
-                          <TabsItem key={cat.id} id={cat.id}>
-                            {cat.name}
-                          </TabsItem>
-                        );
-                      })}
+                      {projectDetails.categories.map((cat) => (
+                        <TabsItem key={cat.id} id={cat.id}>
+                          {cat.name}
+                        </TabsItem>
+                      ))}
                     </Tabs>
                   )}
 
