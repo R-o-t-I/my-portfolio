@@ -376,7 +376,7 @@ export const Project = () => {
                 </div>
               )}
 
-              {projectDetails.techStack && (
+              {(project?.project_skills?.length ?? 0) > 0 && (
                 <div className={styles.content_item}>
                   <Title size="sm">
                     {currentLang === "ru" ?
@@ -415,7 +415,7 @@ export const Project = () => {
                   <Text align="justify">{projectDetails.history}</Text>
                 </div>
               )}
-              {projectDetails.categories && (
+              {projectDetails.gallery?.length > 0 && (
                 <div className={styles.content_item}>
                   <Title size="sm">Галерея</Title>
 
