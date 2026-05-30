@@ -35,12 +35,11 @@ export const ProjectCard = ({
 
   return (
     <div className={styles.card} onClick={handleCardClick}>
-      {snippet && (
-        <div className={styles.snippet_wrapper}>
-          <img className={styles.snippet} src={snippet} />
-          <div className={styles.category_wrapper}>{category}</div>
-        </div>
-      )}
+      <div className={styles.snippet_wrapper}>
+        {snippet && <img className={styles.snippet} src={snippet} />}
+        <div className={styles.category_wrapper}>{category}</div>
+      </div>
+
       <div className={styles.middle}>
         <div className={styles.header}>
           {logo && (
