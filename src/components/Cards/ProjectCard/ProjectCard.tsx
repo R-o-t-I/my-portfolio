@@ -51,9 +51,11 @@ export const ProjectCard = ({
             {title}
           </Text>
         </div>
-        <Text mode="secondary" className={styles.description}>
-          {description}
-        </Text>
+        {description && (
+          <Text mode="secondary" className={styles.description}>
+            {description}
+          </Text>
+        )}
       </div>
     </div>
   );
