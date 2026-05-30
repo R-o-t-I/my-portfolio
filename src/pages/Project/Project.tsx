@@ -260,23 +260,27 @@ export const Project = () => {
       : null;
 
     return {
-      title: project.title[currentLang] || project.title.ru,
-      description: project.description[currentLang] || project.description.ru,
+      title: project.title?.[currentLang] ?? project.title?.ru ?? "",
+      description:
+        project.description?.[currentLang] ?? project.description?.ru ?? "",
       description_mini:
-        project.description_mini[currentLang] || project.description_mini.ru,
-      history: project.history[currentLang] || project.history.ru,
+        project.description_mini?.[currentLang] ??
+        project.description_mini?.ru ??
+        "",
+      history: project.history?.[currentLang] ?? project.history?.ru ?? "",
       created: formattedDate,
-      role: project.role[currentLang] || project.role.ru,
-      logo: project.logo_url[currentLang] || project.logo_url.ru,
-      snippet: project.snippet_url[currentLang] || project.snippet_url.ru,
+      role: project.role?.[currentLang] ?? project.role?.ru ?? "",
+      logo: project.logo_url?.[currentLang] ?? project.logo_url?.ru ?? "",
+      snippet:
+        project.snippet_url?.[currentLang] ?? project.snippet_url?.ru ?? "",
       categoryName:
-        project.category ?
-          project.category.name[currentLang] || project.category.name.ru
-        : "",
+        project.category?.name?.[currentLang] ??
+        project.category?.name?.ru ??
+        "",
       techStack,
       links,
-      gallery, // Готовый массив картинок для сетки
-      categories, // Готовый массив табов для кнопок фильтрации
+      gallery,
+      categories,
     };
   }, [project, currentLang]);
 
