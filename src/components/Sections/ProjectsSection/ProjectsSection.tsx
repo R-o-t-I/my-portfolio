@@ -14,7 +14,7 @@ interface ProjectsSectionProps {
 }
 
 interface LocalizedField {
-  ru: string;
+  ru?: string | null; // Сделали опциональным, т.к. из БД может прийти NULL
   en?: string | null;
 }
 
@@ -81,17 +81,18 @@ export const ProjectsSection = ({ id }: ProjectsSectionProps) => {
         {isLoading ?
           <p>Загружаем проекты...</p>
         : projects.map((item) => {
-            const title = item.title[currentLang] || item.title.ru;
+            const title = item.title?.[currentLang] ?? item.title?.ru ?? "";
             const description =
-              item.description[currentLang] || item.description.ru;
-            const logo = item.logo_url[currentLang] || item.logo_url.ru;
+              item.description?.[currentLang] ?? item.description?.ru ?? "";
+            const logo =
+              item.logo_url?.[currentLang] ?? item.logo_url?.ru ?? "";
             const snippet =
-              item.snippet_url[currentLang] || item.snippet_url.ru;
+              item.snippet_url?.[currentLang] ?? item.snippet_url?.ru ?? "";
 
             const categoryName =
-              item.category ?
-                item.category.name[currentLang] || item.category.name.ru
-              : "";
+              item.category?.name?.[currentLang] ??
+              item.category?.name?.ru ??
+              "";
 
             return (
               <ProjectCard
