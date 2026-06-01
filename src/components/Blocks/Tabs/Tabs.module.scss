@@ -12,10 +12,11 @@
   background: var(--background-tabs-container);
   border: var(--border-glass);
 
+  // Полная поддержка размытия на iOS
   backdrop-filter: blur(8px) brightness(var(--glass-brightness))
     saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(8px) brightness(var(--glass-brightness))
-    saturate(var(--glass-saturate)); // Префикс для iOS
+    saturate(var(--glass-saturate));
 
   &::-webkit-scrollbar {
     display: none;
@@ -37,7 +38,7 @@
       opacity 0.2s ease;
 
     will-change: transform, width, transform-origin;
-    z-index: 1; // Индикатор строго на нижнем слое
+    z-index: 1; // Индикатор строго под текстом кнопок
     pointer-events: none;
   }
 
