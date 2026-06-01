@@ -1,7 +1,5 @@
 import React from "react";
-
 import styles from "./TabsItem.module.scss";
-
 import { Text } from "@/components";
 
 export interface TabsItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -39,8 +37,8 @@ export const TabsItem = ({
       className={`
         ${styles.tabs_item}
         ${styles[`mode_${mode}`]}
-        ${selected && styles.item_selected}
-        ${disabled && styles.item_disabled}
+        ${selected ? styles.item_selected : ""}
+        ${disabled ? styles.item_disabled : ""}
         ${className}
       `.trim()}
       aria-selected={selected}
