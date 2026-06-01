@@ -4,9 +4,6 @@
   justify-content: flex-start;
   flex-grow: 1;
   margin-top: calc($navbar-height + $padding-section-y);
-  width: 100%;
-  max-width: 100vw;
-  overflow: hidden;
 
   .container {
     display: flex;
