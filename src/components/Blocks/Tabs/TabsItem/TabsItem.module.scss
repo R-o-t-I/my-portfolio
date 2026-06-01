@@ -13,13 +13,14 @@
 
   .item_content {
     text-wrap: nowrap;
+    z-index: 3;
   }
 
   // Стили конкретно под выбранный вариант `mode="accent"`
   &.mode_accent {
     padding: 8px 16px;
     border-radius: 16px;
-    background: transparent; // Изменено: базовый фон теперь прозрачный
+    background: transparent;
     color: var(--color-text-tab-primary);
     transition:
       color 0.2s ease,
@@ -36,7 +37,7 @@
       color: var(--color-text-tab-primary--active);
 
       .item_content {
-        color: inherit; // Наследует активный цвет родителя
+        color: var(--color-text-tab-primary--active);
       }
     }
   }
