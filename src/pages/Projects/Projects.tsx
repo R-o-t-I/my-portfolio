@@ -130,7 +130,11 @@ export const Projects = () => {
       {/* Сетка проектов */}
       <div className={styles.projects_grid}>
         {isLoading ?
-          <Text>Загружаем проекты...</Text>
+          <Text>
+            {currentLang === "ru" ?
+              "Загружаем проект..."
+            : "Loading projects..."}
+          </Text>
         : filteredProjects.length === 0 ?
           <Text>
             {currentLang === "ru" ? "Проекты не найдены" : "No projects found"}

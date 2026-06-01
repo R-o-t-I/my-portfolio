@@ -293,12 +293,20 @@ export const Project = () => {
   return (
     <Section className={styles.wrapper}>
       {isLoading ?
-        <Text>Загружаем проект...</Text>
+        <Text>
+          {currentLang === "ru" ?
+            "Загружаем проект..."
+          : "Loading the project..."}
+        </Text>
       : projectDetails && (
           <div className={styles.container}>
-            <button className={styles.back_btn} onClick={() => navigate(-1)}>
+            <Button
+              mode="secondary"
+              className={styles.back_btn}
+              onClick={() => navigate(-1)}
+            >
               {currentLang === "ru" ? "← Назад" : "← Back"}
-            </button>
+            </Button>
 
             <div className={styles.header}>
               <div className={styles.info}>
@@ -322,7 +330,7 @@ export const Project = () => {
                   )}
                   {projectDetails.role && (
                     <Text size="sm">
-                      {currentLang === "ru" ? "Моя роль: " : "my role: "}
+                      {currentLang === "ru" ? "Моя роль: " : "My role: "}
                       {projectDetails.role}
                     </Text>
                   )}
@@ -358,7 +366,9 @@ export const Project = () => {
             <div className={styles.content}>
               {projectDetails.description && (
                 <div className={styles.content_item}>
-                  <Title size="sm">О проекте</Title>
+                  <Title size="sm">
+                    {currentLang === "ru" ? "О проекте" : "About the project"}
+                  </Title>
                   <Text align="justify">{projectDetails.description}</Text>
                 </div>
               )}
@@ -405,7 +415,9 @@ export const Project = () => {
 
               {projectDetails.gallery?.length > 0 && (
                 <div className={styles.content_item}>
-                  <Title size="sm">Галерея</Title>
+                  <Title size="sm">
+                    {currentLang === "ru" ? "Галерея" : "Gallery"}
+                  </Title>
 
                   {projectDetails.categories.length > 1 && (
                     <Tabs

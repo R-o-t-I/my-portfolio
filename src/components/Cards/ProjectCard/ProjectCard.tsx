@@ -36,7 +36,15 @@ export const ProjectCard = ({
   return (
     <div className={styles.card} onClick={handleCardClick}>
       <div className={styles.snippet_wrapper}>
-        {snippet && <img className={styles.snippet} src={snippet} />}
+        {snippet && (
+          <img
+            className={styles.snippet}
+            src={snippet}
+            alt={title} // Обязательно для семантики и SEO
+            loading="lazy" // Картинка грузится только при скролле к ней
+            decoding="async" // Декодирование в фоновом потоке, не фризит UI
+          />
+        )}
         <div className={styles.category_wrapper}>{category}</div>
       </div>
 
@@ -44,7 +52,13 @@ export const ProjectCard = ({
         <div className={styles.header}>
           {logo && (
             <div className={styles.logo_wrapper}>
-              <img className={styles.logo} src={logo} />
+              <img
+                className={styles.logo}
+                src={logo}
+                alt={`${title} logo`}
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           )}
           <Text size="lg" className={styles.title}>
