@@ -18,6 +18,7 @@
     "contact": "Contact me",
     "view_projects": "View projects",
     "send": "Send",
+    "sending": "Sending",
     "attach": "Attach"
   },
 
@@ -88,7 +89,14 @@
     },
     "contacts": {
       "title": "Contacts",
-      "subtitle": "Contact me"
+      "subtitle": "Contact me",
+      "bubbles": {
+        "project": "Tell us about your project",
+        "questions": "Ask questions - I'm in touch",
+        "ideas": "Your ideas are inspiring!",
+        "waiting": "I'm waiting for your message",
+        "dialogue": "Let's start a dialogue"
+      }
     }
   },
 
@@ -117,7 +125,15 @@
       "placeholder": {
         "message": "Enter your message"
       }
+    },
+    "button": {
+      "attach_file_aria": "Attach file",
+      "remove_aria": "Delete file"
     }
+  },
+
+  "notification": {
+    "success": "Message sent"
   },
 
   "other": {

@@ -12,12 +12,6 @@
   background: var(--background-tabs-container);
   border: var(--border-glass);
 
-  // Полная поддержка размытия на iOS
-  backdrop-filter: blur(8px) brightness(var(--glass-brightness))
-    saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(8px) brightness(var(--glass-brightness))
-    saturate(var(--glass-saturate));
-
   &::-webkit-scrollbar {
     display: none;
   }
