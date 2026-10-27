@@ -1,3 +1,55 @@
+.tabs_container {
+  display: inline-flex;
+  overflow-x: scroll;
+  white-space: nowrap;
+  gap: 12px;
+  width: max-content;
+  border-radius: 20px;
+  padding: 4px;
+  position: relative;
+  max-width: 100%;
+  background: var(--background-tabs-container);
+  border: var(--border-glass);
+  z-index: 1; // Устанавливаем контекст наложения для контейнера
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  .indicator {
+    position: absolute;
+    top: 4px;
+    bottom: 4px; // Фиксируем высоту индикатора под размер таба с учетом паддинга контейнера (4px)
+    left: 0;
+    border-radius: 16px;
+    background: var(--background-tab-primary--active);
+    box-shadow: var(--shadow-tabs-active);
+    z-index: 2; // Индикатор ложится НА контейнер, но ПОД текст таба
+
+    transition:
+      transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+      width 0.24s cubic-bezier(0.25, 1, 0.5, 1),
+      opacity 0.2s ease;
+
+    will-change: transform, width;
+    pointer-events: none;
+  }
+
+  &.fill_stretched {
+    width: 100%;
+    :global(.inherited_item) {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+
+  &.fill_shrinked {
+    justify-content: flex-start;
+  }
+}
+
 .tabs_item {
   display: inline-flex;
   align-items: center;
@@ -8,21 +60,14 @@
   outline: none;
   user-select: none;
   white-space: nowrap;
-
-  // Базовый слой для iOS WebKit
   position: relative;
-  z-index: 2;
+  z-index: 3; // Поднимаем сам таб выше индикатора, чтобы текст был виден и кликабелен
+
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 
-  // Исправлено: Стили дочернего компонента текста
-  .item_content {
-    position: relative;
-    z-index: 3;
-    text-wrap: nowrap;
-  }
-
-  // Исправлено: Стили дочерних элементов иконок/badge
+  // Стили дочерних элементов (упрощено, z-index наследуется от родителя)
+  .item_content,
   .item_before,
   .item_after,
   .item_status {
@@ -30,31 +75,30 @@
     align-items: center;
     color: inherit;
     position: relative;
-    z-index: 3;
   }
 
-  // Стили конкретно под выбранный вариант `mode="accent"`
+  .item_content {
+    text-wrap: nowrap;
+  }
+
   &.mode_accent {
     padding: 8px 16px;
     border-radius: 16px;
-    background: transparent;
     color: var(--color-text-tab-primary);
-    transition:
-      color 0.2s ease,
-      background-color 0.2s ease;
+    transition: color 0.2s ease; // Убираем анимацию background, так как фон теперь контролирует .indicator
 
-    // Ховер эффект только для невыбранных элементов
     &:hover:not(.item_selected):not(.item_disabled) {
       background: var(--background-tab-primary--hover);
       color: var(--color-text-tab-primary--hover);
     }
 
     &.item_selected {
-      color: var(--color-text-tab-primary--active) !important;
-
-      // Принудительно красим текст внутри стороннего компонента <Text>
+      // Принудительно перекрашиваем сам таб и ВСЕ вложенные текстовые теги
+      &,
       span,
       p,
+      a,
+      div,
       .item_content {
         color: var(--color-text-tab-primary--active) !important;
       }
@@ -64,11 +108,9 @@
   &.item_disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    z-index: 1;
   }
 }
 
-// Если у вас есть счетчики статуса
 .status_counter {
   background: var(--background-status-badge, #e0e0e0);
   color: var(--text-status-badge, #000);

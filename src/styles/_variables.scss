@@ -1,3 +1,4 @@
+@use "sass:map";
 // 🎨 Фоны (backgrounds)
 $background-primary: var(--background-primary);
 
@@ -132,11 +133,11 @@ $breakpoints: (
 // Адаптивность (Медиа-запросы)
 @mixin respond-to($media-list...) {
   @each $media in $media-list {
-    $breakpoint: map-get($breakpoints, $media);
+    $breakpoint: map.get($breakpoints, $media);
 
     @if $breakpoint {
-      $min: map-get($breakpoint, min);
-      $max: map-get($breakpoint, max);
+      $min: map.get($breakpoint, min);
+      $max: map.get($breakpoint, max);
 
       // Генерируем правильный медиа-запрос
       @if $min and $max {
