@@ -251,6 +251,7 @@
         }
 
         .icon_wrapper {
+          flex-grow: 1;
         }
       }
     }
@@ -334,7 +335,8 @@
         .social_wrapper {
           @include glass-effect;
           @include flex-center;
-          gap: 16px;
+          padding: 12px;
+          gap: 12px;
           width: 100%;
 
           @include respond-to("mobile-m", "mobile-s") {
@@ -344,6 +346,7 @@
           }
 
           .icon_wrapper {
+            flex-grow: 1;
           }
         }
       }

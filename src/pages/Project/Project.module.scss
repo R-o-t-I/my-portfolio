@@ -18,7 +18,8 @@
       position: sticky;
       z-index: 2;
       top: calc(
-        var(--navbar-height, 80px) + var(--navbar-offset-y, 16px) + 16px
+        var(--navbar-height, 80px) + #{$padding-section-y} +
+          var(--navbar-offset-y, 0px) + 16px
       );
       transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
