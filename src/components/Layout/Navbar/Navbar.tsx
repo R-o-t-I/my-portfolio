@@ -96,14 +96,11 @@ export const Navbar = () => {
     setMenuActive(false); // Закрываем бургер при смене роута
 
     // Сбрасываем смещение кнопки "Назад" в дефолтное положение
-    document.documentElement.style.setProperty("--navbar-offset-y", "16px");
+    document.documentElement.style.setProperty("--navbar-offset-y", "0px");
     window.scrollTo(0, 0); // Скроллим страницу наверх при переходе
   }, [location.pathname]);
 
-  // 3.
-  const touchStartY = useRef(0);
-  const touchStartX = useRef(0);
-
+  // 3. УПРАВЛЕНИЕ ВЫСОТОЙ НАВБАРA, НАПРАВЛЕНИЕМ И ТРЕКИНГОМ СКРОЛЛА
   useEffect(() => {
     const updateHeight = () => {
       if (navRef.current) {
@@ -119,7 +116,12 @@ export const Navbar = () => {
 
     if (menuActive) return;
 
+    let touchStartY = 0;
+    let touchStartX = 0; // Добавили для отслеживания горизонтальной оси тача
+
     const handleWheel = (e: WheelEvent) => {
+      // ИСПРАВЛЕНО: Если горизонтальный скролл колесика/тачпада больше вертикального,
+      // значит пользователь крутит галерею — полностью игнорируем это событие
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
 
       const navbarHeight = navRef.current?.offsetHeight || 80;
@@ -131,30 +133,29 @@ export const Navbar = () => {
       if (e.deltaY > 0 && currentScrollY > navbarHeight) {
         setIsVisible(false);
         setIsScrolled(true);
-        // Навбар скрывается: уводим кнопку на полную высоту навигации
         document.documentElement.style.setProperty(
           "--navbar-offset-y",
           `-${navbarHeight}px`,
         );
       } else if (e.deltaY < 0) {
         setIsVisible(true);
-        // ИСПРАВЛЕНО: Навбар возвращается. Чтобы кнопка не прижималась вплотную,
-        // возвращаем ей исходное смещение в 0px
         document.documentElement.style.setProperty("--navbar-offset-y", "0px");
       }
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-      touchStartX.current = e.touches[0].clientX;
+      if (!e.touches.length) return;
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX; // Запоминаем стартовую точку по горизонтали
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      const currentY = e.touches[0].clientY;
-      const currentX = e.touches[0].clientX;
+      if (!e.touches.length) return;
+      const touchEndY = e.touches[0].clientY;
+      const touchEndX = e.touches[0].clientX; // Конечная точка по горизонтали
 
-      const differenceY = touchStartY.current - currentY;
-      const differenceX = touchStartX.current - currentX;
+      const differenceY = touchStartY - touchEndY;
+      const differenceX = touchStartX - touchEndX; // Дистанция свайпа по горизонтали
 
       const navbarHeight = navRef.current?.offsetHeight || 80;
       const currentScrollY =
@@ -162,28 +163,26 @@ export const Navbar = () => {
         document.documentElement.scrollTop ||
         document.body.scrollTop;
 
-      if (
-        Math.abs(differenceX) > Math.abs(differenceY) ||
-        Math.abs(differenceY) < 5
-      ) {
-        return;
-      }
+      // ИСПРАВЛЕНО: Если свайп пальцем по горизонтали (X) больше, чем по вертикали (Y),
+      // значит идет прокрутка карусели или свайп галереи — выходим из функции
+      if (Math.abs(differenceX) > Math.abs(differenceY)) return;
 
-      if (differenceY > 0 && currentScrollY > navbarHeight) {
-        setIsVisible(false);
-        setIsScrolled(true);
-        document.documentElement.style.setProperty(
-          "--navbar-offset-y",
-          `-${navbarHeight}px`,
-        );
-      } else if (differenceY < 0) {
-        setIsVisible(true);
-        // ИСПРАВЛЕНО: Навбар возвращается при таче на мобильных телефонах
-        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
+      if (Math.abs(differenceY) > 10) {
+        if (differenceY > 0 && currentScrollY > navbarHeight) {
+          setIsVisible(false);
+          setIsScrolled(true);
+          document.documentElement.style.setProperty(
+            "--navbar-offset-y",
+            `-${navbarHeight}px`,
+          );
+        } else if (differenceY < 0) {
+          setIsVisible(true);
+          document.documentElement.style.setProperty(
+            "--navbar-offset-y",
+            "0px",
+          );
+        }
       }
-
-      touchStartY.current = currentY;
-      touchStartX.current = currentX;
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
