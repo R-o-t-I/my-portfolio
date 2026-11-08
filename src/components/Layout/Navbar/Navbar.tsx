@@ -94,125 +94,81 @@ export const Navbar = () => {
     setIsVisible(true);
     setIsScrolled(false);
     setMenuActive(false); // Закрываем бургер при смене роута
+    lastScrollY.current = 0;
 
     // Сбрасываем смещение кнопки "Назад" в дефолтное положение
     document.documentElement.style.setProperty("--navbar-offset-y", "0px");
     window.scrollTo(0, 0); // Скроллим страницу наверх при переходе
   }, [location.pathname]);
 
-  // 3. УПРАВЛЕНИЕ НАВБАРОМ ПРИ СКРОЛЛЕ (ОПТИМИЗИРОВАНО ПОД БЫСТРЫЙ И ИНЕРЦИОННЫЙ СКРОЛЛ)
+  // 3. ИСПРАВЛЕНО: ЧИСТОЕ НАТИВНОЕ УПРАВЛЕНИЕ СКРОЛЛОМ БЕЗ КОНФЛИКТОВ ТАЧ-СОБЫТИЙ
   useEffect(() => {
-    const updateHeight = () => {
-      if (navRef.current) {
-        document.documentElement.style.setProperty(
-          "--navbar-height",
-          `${navRef.current.offsetHeight}px`,
-        );
-      }
-    };
-
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-
     if (menuActive) return;
 
-    let touchStartY = 0;
-    let touchStartX = 0;
+    const handleScroll = () => {
+      // Кроссбраузерное получение позиции вертикального скролла страницы
+      const currentScrollY =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
 
-    // ОБЩАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ СОСТОЯНИЯ НАВБАРА
-    const toggleNavbar = (direction: "up" | "down", currentScrollY: number) => {
-      const navbarHeight = navRef.current?.offsetHeight || 80;
+      // ЗАЩИТА ОТ iOS BOUNCE: Игнорируем отрицательный скролл при отскоке вверх страницы
+      if (currentScrollY < 0) {
+        setIsVisible(true);
+        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
+        return;
+      }
+
+      // ЗАЩИТА ОТ iOS BOUNCE: Предотвращаем баги дерганья навигации при отскоке от футера сайта
+      const maxScrollableHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      if (currentScrollY >= maxScrollableHeight - 10) {
+        return;
+      }
 
       // Меняем прозрачность/тень навбара при легком отрыве от верха
       setIsScrolled(currentScrollY > 20);
 
-      if (currentScrollY <= navbarHeight || direction === "up") {
-        // Показываем плавно
+      // ИСПРАВЛЕНО: Навбар начинает скрываться, только если пользователь пролистал базовую высоту (80px)
+      if (currentScrollY <= 80) {
         setIsVisible(true);
         document.documentElement.style.setProperty("--navbar-offset-y", "0px");
-      } else if (direction === "down" && currentScrollY > navbarHeight) {
-        // Скрываем плавно
-        setIsVisible(false);
-        document.documentElement.style.setProperty(
-          "--navbar-offset-y",
-          `-${navbarHeight}px`,
-        );
+      } else {
+        // Вычисляем разницу между предыдущим и текущим шагом скролла
+        const diff = currentScrollY - lastScrollY.current;
+
+        // Порог в 5px защищает от микро-дрожания пальца на экране телефона
+        if (Math.abs(diff) > 5) {
+          if (diff > 0) {
+            // СКРОЛЛ ВНИЗ: Навбар уезжает плавно
+            setIsVisible(false);
+            // Передаем точное смещение в CSS (учитываем высоту плашки навбара — 80px)
+            document.documentElement.style.setProperty(
+              "--navbar-offset-y",
+              "-80px",
+            );
+          } else {
+            // СКРОЛЛ ВВЕРХ: Навбар возвращается плавно
+            setIsVisible(true);
+            document.documentElement.style.setProperty(
+              "--navbar-offset-y",
+              "0px",
+            );
+          }
+        }
       }
-    };
 
-    const handleWheel = (e: WheelEvent) => {
-      // Защита от горизонтального скролла галереи
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-
-      const currentScrollY =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop;
-      toggleNavbar(e.deltaY > 0 ? "down" : "up", currentScrollY);
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (!e.touches.length) return;
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!e.touches.length) return;
-      const touchEndY = e.touches[0].clientY;
-      const touchEndX = e.touches[0].clientX;
-
-      const differenceY = touchStartY - touchEndY;
-      const differenceX = touchStartX - touchEndX;
-
-      // Защита от горизонтального скролла карусели/галереи
-      if (Math.abs(differenceX) > Math.abs(differenceY)) return;
-
-      const currentScrollY =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop;
-
-      // ИСПРАВЛЕНО ДЛЯ БЫСТРОГО СКРОЛЛА: Порог уменьшен до 5px для моментальной реакции,
-      // а также добавлена постоянная перезапись точки отсчета при катящемся движении пальца
-      if (Math.abs(differenceY) > 5) {
-        toggleNavbar(differenceY > 0 ? "down" : "up", currentScrollY);
-        touchStartY = touchEndY; // Сбрасываем шаг дельты для плавной непрерывной прокрутки
-      }
-    };
-
-    // ГИБКАЯ СТРАХОВКА: Нативное событие scroll подхватывает быстрый инерционный полет страницы,
-    // когда палец пользователя уже оторвался от экрана, доводя анимацию навбара до конца.
-    const handleNativeScroll = () => {
-      const currentScrollY =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop;
-
-      // Защита от iOS отскоков (bounce)
-      if (currentScrollY < 0) return;
-
-      const diff = currentScrollY - lastScrollY.current;
-      if (Math.abs(diff) > 15) {
-        // Реагируем только на резкие скачки инерции
-        toggleNavbar(diff > 0 ? "down" : "up", currentScrollY);
-      }
+      // Запоминаем текущую координату для следующего такта прокрутки
       lastScrollY.current = currentScrollY;
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: true });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchmove", handleTouchMove, { passive: true });
-    window.addEventListener("scroll", handleNativeScroll, { passive: true });
+    // Слушаем исключительно системное нативное событие scroll окна (оно идеально обрабатывает инерцию)
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", updateHeight);
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("scroll", handleNativeScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [menuActive, location.pathname]);
+  }, [menuActive]);
 
   // 4. ОБРАБОТКА ХЕША (Для переходов из других страниц)
   useEffect(() => {
@@ -248,7 +204,7 @@ export const Navbar = () => {
       },
       {
         threshold: 0.5,
-        rootMargin: `-${navRef.current?.offsetHeight || 80}px 0px 0px 0px`,
+        rootMargin: "-80px 0px 0px 0px", // Заменили реф на стабильные 80px
       },
     );
 
