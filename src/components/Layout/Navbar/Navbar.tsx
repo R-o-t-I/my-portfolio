@@ -93,62 +93,76 @@ export const Navbar = () => {
   useEffect(() => {
     setIsVisible(true);
     setIsScrolled(false);
-    setMenuActive(false); // Закрываем бургер при смене роута
+    setMenuActive(false);
     lastScrollY.current = 0;
 
-    // Сбрасываем смещение кнопки "Назад" в дефолтное положение
     document.documentElement.style.setProperty("--navbar-offset-y", "0px");
-    window.scrollTo(0, 0); // Скроллим страницу наверх при переходе
+    window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // 3. ИСПРАВЛЕНО: ЧИСТОЕ НАТИВНОЕ УПРАВЛЕНИЕ СКРОЛЛОМ БЕЗ КОНФЛИКТОВ ТАЧ-СОБЫТИЙ
+  // 3. ИСПРАВЛЕНО: ГАРАНТИРОВАННОЕ ОТСЛЕЖИВАНИЕ СКРОЛЛА ДЛЯ ЛЮБЫХ CSS СТРУКТУР И ДЕВТУЛСА
   useEffect(() => {
+    const updateHeight = () => {
+      if (navRef.current) {
+        document.documentElement.style.setProperty(
+          "--navbar-height",
+          `${navRef.current.offsetHeight}px`,
+        );
+      }
+    };
+
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+
     if (menuActive) return;
 
-    const handleScroll = () => {
-      // Кроссбраузерное получение позиции вертикального скролла страницы
+    const handleScroll = (e: Event) => {
+      const navbarHeight = navRef.current?.offsetHeight || 80;
+
+      // Вычисляем позицию прокрутки из любого доступного источника (чинит DevTools и мобильные)
+      const target = e.target as HTMLElement | Document;
+      const scrollNode =
+        target instanceof Document ?
+          target.documentElement || target.body
+        : target;
+
       const currentScrollY =
         window.scrollY ||
+        (scrollNode ? scrollNode.scrollTop : 0) ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
 
-      // ЗАЩИТА ОТ iOS BOUNCE: Игнорируем отрицательный скролл при отскоке вверх страницы
+      // Защита от iOS отскоков (bounce) вверх
       if (currentScrollY < 0) {
         setIsVisible(true);
         document.documentElement.style.setProperty("--navbar-offset-y", "0px");
         return;
       }
 
-      // ЗАЩИТА ОТ iOS BOUNCE: Предотвращаем баги дерганья навигации при отскоке от футера сайта
+      // Защита от iOS отскоков (bounce) вниз футера
       const maxScrollableHeight =
         document.documentElement.scrollHeight - window.innerHeight;
-      if (currentScrollY >= maxScrollableHeight - 10) {
-        return;
-      }
+      if (currentScrollY >= maxScrollableHeight - 10) return;
 
-      // Меняем прозрачность/тень навбара при легком отрыве от верха
       setIsScrolled(currentScrollY > 20);
 
-      // ИСПРАВЛЕНО: Навбар начинает скрываться, только если пользователь пролистал базовую высоту (80px)
-      if (currentScrollY <= 80) {
+      if (currentScrollY <= navbarHeight) {
         setIsVisible(true);
         document.documentElement.style.setProperty("--navbar-offset-y", "0px");
       } else {
-        // Вычисляем разницу между предыдущим и текущим шагом скролла
         const diff = currentScrollY - lastScrollY.current;
 
-        // Порог в 5px защищает от микро-дрожания пальца на экране телефона
-        if (Math.abs(diff) > 5) {
+        // Порог в 6 пикселей для фильтрации микротремора пальца
+        if (Math.abs(diff) > 6) {
           if (diff > 0) {
-            // СКРОЛЛ ВНИЗ: Навбар уезжает плавно
+            // СКРОЛЛ ВНИЗ
             setIsVisible(false);
-            // Передаем точное смещение в CSS (учитываем высоту плашки навбара — 80px)
             document.documentElement.style.setProperty(
               "--navbar-offset-y",
-              "-80px",
+              `-${navbarHeight}px`,
             );
           } else {
-            // СКРОЛЛ ВВЕРХ: Навбар возвращается плавно
+            // СКРОЛЛ ВВЕРХ
             setIsVisible(true);
             document.documentElement.style.setProperty(
               "--navbar-offset-y",
@@ -158,15 +172,19 @@ export const Navbar = () => {
         }
       }
 
-      // Запоминаем текущую координату для следующего такта прокрутки
       lastScrollY.current = currentScrollY;
     };
 
-    // Слушаем исключительно системное нативное событие scroll окна (оно идеально обрабатывает инерцию)
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    // ИСПРАВЛЕНО ДЛЯ МОБИЛЬНЫХ: Слушаем скролл на уровне document в фазе захвата (capture: true).
+    // Это заставляет скрипт перехватывать нативный скролл инерции, даже если на html/body стоит height: 100%
+    document.addEventListener("scroll", handleScroll, {
+      passive: true,
+      capture: true,
+    });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateHeight);
+      document.removeEventListener("scroll", handleScroll, { capture: true });
     };
   }, [menuActive]);
 
@@ -204,7 +222,7 @@ export const Navbar = () => {
       },
       {
         threshold: 0.5,
-        rootMargin: "-80px 0px 0px 0px", // Заменили реф на стабильные 80px
+        rootMargin: `-${navRef.current?.offsetHeight || 80}px 0px 0px 0px`,
       },
     );
 
@@ -312,7 +330,7 @@ export const Navbar = () => {
               {t("button.contact")}
             </Button>
           </div>
-          <div className={styles.burger_menu}>
+          <div className={styles.burger_menu_box}>
             <div
               className={`${styles.burger_menu} ${menuActive ? styles.active : ""}`}
               onClick={() => setMenuActive(!menuActive)}
