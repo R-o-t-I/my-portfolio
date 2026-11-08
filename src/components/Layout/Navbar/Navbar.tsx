@@ -353,7 +353,7 @@ export const Navbar = () => {
               {t("button.contact")}
             </Button>
           </div>
-          <div className={styles.burger_menu_box}>
+          <div className={styles.burger_menu}>
             <div
               className={`${styles.burger_menu} ${menuActive ? styles.active : ""}`}
               onClick={() => setMenuActive(!menuActive)}
