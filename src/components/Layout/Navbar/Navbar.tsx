@@ -100,7 +100,7 @@ export const Navbar = () => {
     window.scrollTo(0, 0); // Скроллим страницу наверх при переходе
   }, [location.pathname]);
 
-  // 3. УПРАВЛЕНИЕ ВЫСОТОЙ НАВБАРA, НАПРАВЛЕНИЕМ И ТРЕКИНГОМ СКРОЛЛА
+  // 3. УПРАВЛЕНИЕ НАВБАРОМ ПРИ СКРОЛЛЕ (ОПТИМИЗИРОВАНО ПОД БЫСТРЫЙ И ИНЕРЦИОННЫЙ СКРОЛЛ)
   useEffect(() => {
     const updateHeight = () => {
       if (navRef.current) {
@@ -117,83 +117,100 @@ export const Navbar = () => {
     if (menuActive) return;
 
     let touchStartY = 0;
-    let touchStartX = 0; // Добавили для отслеживания горизонтальной оси тача
+    let touchStartX = 0;
 
-    const handleWheel = (e: WheelEvent) => {
-      // ИСПРАВЛЕНО: Если горизонтальный скролл колесика/тачпада больше вертикального,
-      // значит пользователь крутит галерею — полностью игнорируем это событие
-      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-
+    // ОБЩАЯ ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ СОСТОЯНИЯ НАВБАРА
+    const toggleNavbar = (direction: "up" | "down", currentScrollY: number) => {
       const navbarHeight = navRef.current?.offsetHeight || 80;
-      const currentScrollY =
-        window.scrollY ||
-        document.documentElement.scrollTop ||
-        document.body.scrollTop;
 
-      if (e.deltaY > 0 && currentScrollY > navbarHeight) {
+      // Меняем прозрачность/тень навбара при легком отрыве от верха
+      setIsScrolled(currentScrollY > 20);
+
+      if (currentScrollY <= navbarHeight || direction === "up") {
+        // Показываем плавно
+        setIsVisible(true);
+        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
+      } else if (direction === "down" && currentScrollY > navbarHeight) {
+        // Скрываем плавно
         setIsVisible(false);
-        setIsScrolled(true);
         document.documentElement.style.setProperty(
           "--navbar-offset-y",
           `-${navbarHeight}px`,
         );
-      } else if (e.deltaY < 0) {
-        setIsVisible(true);
-        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
       }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      // Защита от горизонтального скролла галереи
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+      const currentScrollY =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+      toggleNavbar(e.deltaY > 0 ? "down" : "up", currentScrollY);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
       if (!e.touches.length) return;
       touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX; // Запоминаем стартовую точку по горизонтали
+      touchStartX = e.touches[0].clientX;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       if (!e.touches.length) return;
       const touchEndY = e.touches[0].clientY;
-      const touchEndX = e.touches[0].clientX; // Конечная точка по горизонтали
+      const touchEndX = e.touches[0].clientX;
 
       const differenceY = touchStartY - touchEndY;
-      const differenceX = touchStartX - touchEndX; // Дистанция свайпа по горизонтали
+      const differenceX = touchStartX - touchEndX;
 
-      const navbarHeight = navRef.current?.offsetHeight || 80;
+      // Защита от горизонтального скролла карусели/галереи
+      if (Math.abs(differenceX) > Math.abs(differenceY)) return;
+
       const currentScrollY =
         window.scrollY ||
         document.documentElement.scrollTop ||
         document.body.scrollTop;
 
-      // ИСПРАВЛЕНО: Если свайп пальцем по горизонтали (X) больше, чем по вертикали (Y),
-      // значит идет прокрутка карусели или свайп галереи — выходим из функции
-      if (Math.abs(differenceX) > Math.abs(differenceY)) return;
-
-      if (Math.abs(differenceY) > 10) {
-        if (differenceY > 0 && currentScrollY > navbarHeight) {
-          setIsVisible(false);
-          setIsScrolled(true);
-          document.documentElement.style.setProperty(
-            "--navbar-offset-y",
-            `-${navbarHeight}px`,
-          );
-        } else if (differenceY < 0) {
-          setIsVisible(true);
-          document.documentElement.style.setProperty(
-            "--navbar-offset-y",
-            "0px",
-          );
-        }
+      // ИСПРАВЛЕНО ДЛЯ БЫСТРОГО СКРОЛЛА: Порог уменьшен до 5px для моментальной реакции,
+      // а также добавлена постоянная перезапись точки отсчета при катящемся движении пальца
+      if (Math.abs(differenceY) > 5) {
+        toggleNavbar(differenceY > 0 ? "down" : "up", currentScrollY);
+        touchStartY = touchEndY; // Сбрасываем шаг дельты для плавной непрерывной прокрутки
       }
+    };
+
+    // ГИБКАЯ СТРАХОВКА: Нативное событие scroll подхватывает быстрый инерционный полет страницы,
+    // когда палец пользователя уже оторвался от экрана, доводя анимацию навбара до конца.
+    const handleNativeScroll = () => {
+      const currentScrollY =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+      // Защита от iOS отскоков (bounce)
+      if (currentScrollY < 0) return;
+
+      const diff = currentScrollY - lastScrollY.current;
+      if (Math.abs(diff) > 15) {
+        // Реагируем только на резкие скачки инерции
+        toggleNavbar(diff > 0 ? "down" : "up", currentScrollY);
+      }
+      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("scroll", handleNativeScroll, { passive: true });
 
     return () => {
       window.removeEventListener("resize", updateHeight);
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("scroll", handleNativeScroll);
     };
   }, [menuActive, location.pathname]);
 
