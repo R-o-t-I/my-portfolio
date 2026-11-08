@@ -24,7 +24,10 @@ export const Navbar = () => {
   const [menuActive, setMenuActive] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
+
   const lastScrollY = useRef(0);
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,26 +103,74 @@ export const Navbar = () => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // 3. ИСПРАВЛЕНО: ГАРАНТИРОВАННОЕ ОТСЛЕЖИВАНИЕ СКРОЛЛА ДЛЯ ЛЮБЫХ CSS СТРУКТУР И ДЕВТУЛСА
+  // 3. ИСПРАВЛЕНО: УНИВЕРСАЛЬНЫЙ КОМБИНИРОВАННЫЙ СКРОЛЛ-ХУК ДЛЯ МОБИЛЬНЫХ И ДЕВТУЛСА
   useEffect(() => {
-    const updateHeight = () => {
-      if (navRef.current) {
-        document.documentElement.style.setProperty(
-          "--navbar-height",
-          `${navRef.current.offsetHeight}px`,
-        );
-      }
-    };
-
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
+    // ИСПРАВЛЕНО: Задаем высоту жестко через CSS-переменную на старте, чтобы отступ не прыгал фантомно
+    document.documentElement.style.setProperty("--navbar-height", "80px");
 
     if (menuActive) return;
 
-    const handleScroll = (e: Event) => {
-      const navbarHeight = navRef.current?.offsetHeight || 80;
+    // Единая функция скрытия / показа навбара
+    const handleScrollDirection = (
+      direction: "up" | "down",
+      currentScrollY: number,
+    ) => {
+      setIsScrolled(currentScrollY > 20);
 
-      // Вычисляем позицию прокрутки из любого доступного источника (чинит DevTools и мобильные)
+      if (currentScrollY <= 80 || direction === "up") {
+        setIsVisible(true);
+        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
+      } else if (direction === "down" && currentScrollY > 80) {
+        setIsVisible(false);
+        document.documentElement.style.setProperty(
+          "--navbar-offset-y",
+          "-80px",
+        ); // Фиксированное смещение
+      }
+    };
+
+    // А. ОБРАБОТКА ДЛЯ ДЕСКТОПА / МЫШКИ / ТАЧПАДА
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return; // Игнорируем скролл карусели
+      const currentScrollY =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+      handleScrollDirection(e.deltaY > 0 ? "down" : "up", currentScrollY);
+    };
+
+    // Б. ОБРАБОТКА ДЛЯ МОБИЛЬНЫХ ТАЧЕЙ (Защита от блокировок скролла окна)
+    const handleTouchStart = (e: TouchEvent) => {
+      if (!e.touches.length) return;
+      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!e.touches.length) return;
+      const currentY = e.touches[0].clientY;
+      const currentX = e.touches[0].clientX;
+
+      const diffY = touchStartY.current - currentY;
+      const diffX = touchStartX.current - currentX;
+
+      // Полностью игнорируем горизонтальные свайпы галереи
+      if (Math.abs(diffX) > Math.abs(diffY)) return;
+
+      const currentScrollY =
+        window.scrollY ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop;
+
+      // Порог в 8px для отсечения микротремора рук
+      if (Math.abs(diffY) > 8) {
+        handleScrollDirection(diffY > 0 ? "down" : "up", currentScrollY);
+        touchStartY.current = currentY; // Плавное скольжение
+      }
+    };
+
+    // В. СТРАХОВКА: Нативный скролл ловит инерцию (когда палец оторван от экрана)
+    const handleNativeScroll = (e: Event) => {
       const target = e.target as HTMLElement | Document;
       const scrollNode =
         target instanceof Document ?
@@ -132,63 +183,35 @@ export const Navbar = () => {
         document.documentElement.scrollTop ||
         document.body.scrollTop;
 
-      // Защита от iOS отскоков (bounce) вверх
-      if (currentScrollY < 0) {
-        setIsVisible(true);
-        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
-        return;
+      if (currentScrollY < 0) return; // Защита от bounce верхнего края
+
+      const diff = currentScrollY - lastScrollY.current;
+      if (Math.abs(diff) > 10) {
+        handleScrollDirection(diff > 0 ? "down" : "up", currentScrollY);
       }
-
-      // Защита от iOS отскоков (bounce) вниз футера
-      const maxScrollableHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      if (currentScrollY >= maxScrollableHeight - 10) return;
-
-      setIsScrolled(currentScrollY > 20);
-
-      if (currentScrollY <= navbarHeight) {
-        setIsVisible(true);
-        document.documentElement.style.setProperty("--navbar-offset-y", "0px");
-      } else {
-        const diff = currentScrollY - lastScrollY.current;
-
-        // Порог в 6 пикселей для фильтрации микротремора пальца
-        if (Math.abs(diff) > 6) {
-          if (diff > 0) {
-            // СКРОЛЛ ВНИЗ
-            setIsVisible(false);
-            document.documentElement.style.setProperty(
-              "--navbar-offset-y",
-              `-${navbarHeight}px`,
-            );
-          } else {
-            // СКРОЛЛ ВВЕРХ
-            setIsVisible(true);
-            document.documentElement.style.setProperty(
-              "--navbar-offset-y",
-              "0px",
-            );
-          }
-        }
-      }
-
       lastScrollY.current = currentScrollY;
     };
 
-    // ИСПРАВЛЕНО ДЛЯ МОБИЛЬНЫХ: Слушаем скролл на уровне document в фазе захвата (capture: true).
-    // Это заставляет скрипт перехватывать нативный скролл инерции, даже если на html/body стоит height: 100%
-    document.addEventListener("scroll", handleScroll, {
+    // Вешаем слушатели на все возможные типы ввода
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    document.addEventListener("scroll", handleNativeScroll, {
       passive: true,
       capture: true,
     });
 
     return () => {
-      window.removeEventListener("resize", updateHeight);
-      document.removeEventListener("scroll", handleScroll, { capture: true });
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("scroll", handleNativeScroll, {
+        capture: true,
+      });
     };
   }, [menuActive]);
 
-  // 4. ОБРАБОТКА ХЕША (Для переходов из других страниц)
+  // 4. ОБРАБОТКА ХЕША
   useEffect(() => {
     if (location.hash && location.pathname === "/") {
       const id = location.hash.replace("#", "");
@@ -203,7 +226,7 @@ export const Navbar = () => {
     }
   }, [location.hash, location.pathname]);
 
-  // 5. ОБНОВЛЕНИЕ АКТИВНОЙ СЕКЦИИ ПРИ СКРОЛЛЕ (IntersectionObserver)
+  // 5. ОБНОВЛЕНИЕ АКТИВНОЙ СЕКЦИИ ПРИ СКРОЛЛЕ
   useEffect(() => {
     if (location.pathname !== "/") {
       setActiveSection("");
@@ -222,7 +245,7 @@ export const Navbar = () => {
       },
       {
         threshold: 0.5,
-        rootMargin: `-${navRef.current?.offsetHeight || 80}px 0px 0px 0px`,
+        rootMargin: "-80px 0px 0px 0px", // Жесткие 80px вместо рефа
       },
     );
 
