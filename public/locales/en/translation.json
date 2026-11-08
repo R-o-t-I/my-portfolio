@@ -28,7 +28,8 @@
       "instagram": "Instagram account",
       "threads": "Threads account",
       "vk": "VK account",
-      "github": "GitHub account"
+      "github": "GitHub account",
+      "tiktok": "TikTok account"
     },
     "photo": {
       "me": "Alexander Tihonovich - web-developer and designer"
@@ -107,6 +108,17 @@
   },
 
   "form": {
+    "error": {
+      "name_required": "Please enter your name",
+      "name_short": "Name must be at least 2 characters long",
+      "contacts_empty": "Fill in at least one field: Email or Link",
+      "contacts_invalid_both": "Invalid email and link format",
+      "email_invalid": "Email address must contain an '@' symbol and a domain zone",
+      "social_invalid": "Enter a valid link (URL)",
+      "message_required": "Please enter your message",
+      "message_short": "Message must be at least 10 characters long",
+      "file_too_large": "The file is too large. Maximum 10 MB"
+    },
     "input": {
       "title": {
         "name": "Your name",

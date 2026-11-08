@@ -14,6 +14,15 @@
     width: 100%;
     max-width: 100%;
 
+    .back_btn {
+      position: sticky;
+      z-index: 2;
+      top: calc(
+        var(--navbar-height, 80px) + var(--navbar-offset-y, 16px) + 16px
+      );
+      transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     .header {
       display: flex;
       justify-content: space-between;

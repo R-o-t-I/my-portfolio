@@ -18,6 +18,7 @@ import {
   IconLogoInstagram,
   IconLogoTelegram,
   IconLogoThreads,
+  IconLogoTikTok,
   IconLogoVK,
 } from "@/assets/icons";
 
@@ -69,19 +70,24 @@ export const AboutSection = ({ id }: AboutSectionProps) => {
       label: t("aria_label.social.instagram"),
     },
     {
-      icon: <IconLogoThreads />,
-      href: "https://www.threads.com/@alexander_tihonovich",
-      label: t("aria_label.social.threads"),
-    },
-    {
       icon: <IconLogoVK />,
       href: "https://vk.com/alexander_tihonovich",
       label: t("aria_label.social.vk"),
     },
     {
+      icon: <IconLogoThreads />,
+      href: "https://www.threads.com/@alexander_tihonovich",
+      label: t("aria_label.social.threads"),
+    },
+    {
       icon: <IconLogoGitHub />,
       href: "https://github.com/R-o-t-I",
       label: t("aria_label.social.github"),
+    },
+    {
+      icon: <IconLogoTikTok />,
+      href: "https://www.tiktok.com/@alexander_tihonovich",
+      label: t("aria_label.social.tiktok"),
     },
   ];
 

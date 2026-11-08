@@ -20,6 +20,18 @@
     gap: 48px;
   }
 
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  transform: translateY(0);
+
+  &.hidden {
+    transform: translateY(
+      calc(-100% - #{$padding-section-y} - 16px)
+    ) !important;
+  }
+
   .before {
     display: flex;
     align-content: center;

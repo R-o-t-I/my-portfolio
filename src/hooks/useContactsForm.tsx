@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   supabase,
   validateContactsForm,
@@ -21,6 +22,7 @@ export const useContactsForm = (
   onSuccess: () => void,
   onError: (err: unknown) => void,
 ) => {
+  const { t } = useTranslation(); // Инициализируем перевод внутри хука
   const [formData, setFormData] = useState<FormDataState>(INITIAL_FORM_STATE);
   const [errors, setErrors] = useState<FormErrorsState>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +30,7 @@ export const useContactsForm = (
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Оптимизированное управление кулдауном через единый интервал
+  // Управление кулдауном через единый интервал
   useEffect(() => {
     const checkExistingCooldown = () => {
       const lastSubmit = localStorage.getItem(STORAGE_KEY);
@@ -80,7 +82,11 @@ export const useContactsForm = (
     if (selectedFile.size > 10 * 1024 * 1024) {
       setErrors((prev) => ({
         ...prev,
-        file: "Файл слишком большой. Максимум 10 МБ",
+        // ИСПРАВЛЕНО: Текст ошибки размера файла теперь переводится
+        file: t(
+          "form.error.file_too_large",
+          "Файл слишком большой. Максимум 10 МБ",
+        ),
       }));
       return;
     }
@@ -133,7 +139,9 @@ export const useContactsForm = (
 
     if (cooldownLeft > 0) return;
 
-    const formErrors = validateContactsForm(formData);
+    // ИСПРАВЛЕНО: Передаем функцию t вторым аргументом в валидатор полей формы
+    const formErrors = validateContactsForm(formData, t);
+
     if (Object.keys(formErrors).length > 0 || errors.file) {
       setErrors((prev) => ({ ...prev, ...formErrors }));
       return;
@@ -164,12 +172,10 @@ export const useContactsForm = (
       localStorage.setItem(STORAGE_KEY, Date.now().toString());
       setCooldownLeft(COOLDOWN_MS / 1000);
 
-      // Сначала очищаем форму в UI, чтобы всё отвисло мгновенно
       setFormData(INITIAL_FORM_STATE);
       setErrors({});
       if (fileInputRef.current) fileInputRef.current.value = "";
 
-      // Вызываем алерт только после полной очистки состояния формы
       onSuccess();
     } catch (err) {
       onError(err);

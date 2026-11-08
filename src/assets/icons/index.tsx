@@ -7,6 +7,7 @@ import LogoInstagram from "./IconLogoInstagram.svg";
 import LogoVK from "./IconLogoVK.svg";
 import LogoThreads from "./IconLogoThreads.svg";
 import LogoGitHub from "./IconLogoGitHub.svg";
+import LogoTikTok from "./IconLogoTikTok.svg";
 import Code from "./IconCode.svg";
 import Prototype from "./IconPrototype.svg";
 import Pen from "./IconPen.svg";
@@ -67,6 +68,12 @@ export const IconLogoThreads = (props: IconProps) => (
 export const IconLogoGitHub = (props: IconProps) => (
   <IconWrapper {...props}>
     <LogoGitHub />
+  </IconWrapper>
+);
+
+export const IconLogoTikTok = (props: IconProps) => (
+  <IconWrapper {...props}>
+    <LogoTikTok />
   </IconWrapper>
 );
 
