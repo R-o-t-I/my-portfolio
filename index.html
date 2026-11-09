@@ -8,28 +8,90 @@
       content="width=device-width, initial-scale=1, maximum-scale=1"
     />
 
-    <title>Веб-разработчик и дизайнер – Александр Тихонович</title>
-    <meta name="description" content="Описание" />
+    <!-- Базовые SEO мета-теги -->
+    <title>Загрузка...</title>
+    <meta name="description" content="" />
+    <meta name="keywords" content="" />
+    <meta name="author" content="Александр Тихонович" />
+
+    <!-- Open Graph мета-теги (для Telegram, VK, WhatsApp, Discord) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vercel.app" />
+    <meta property="og:image" content="https://vercel.app/og-image.jpg" />
+    <meta property="og:title" content="" />
+    <meta property="og:description" content="" />
+
+    <!-- Twitter Cards мета-теги (для X / Twitter) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://vercel.app" />
+    <meta name="twitter:title" content="" />
+    <meta name="twitter:description" content="" />
+    <meta name="twitter:image" content="https://vercel.app/og-image.jpg" />
 
     <script>
       (function () {
         try {
+          // 1. JSON-КОНФИГ ПЕРЕВОДОВ С КЛЮЧЕВЫМИ СЛОВАМИ
+          const metaConfig = {
+            ru: {
+              title: "Веб-разработчик и дизайнер – Александр Тихонович",
+              description:
+                "Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX.",
+              keywords:
+                "веб-разработчик, дизайнер, интерфейсы, портфолио, SkyReglis, верстка, React, фронтенд, UI, UX",
+            },
+            en: {
+              title: "Web Developer & Designer – Alexander Tihonovich",
+              description:
+                "Alexander Tihonovich – modern web development, frontend engineering and UI/UX design portfolio.",
+              keywords:
+                "web developer, designer, UI/UX, portfolio, SkyReglis, React, frontend development, layout",
+            },
+          };
+
           const savedTheme = localStorage.getItem("theme");
           const systemDark = window.matchMedia(
             "(prefers-color-scheme: dark)",
           ).matches;
+          document.documentElement.setAttribute(
+            "data-theme",
+            savedTheme || (systemDark ? "dark" : "light"),
+          );
 
-          // Определяем тему: либо сохраненная, либо системная
-          const theme = savedTheme || (systemDark ? "dark" : "light");
+          const savedLng = localStorage.getItem("i18nextLng");
+          const browserLng =
+            window.navigator.language || window.navigator.userLanguage || "";
+          const defaultLng = /(ru|be|uk|kk)/i.test(browserLng) ? "ru" : "en";
+          const currentLng = savedLng || defaultLng;
 
-          if (theme === "dark") {
-            document.documentElement.setAttribute("data-theme", "dark");
-          } else {
-            document.documentElement.setAttribute("data-theme", "light");
-          }
+          document.documentElement.setAttribute("lang", currentLng);
+
+          const locale = metaConfig[currentLng] || metaConfig.en;
+
+          // Динамически заполняем все текстовые SEO, OG и Twitter теги
+          document.title = locale.title;
+          document
+            .querySelector('meta[name="description"]')
+            .setAttribute("content", locale.description);
+          document
+            .querySelector('meta[name="keywords"]')
+            .setAttribute("content", locale.keywords); // ДОБАВЛЕНО
+
+          document
+            .querySelector('meta[property="og:title"]')
+            .setAttribute("content", locale.title);
+          document
+            .querySelector('meta[property="og:description"]')
+            .setAttribute("content", locale.description);
+
+          document
+            .querySelector('meta[name="twitter:title"]')
+            .setAttribute("content", locale.title);
+          document
+            .querySelector('meta[name="twitter:description"]')
+            .setAttribute("content", locale.description);
         } catch (e) {
-          // На случай, если localStorage заблокирован
-          console.error("Theme initialization failed", e);
+          console.error("SEO initialization failed", e);
         }
       })();
     </script>

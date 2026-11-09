@@ -8,7 +8,10 @@ i18n
   .use(LanguageDetector) // Запоминает выбор пользователя
   .use(initReactI18next)
   .init({
-    fallbackLng: "ru",
+    // ИСПРАВЛЕНО: Резервным языком (если у пользователя в браузере, например, французский)
+    // делаем английский, чтобы сайт оставался международным для зарубежных клиентов
+    fallbackLng: "en",
+
     ns: ["translation"],
     defaultNS: "translation",
     debug: false,
@@ -17,6 +20,12 @@ i18n
     },
     backend: {
       loadPath: "/locales/{{lng}}/{{ns}}.json",
+    },
+    // ДОБАВЛЕНО: Настройка плагина детекции для идеальной стыковки с index.html
+    detection: {
+      order: ["localStorage", "navigator"], // Сначала смотрим, что сохранено, потом на систему
+      caches: ["localStorage"], // Кешируем строго в localStorage (запишет ключ i18nextLng)
+      lookupLocalStorage: "i18nextLng",
     },
   });
 

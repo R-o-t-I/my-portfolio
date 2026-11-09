@@ -38,7 +38,7 @@
 
   "section": {
     "about": {
-      "greeting": "Hi! I",
+      "greeting": "Hi! I'm",
       "first_name": "Alexander",
       "last_name": "Tihonovich",
       "description": "Web-developer, designer and founder <0>SkyReglis Studio</0>. I create modern websites and applications.",
@@ -55,7 +55,7 @@
     },
     "services": {
       "title": "Services",
-      "subtitle": "What am I doing",
+      "subtitle": "What am I do",
       "card": {
         "code": {
           "title": "Layout of websites and applications",
@@ -92,7 +92,7 @@
       "title": "Contacts",
       "subtitle": "Contact me",
       "bubbles": {
-        "project": "Tell us about your project",
+        "project": "Tell me about your project",
         "questions": "Ask questions - I'm in touch",
         "ideas": "Your ideas are inspiring!",
         "waiting": "I'm waiting for your message",

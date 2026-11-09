@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { supabase } from "../../utils";
-
 import styles from "./Project.module.scss";
 
 import {
@@ -26,9 +25,8 @@ import {
   IconLogoVK,
 } from "@/assets/icons";
 
-// Строгие интерфейсы для TypeScript под JSONB структуру
 interface LocalizedField {
-  ru?: string | null; // Сделали опциональным, т.к. из БД может прийти NULL
+  ru?: string | null;
   en?: string | null;
 }
 
@@ -123,15 +121,13 @@ export const Project = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  // Вычисляем текущий язык ('ru' или 'en')
   const currentLang = i18n.language.startsWith("ru") ? "ru" : "en";
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Прокрутка вверх при открытии проекта
+    window.scrollTo(0, 0);
 
     const getProject = async () => {
       try {
-        // Подгружаем проект вместе со связанной информацией о категории
         const { data, error } = await supabase
           .from("projects")
           .select(
@@ -169,7 +165,6 @@ export const Project = () => {
     if (slug) getProject();
   }, [slug, navigate]);
 
-  // Извлекаем локализованные данные с автоматическим фолбэком на 'ru'
   const projectDetails = useMemo(() => {
     if (!project) return null;
 
@@ -179,11 +174,11 @@ export const Project = () => {
         ?.map((item) => {
           if (!item?.skill) return null;
           const name =
-            item.skill.name?.[currentLang] ?? item.skill.name?.ru ?? ""; // Защита от null
+            item.skill.name?.[currentLang] ?? item.skill.name?.ru ?? "";
           const icon =
             item.skill.skill_icon?.[currentLang] ??
             item.skill.skill_icon?.ru ??
-            ""; // Защита от null
+            "";
           return {
             id: item.skill.id,
             name,
@@ -191,9 +186,11 @@ export const Project = () => {
             color: item.skill.skill_icon_color,
           };
         })
-        .filter(Boolean) || [];
+        // ИСПРАВЛЕНО: Вместо .filter(Boolean) используем Type Guard предикат,
+        // который на уровне типов гарантирует TS, что null элементов внутри больше нет
+        .filter((item): item is NonNullable<typeof item> => item !== null) ||
+      [];
 
-    // 2. Мапим ссылки с проверкой наличия кастомного текста в базе данных
     const links = (project.links ?? [])
       .map((link) => {
         if (!link?.type) return null;
@@ -211,22 +208,20 @@ export const Project = () => {
       })
       .filter(Boolean);
 
-    // 3. Мапим массив картинок для галереи, привязывая их к ID категории
     const rawGallery = project.gallery ?? [];
     const gallery = rawGallery.map((item) => ({
       url: item.url ?? "",
       categoryId: item.category?.id ?? "other",
-      title: item.title?.[currentLang] ?? item.title?.ru ?? "", // Защита от null
+      title: item.title?.[currentLang] ?? item.title?.ru ?? "",
     }));
 
-    // 4. Динамически собираем уникальные категории для табов напрямую из объектов в БД
     const uniqueCategoriesMap = new Map<string, string>();
     rawGallery.forEach((item) => {
       if (item.category?.id) {
         const localizedName =
           item.category.name?.[currentLang] ??
           item.category.name?.ru ??
-          "Other"; // Защита от null
+          "Other";
         uniqueCategoriesMap.set(item.category.id, localizedName);
       }
     });
@@ -234,7 +229,6 @@ export const Project = () => {
       ([id, name]) => ({ id, name }),
     );
 
-    // 5. Форматируем дату один раз внутри useMemo
     const formattedDate =
       project.created_at ?
         (() => {
@@ -274,7 +268,8 @@ export const Project = () => {
     };
   }, [project, currentLang]);
 
-  // Управление заголовком вкладки браузера (учитываем язык)
+  // УПРАВЛЕНИЕ ЗАГОЛОВКОМ ВКЛАДКИ (СИНХРОНИЗИРОВАНО С APP.TSX)
+  // УПРАВЛЕНИЕ ЗАГОЛОВКОМ И МЕТА-ТЕГАМИ ПРОЕКТА
   useEffect(() => {
     if (projectDetails?.title) {
       const baseTitle =
@@ -282,11 +277,60 @@ export const Project = () => {
           "Веб-разработчик и дизайнер – Александр Тихонович"
         : "Web Developer & Designer – Alexander Tikhonovich";
 
+      // 1. Меняем название вкладки браузера
       document.title = `${projectDetails.title} | ${baseTitle}`;
+
+      // 2. ДОБАВЛЕНО: Меняем описание и ключевые слова под конкретный кейс проекта
+      const metaDescription = document.querySelector(
+        'meta[name="description"]',
+      );
+      if (metaDescription && projectDetails.description_mini) {
+        metaDescription.setAttribute(
+          "content",
+          projectDetails.description_mini,
+        );
+      }
+
+      // Генерируем ключевые слова на базе стека технологий проекта
+      const metaKeywords = document.querySelector('meta[name="keywords"]');
+      if (metaKeywords && projectDetails.techStack) {
+        const stackNames = projectDetails.techStack
+          .map((t) => t.name)
+          .join(", ");
+        metaKeywords.setAttribute(
+          "content",
+          `${projectDetails.title}, ${stackNames}, SkyReglis`,
+        );
+      }
+
+      // 3. ДОБАВЛЕНО: Подменяем превью-картинки на сниппет или логотип проекта из Supabase
+      if (projectDetails.snippet) {
+        document
+          .querySelector('meta[property="og:image"]')
+          ?.setAttribute("content", projectDetails.snippet);
+        document
+          .querySelector('meta[name="twitter:image"]')
+          ?.setAttribute("content", projectDetails.snippet);
+      }
+
+      // Подменяем заголовки для превью мессенджеров
+      document
+        .querySelector('meta[property="og:title"]')
+        ?.setAttribute("content", projectDetails.title);
+      document
+        .querySelector('meta[name="twitter:title"]')
+        ?.setAttribute("content", projectDetails.title);
     }
 
+    // При размонтировании компонента (уходе со страницы) сбрасываем всё обратно в дефолт
     return () => {
       document.title = "Веб-разработчик и дизайнер – Александр Тихонович";
+      document
+        .querySelector('meta[property="og:image"]')
+        ?.setAttribute("content", "https://vercel.app");
+      document
+        .querySelector('meta[name="twitter:image"]')
+        ?.setAttribute("content", "https://vercel.app");
     };
   }, [projectDetails, currentLang]);
 
