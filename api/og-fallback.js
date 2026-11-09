@@ -22,12 +22,18 @@ export default async function handler(req, res) {
   let htmlContent = "";
 
   try {
-    // Скачиваем оригинальный собранный index.html прямо по сети с вашего домена
-    const htmlResponse = await fetch(`${baseUrl}/index.html`);
-    if (!htmlResponse.ok) throw new Error("Failed to fetch template");
-    htmlContent = await htmlResponse.text();
+    // Способ А: Пробуем прочитать локально (в Vercel файлы часто лежат в корне процесса)
+    const localPath = path.join(process.cwd(), "index.html");
+    if (fs.existsSync(localPath)) {
+      htmlContent = fs.readFileSync(localPath, "utf8");
+    } else {
+      // Способ Б: Если локально файла нет, скачиваем его по сети
+      const htmlResponse = await fetch(`${baseUrl}/index.html`);
+      if (!htmlResponse.ok) throw new Error("Network response was not ok");
+      htmlContent = await htmlResponse.text();
+    }
   } catch (e) {
-    console.error("Failed to fetch static index.html over network:", e);
+    console.error("Failed to fetch static index.html:", e);
     return res
       .status(500)
       .send("Internal Server Error: Meta-template inaccessible");
