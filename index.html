@@ -8,37 +8,57 @@
       content="width=device-width, initial-scale=1, maximum-scale=1"
     />
 
-    <!-- Базовые SEO мета-теги -->
-    <title>Загрузка...</title>
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
+    <!-- Базовые SEO мета-теги — ИСПРАВЛЕНО: Текст прописан статически, чтобы ленивые роботы (WhatsApp) сразу его видели -->
+    <title>Веб-разработчик и дизайнер – Александр Тихонович</title>
+    <meta
+      name="description"
+      content="Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX."
+    />
+    <meta
+      name="keywords"
+      content="веб-разработчик, дизайнер, интерфейсы, портфолио, SkyReglis, верстка, React, фронтенд, UI, UX"
+    />
     <meta name="author" content="Александр Тихонович" />
 
     <!-- Open Graph мета-теги (для Telegram, VK, WhatsApp, Discord) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tihonovich.vercel.app" />
-    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный интернет-URL вашей главной картинки -->
-    <meta property="og:image" content="/og-image.jpeg" />
-    <meta property="og:title" content="" />
-    <meta property="og:description" content="" />
+    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный URL вашей главной картинки -->
+    <meta
+      property="og:image"
+      content="https://tihonovich.vercel.app/og-image.jpeg"
+    />
+    <meta
+      property="og:title"
+      content="Веб-разработчик и дизайнер – Александр Тихонович"
+    />
+    <meta
+      property="og:description"
+      content="Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX."
+    />
 
     <!-- Twitter Cards мета-теги (для X / Twitter) -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://tihonovich.vercel.app" />
-    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный интернет-URL -->
-    <meta name="twitter:image" content="/og-image.jpeg" />
+    <meta
+      name="twitter:title"
+      content="Веб-разработчик и дизайнер – Александр Тихонович"
+    />
+    <meta
+      name="twitter:description"
+      content="Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX."
+    />
+    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный URL вашей главной картинки -->
+    <meta
+      name="twitter:image"
+      content="https://tihonovich.vercel.app/og-image.jpeg"
+    />
 
     <script>
       (function () {
         try {
+          // JSON-КОНФИГ ДЛЯ АНГЛИЙСКОЙ ЛОКАЛИ (Русская уже вшита в HTML выше)
           const metaConfig = {
-            ru: {
-              title: "Веб-разработчик и дизайнер – Александр Тихонович",
-              description:
-                "Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX.",
-              keywords:
-                "веб-разработчик, дизайнер, интерфейсы, портфолио, SkyReglis, верстка, React, frontend, UI, UX",
-            },
             en: {
               title: "Web Developer & Designer – Alexander Tihonovich",
               description:
@@ -64,29 +84,33 @@
           const currentLng = savedLng || defaultLng;
 
           document.documentElement.setAttribute("lang", currentLng);
-          const locale = metaConfig[currentLng] || metaConfig.en;
 
-          document.title = locale.title;
-          document
-            .querySelector('meta[name="description"]')
-            .setAttribute("content", locale.description);
-          document
-            .querySelector('meta[name="keywords"]')
-            .setAttribute("content", locale.keywords);
+          // ИСПРАВЛЕНО: Меняем теги динамически ТОЛЬКО если выбран английский язык.
+          // Если язык русский, ничего не трогаем — роботы прочитают готовую статическую вёрстку.
+          if (currentLng === "en") {
+            const locale = metaConfig.en;
+            document.title = locale.title;
+            document
+              .querySelector('meta[name="description"]')
+              .setAttribute("content", locale.description);
+            document
+              .querySelector('meta[name="keywords"]')
+              .setAttribute("content", locale.keywords);
 
-          document
-            .querySelector('meta[property="og:title"]')
-            .setAttribute("content", locale.title);
-          document
-            .querySelector('meta[property="og:description"]')
-            .setAttribute("content", locale.description);
+            document
+              .querySelector('meta[property="og:title"]')
+              .setAttribute("content", locale.title);
+            document
+              .querySelector('meta[property="og:description"]')
+              .setAttribute("content", locale.description);
 
-          document
-            .querySelector('meta[name="twitter:title"]')
-            .setAttribute("content", locale.title);
-          document
-            .querySelector('meta[name="twitter:description"]')
-            .setAttribute("content", locale.description);
+            document
+              .querySelector('meta[name="twitter:title"]')
+              .setAttribute("content", locale.title);
+            document
+              .querySelector('meta[name="twitter:description"]')
+              .setAttribute("content", locale.description);
+          }
         } catch (e) {
           console.error("SEO initialization failed", e);
         }
