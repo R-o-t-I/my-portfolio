@@ -291,11 +291,8 @@ export const Project = () => {
       const metaDescription = document.querySelector(
         'meta[name="description"]',
       );
-      if (metaDescription && projectDetails.description_mini) {
-        metaDescription.setAttribute(
-          "content",
-          projectDetails.description_mini,
-        );
+      if (metaDescription && projectDetails.description) {
+        metaDescription.setAttribute("content", projectDetails.description);
       }
 
       const metaKeywords = document.querySelector('meta[name="keywords"]');
@@ -326,13 +323,13 @@ export const Project = () => {
         ?.setAttribute("content", projectDetails.title);
 
       // ИСПРАВЛЕНО: описание тоже подменяем под проект
-      if (projectDetails.description_mini) {
+      if (projectDetails.description) {
         document
           .querySelector('meta[property="og:description"]')
-          ?.setAttribute("content", projectDetails.description_mini);
+          ?.setAttribute("content", projectDetails.description);
         document
           .querySelector('meta[name="twitter:description"]')
-          ?.setAttribute("content", projectDetails.description_mini);
+          ?.setAttribute("content", projectDetails.description);
       }
     }
 

@@ -1,7 +1,16 @@
 .wrapper {
+  color: inherit;
+  text-decoration: none;
+
   &.active {
     .navbar {
       color: $color-text-primary;
     }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-text-accent;
+    outline-offset: 4px;
+    border-radius: 8px;
   }
 }

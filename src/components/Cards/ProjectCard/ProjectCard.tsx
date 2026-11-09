@@ -1,6 +1,4 @@
-import React from "react";
-
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import styles from "./ProjectCard.module.scss";
 
@@ -23,26 +21,16 @@ export const ProjectCard = ({
   category,
   slug,
 }: ProjectCardProps) => {
-  const navigate = useNavigate();
-
-  const handleCardClick = () => {
-    // Здесь можно добавить проигрывание звука клика, если хочешь
-    // playClickSound();
-
-    // Выполняем переход программно
-    navigate(`/project/${slug}`);
-  };
-
   return (
-    <div className={styles.card} onClick={handleCardClick}>
+    <Link to={`/project/${slug}`} className={styles.card}>
       <div className={styles.snippet_wrapper}>
         {snippet && (
           <img
             className={styles.snippet}
             src={snippet}
-            alt={title} // Обязательно для семантики и SEO
-            loading="lazy" // Картинка грузится только при скролле к ней
-            decoding="async" // Декодирование в фоновом потоке, не фризит UI
+            alt={title}
+            loading="lazy"
+            decoding="async"
           />
         )}
         <div className={styles.category_wrapper}>{category}</div>
@@ -55,7 +43,7 @@ export const ProjectCard = ({
               <img
                 className={styles.logo}
                 src={logo}
-                alt={`${title} logo`}
+                alt=""
                 loading="lazy"
                 decoding="async"
               />
@@ -71,6 +59,6 @@ export const ProjectCard = ({
           </Text>
         )}
       </div>
-    </div>
+    </Link>
   );
 };

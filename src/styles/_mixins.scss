@@ -123,7 +123,11 @@
   );
 
   // Фоны табов
-  --background-tabs-container: none;
+  --background-tabs-container: linear-gradient(
+    135deg,
+    rgba(20, 40, 80, 0.6),
+    rgba(20, 30, 50, 0.5)
+  );
   --background-tab-primary: transparent;
   --background-tab-primary--active: linear-gradient(
     135deg,

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import styles from "./NavbarItem.module.scss";
 
@@ -19,44 +19,45 @@ export const NavbarItem = ({
   isActive,
   onClick,
 }: NavbarItemProps) => {
-  const navigate = useNavigate();
   const location = useLocation();
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const targetId = to.includes("#") ? to.split("#")[1] : null;
+  const isAnchor = Boolean(targetId);
 
-    const targetId = to.includes("#") ? to.split("#")[1] : null;
+  // Якорные ссылки валидны только на главной; с других страниц
+  // сначала переходим на главную, на которой якорь сработает
+  const href = isAnchor && location.pathname !== "/" ? `/#${targetId}` : to;
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (!isAnchor) return; // обычный переход — Link справится сам
 
     if (location.pathname === "/") {
-      if (targetId) {
-        const element = document.getElementById(targetId);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-          // Принудительно обновляем URL в строке
-          window.history.pushState(null, "", to);
-        }
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        window.history.pushState(null, "", "/");
+      e.preventDefault();
+
+      // Сужаем тип: targetId гарантированно строка после isAnchor
+      if (!targetId) return;
+
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        window.history.replaceState(null, "", to);
       }
-    } else {
-      // Если уходим с другой страницы на главную к якорю
-      navigate(to);
     }
   };
 
   return (
-    <button
-      type="button" // Добавляем тип, чтобы избежать случайных отправок форм
+    <Link
+      to={href}
       onClick={(e) => {
         handleClick(e);
-        onClick();
+        onClick?.();
       }}
       className={`${styles.wrapper} ${isActive ? styles.active : ""}`}
+      aria-current={isActive ? "page" : undefined}
     >
       <Text size="sm" mode="secondary" align="center" className={styles.navbar}>
         {children}
       </Text>
-    </button>
+    </Link>
   );
 };

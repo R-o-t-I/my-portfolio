@@ -5,6 +5,80 @@
   flex-grow: 1;
   margin-top: calc($navbar-height + $padding-section-y);
 
+  // Строка фильтров: табы слева, сортировка справа.
+  // На мобильных складывается в колонку, кнопка тянется на всю ширину
+  .filters_row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    @include respond-to("mobile-m", "mobile-s") {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+    }
+  }
+
+  .sort_wrapper {
+    flex-shrink: 0;
+
+    @include respond-to("mobile-m", "mobile-s") {
+      flex-shrink: 1;
+
+      // Растягиваем triggerWrapper из Dropdown на всю ширину:
+      // сам триггер — inline-flex и не даёт кнопке разогнаться
+      > div {
+        width: 100%;
+      }
+    }
+  }
+
+  .sort_button {
+    @include glass-effect;
+    @include flex-center;
+
+    @include respond-to("mobile-m", "mobile-s") {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  // Переворот шеврона, когда меню открыто
+  .sort_button_open {
+    .sort_arrow {
+      transform: rotate(-135deg) translateY(-2px);
+    }
+  }
+
+  .title {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    gap: 12px;
+    width: 100%;
+
+    .text {
+      display: block;
+      text-align: left;
+      width: 100%;
+    }
+
+    .icon {
+      @include flex-center;
+    }
+  }
+
+  .sort_arrow {
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 0.2s ease;
+  }
+
   .projects_grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -17,5 +91,42 @@
     @include respond-to("mobile-l", "tablet") {
       grid-template-columns: repeat(2, 1fr);
     }
+  }
+}
+
+// === ПОРТАЛЬНОЕ МЕНЮ: вне .wrapper, потому что createPortal
+// рендерит его в document.body, вне DOM-потомков .wrapper ===
+
+.sort_menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  min-width: 200px;
+
+  @include respond-to("mobile-m", "mobile-s") {
+    min-width: 0;
+  }
+}
+
+.sort_option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  &.sort_option_active {
+    background: var(--background-tab-primary--active);
+    color: #fff;
   }
 }

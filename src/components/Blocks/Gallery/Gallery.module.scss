@@ -37,6 +37,7 @@
   position: relative;
   overflow: hidden;
   height: 400px;
+  cursor: zoom-in;
 
   &:first-child {
     padding-left: $padding-section-x;
@@ -177,6 +178,7 @@
       max-height 0.3s ease-in-out,
       max-width 0.3s ease-in-out,
       border-radius 0.3s ease-in-out;
+    cursor: zoom-in;
   }
 
   // Режим 100% заполнения экрана при скрытии интерфейса
@@ -192,6 +194,7 @@
       max-width: 100vw !important;
       border-radius: 0px;
       box-shadow: none;
+      cursor: zoom-out;
     }
   }
 }

@@ -151,7 +151,6 @@ export const Gallery = ({ images, activeCategory }: GalleryProps) => {
             key={index}
             className={styles.gallery_item}
             onClick={() => setFullscreenIndex(index)}
-            style={{ cursor: "zoom-in" }}
           >
             <img
               src={img.url}
@@ -218,7 +217,7 @@ export const Gallery = ({ images, activeCategory }: GalleryProps) => {
 
           <div
             className={`${styles.fullscreen_content} ${!isInterfaceVisible ? styles.fullscreen_mode : ""}`}
-            onClick={(e) => e.stopPropagation()} // ИСПРАВЛЕНО: Клик по пустой зоне внутри контента больше не закрывает и не скрывает UI
+            // onClick={(e) => e.stopPropagation()} // ИСПРАВЛЕНО: Клик по пустой зоне внутри контента больше не закрывает и не скрывает UI
           >
             <img
               src={images[fullscreenIndex].url}
@@ -227,7 +226,6 @@ export const Gallery = ({ images, activeCategory }: GalleryProps) => {
                 e.stopPropagation();
                 setIsInterfaceVisible((prev) => !prev); // ИСПРАВЛЕНО: Только клик по САМОЙ картинке переключает интерфейс
               }}
-              style={{ cursor: "pointer" }}
             />
 
             {images[fullscreenIndex].title && (

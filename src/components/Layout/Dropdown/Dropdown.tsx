@@ -9,6 +9,12 @@ interface DropdownProps {
     | ((closeMenu: () => void) => React.ReactNode);
   className?: string;
   closeOnClick?: boolean;
+  /** Выравнивание меню относительно триггера: по левому или правому краю */
+  align?: "left" | "right";
+  /** Растягивает меню на ширину триггера */
+  fullWidth?: boolean;
+  /** Сообщает наружу об изменении состояния открытия */
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const Dropdown = ({
@@ -16,9 +22,16 @@ export const Dropdown = ({
   dropdownContent,
   className = "",
   closeOnClick = true,
+  align = "left",
+  fullWidth = false,
+  onOpenChange,
 }: DropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [coords, setCoords] = useState({
+    top: 0,
+    left: 0,
+    width: undefined as number | undefined,
+  });
   const [isUp, setIsUp] = useState(false);
 
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -34,23 +47,37 @@ export const Dropdown = ({
     const scrollX = window.scrollX;
 
     const menuH = menuRef.current?.offsetHeight || 0;
-    const menuW = menuRef.current?.offsetWidth || 0;
+    const menuW = fullWidth ? rect.width : menuRef.current?.offsetWidth || 0;
 
     const spaceBelow = winH - rect.bottom;
     const shouldOpenUp = spaceBelow < menuH && rect.top > menuH;
     setIsUp(shouldOpenUp);
 
     const spaceRight = winW - rect.left;
-    const shouldShiftLeft = spaceRight < menuW;
+    const shouldShiftLeft =
+      !fullWidth && (align === "right" || spaceRight < menuW);
 
     const top =
       shouldOpenUp ? rect.top + scrollY - menuH - 4 : rect.bottom + scrollY + 4;
 
-    const left =
+    let left =
       shouldShiftLeft ? rect.right + scrollX - menuW : rect.left + scrollX;
 
-    setCoords({ top, left });
-  }, []);
+    // Вписываем меню в границы окна, чтобы на узких экранах
+    // оно не вылезало за края (с отступом 8px)
+    const margin = 8;
+    if (left < scrollX + margin) {
+      left = scrollX + margin;
+    } else if (left + menuW > scrollX + winW - margin) {
+      left = scrollX + winW - margin - menuW;
+    }
+
+    setCoords({
+      top,
+      left,
+      width: fullWidth ? rect.width : undefined,
+    });
+  }, [align, fullWidth]);
 
   useEffect(() => {
     if (isOpen) {
@@ -82,6 +109,11 @@ export const Dropdown = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
+  // Уведомляем родителя о смене состояния открытия
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
+
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -110,6 +142,7 @@ export const Dropdown = ({
             style={{
               top: `${coords.top}px`,
               left: `${coords.left}px`,
+              width: coords.width ? `${coords.width}px` : undefined,
               visibility: coords.top === 0 ? "hidden" : "visible",
             }}
             onClick={(e) => {

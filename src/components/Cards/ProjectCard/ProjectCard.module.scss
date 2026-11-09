@@ -1,18 +1,43 @@
 .card {
   @include glass-effect($padding: 4px);
-  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-text-accent, #7731da);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
 
   .snippet_wrapper {
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
+    overflow: hidden; // обрезает углы картинки, категория ложится поверх
+    border-radius: 12px;
 
     .snippet {
       position: absolute;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 12px;
     }
 
     .category_wrapper {
