@@ -1,31 +1,36 @@
 import { createClient } from "@supabase/supabase-js";
-import fs from "fs";
-import path from "path";
 
-// Кросплатформенный сбор переменных с бэкенда Vercel
+// Сбор секретных переменных с бэкенда Vercel
 const supabaseUrl =
   process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
 const supabaseKey =
   process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
-
 const supabase =
   supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 export default async function handler(req, res) {
   const { slug } = req.query;
 
-  // ИСПРАВЛЕНО ДЛЯ VERCEL БЭКЕНДА: Читаем шаблон index.html, который лежит
-  // в одной папке с этой серверной функцией. Это убирает ошибку "File not found" на сервере.
-  const htmlPath = path.join(__dirname, "index.html");
+  // Динамически определяем текущий хост (домен) вашего продакшена Vercel
+  const host =
+    req.headers["x-forwarded-host"] ||
+    req.headers.host ||
+    "tihonovich.vercel.app";
+  const protocol = req.headers["x-forwarded-proto"] || "https";
+  const baseUrl = `${protocol}://${host}`;
+
   let htmlContent = "";
 
   try {
-    htmlContent = fs.readFileSync(htmlPath, "utf8");
+    // Скачиваем оригинальный собранный index.html прямо по сети с вашего домена
+    const htmlResponse = await fetch(`${baseUrl}/index.html`);
+    if (!htmlResponse.ok) throw new Error("Failed to fetch template");
+    htmlContent = await htmlResponse.text();
   } catch (e) {
-    console.error("Failed to read index.html from api folder:", e);
+    console.error("Failed to fetch static index.html over network:", e);
     return res
       .status(500)
-      .send("Internal Server Error: Meta-template not found");
+      .send("Internal Server Error: Meta-template inaccessible");
   }
 
   // Если клиент базы данных не инициализировался, отдаем стандартную страницу
@@ -51,9 +56,9 @@ export default async function handler(req, res) {
 
     const titleRu = project.title?.ru || "Проект";
     const descRu = project.description_mini?.ru || "";
-    const image = project.snippet_url || "https://vercel.app";
+    const image = project.snippet_url || `${baseUrl}/og-image.jpg`;
 
-    // 2. На сервере жестко подменяем теги регулярными выражениями до отправки парсеру Telegram
+    // 2. Модифицируем теги Open Graph в скачанном шаблоне
     htmlContent = htmlContent
       .replace(
         /<title>.*?<\/title>/,
