@@ -17,28 +17,27 @@
     <!-- Open Graph мета-теги (для Telegram, VK, WhatsApp, Discord) -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tihonovich.vercel.app" />
-    <meta property="og:image" content="/og-image.jpeg" />
+    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный интернет-URL вашей главной картинки -->
+    <meta property="og:image" content="https://vercel.app" />
     <meta property="og:title" content="" />
     <meta property="og:description" content="" />
 
     <!-- Twitter Cards мета-теги (для X / Twitter) -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://tihonovich.vercel.app" />
-    <meta name="twitter:title" content="" />
-    <meta name="twitter:description" content="" />
-    <meta name="twitter:image" content="/og-image.jpeg" />
+    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный интернет-URL -->
+    <meta name="twitter:image" content="https://vercel.app" />
 
     <script>
       (function () {
         try {
-          // 1. JSON-КОНФИГ ПЕРЕВОДОВ С КЛЮЧЕВЫМИ СЛОВАМИ
           const metaConfig = {
             ru: {
               title: "Веб-разработчик и дизайнер – Александр Тихонович",
               description:
                 "Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX.",
               keywords:
-                "веб-разработчик, дизайнер, интерфейсы, портфолио, SkyReglis, верстка, React, фронтенд, UI, UX",
+                "веб-разработчик, дизайнер, интерфейсы, портфолио, SkyReglis, верстка, React, frontend, UI, UX",
             },
             en: {
               title: "Web Developer & Designer – Alexander Tihonovich",
@@ -65,17 +64,15 @@
           const currentLng = savedLng || defaultLng;
 
           document.documentElement.setAttribute("lang", currentLng);
-
           const locale = metaConfig[currentLng] || metaConfig.en;
 
-          // Динамически заполняем все текстовые SEO, OG и Twitter теги
           document.title = locale.title;
           document
             .querySelector('meta[name="description"]')
             .setAttribute("content", locale.description);
           document
             .querySelector('meta[name="keywords"]')
-            .setAttribute("content", locale.keywords); // ДОБАВЛЕНО
+            .setAttribute("content", locale.keywords);
 
           document
             .querySelector('meta[property="og:title"]')

@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
+import fs from "fs";
+import path from "path";
 
-// Сбор секретных переменных с бэкенда Vercel
 const supabaseUrl =
   process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
 const supabaseKey =
@@ -11,7 +12,6 @@ const supabase =
 export default async function handler(req, res) {
   const { slug } = req.query;
 
-  // Динамически определяем текущий хост (домен) вашего продакшена Vercel
   const host =
     req.headers["x-forwarded-host"] ||
     req.headers.host ||
@@ -22,12 +22,10 @@ export default async function handler(req, res) {
   let htmlContent = "";
 
   try {
-    // Способ А: Пробуем прочитать локально (в Vercel файлы часто лежат в корне процесса)
     const localPath = path.join(process.cwd(), "index.html");
     if (fs.existsSync(localPath)) {
       htmlContent = fs.readFileSync(localPath, "utf8");
     } else {
-      // Способ Б: Если локально файла нет, скачиваем его по сети
       const htmlResponse = await fetch(`${baseUrl}/index.html`);
       if (!htmlResponse.ok) throw new Error("Network response was not ok");
       htmlContent = await htmlResponse.text();
@@ -39,7 +37,6 @@ export default async function handler(req, res) {
       .send("Internal Server Error: Meta-template inaccessible");
   }
 
-  // Если клиент базы данных не инициализировался, отдаем стандартную страницу
   if (!supabase) {
     console.error(
       "Supabase client failed to initialize. Check your Environment Variables on Vercel.",
@@ -48,7 +45,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Делаем быстрый запрос к Supabase для получения данных проекта
     const { data: project, error } = await supabase
       .from("projects")
       .select("title, description_mini, snippet_url")
@@ -62,9 +58,10 @@ export default async function handler(req, res) {
 
     const titleRu = project.title?.ru || "Проект";
     const descRu = project.description_mini?.ru || "";
-    const image = project.snippet_url || `${baseUrl}/og-image.jpg`;
 
-    // 2. Модифицируем теги Open Graph в скачанном шаблоне
+    // ИСПРАВЛЕНО: Если у проекта нет уникального сниппета, фолбэкаемся на полный путь картинки
+    const image = project.snippet_url || `${baseUrl}/og-image.jpeg`;
+
     htmlContent = htmlContent
       .replace(
         /<title>.*?<\/title>/,
