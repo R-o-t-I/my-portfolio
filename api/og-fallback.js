@@ -11,7 +11,6 @@ const supabase =
 
 export default async function handler(req, res) {
   const { slug } = req.query;
-
   const host =
     req.headers["x-forwarded-host"] ||
     req.headers.host ||
@@ -22,25 +21,21 @@ export default async function handler(req, res) {
   let htmlContent = "";
 
   try {
-    const localPath = path.join(process.cwd(), "index.html");
-    if (fs.existsSync(localPath)) {
-      htmlContent = fs.readFileSync(localPath, "utf8");
+    const htmlPath = path.join(process.cwd(), "index.html");
+    if (fs.existsSync(htmlPath)) {
+      htmlContent = fs.readFileSync(htmlPath, "utf8");
     } else {
-      const htmlResponse = await fetch(`${baseUrl}/index.html`);
-      if (!htmlResponse.ok) throw new Error("Network response was not ok");
-      htmlContent = await htmlResponse.text();
+      const fallbackLocalPath = path.join(process.cwd(), "dist", "index.html");
+      htmlContent = fs.readFileSync(fallbackLocalPath, "utf8");
     }
   } catch (e) {
-    console.error("Failed to fetch static index.html:", e);
+    console.error("Critical Error reading index.html:", e);
     return res
       .status(500)
       .send("Internal Server Error: Meta-template inaccessible");
   }
 
   if (!supabase) {
-    console.error(
-      "Supabase client failed to initialize. Check your Environment Variables on Vercel.",
-    );
     return res.status(200).send(htmlContent);
   }
 
@@ -52,14 +47,11 @@ export default async function handler(req, res) {
       .single();
 
     if (error || !project) {
-      console.warn(`Project with slug "${slug}" not found in Supabase:`, error);
       return res.status(200).send(htmlContent);
     }
 
     const titleRu = project.title?.ru || "Проект";
     const descRu = project.description_mini?.ru || "";
-
-    // ИСПРАВЛЕНО: Если у проекта нет уникального сниппета, фолбэкаемся на полный путь картинки
     const image = project.snippet_url || `${baseUrl}/og-image.jpeg`;
 
     htmlContent = htmlContent
@@ -95,7 +87,7 @@ export default async function handler(req, res) {
     res.setHeader("Content-Type", "text/html");
     return res.status(200).send(htmlContent);
   } catch (err) {
-    console.error("API OG Fallback Error during generation:", err);
+    console.error("API OG Fallback Error:", err);
     return res.status(200).send(htmlContent);
   }
 }

@@ -14,10 +14,6 @@
       "destination": "/og-image.jpeg"
     },
     {
-      "source": "/og-image.jpg",
-      "destination": "/og-image.jpg"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
