@@ -58,11 +58,13 @@
     align-content: center;
     gap: 12px;
     width: 100%;
+    color: var(--color-text-primary) !important;
 
     .text {
       display: block;
       text-align: left;
       width: 100%;
+      color: var(--color-text-primary) !important;
     }
 
     .icon {
