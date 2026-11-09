@@ -215,7 +215,7 @@ export const Projects = () => {
                     aria-selected={sortOption === option}
                     type="button"
                   >
-                    {sortLabels[option]}
+                    <Text>{sortLabels[option]}</Text>
                   </button>
                 ))}
               </div>
