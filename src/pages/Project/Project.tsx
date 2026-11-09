@@ -268,8 +268,7 @@ export const Project = () => {
     };
   }, [project, currentLang]);
 
-  // УПРАВЛЕНИЕ ЗАГОЛОВКОМ ВКЛАДКИ (СИНХРОНИЗИРОВАНО С APP.TSX)
-  // УПРАВЛЕНИЕ ЗАГОЛОВКОМ И МЕТА-ТЕГАМИ ПРОЕКТА
+  // УПРАВЛЕНИЕ ЗАГОЛОВКОМ И ДИНАМИЧЕСКИМИ МЕТА-ТЕГАМИ ДЛЯ ПОИСКОВИКОВ И КЭША
   useEffect(() => {
     if (projectDetails?.title) {
       const baseTitle =
@@ -277,10 +276,8 @@ export const Project = () => {
           "Веб-разработчик и дизайнер – Александр Тихонович"
         : "Web Developer & Designer – Alexander Tikhonovich";
 
-      // 1. Меняем название вкладки браузера
       document.title = `${projectDetails.title} | ${baseTitle}`;
 
-      // 2. ДОБАВЛЕНО: Меняем описание и ключевые слова под конкретный кейс проекта
       const metaDescription = document.querySelector(
         'meta[name="description"]',
       );
@@ -291,7 +288,6 @@ export const Project = () => {
         );
       }
 
-      // Генерируем ключевые слова на базе стека технологий проекта
       const metaKeywords = document.querySelector('meta[name="keywords"]');
       if (metaKeywords && projectDetails.techStack) {
         const stackNames = projectDetails.techStack
@@ -303,7 +299,6 @@ export const Project = () => {
         );
       }
 
-      // 3. ДОБАВЛЕНО: Подменяем превью-картинки на сниппет или логотип проекта из Supabase
       if (projectDetails.snippet) {
         document
           .querySelector('meta[property="og:image"]')
@@ -313,7 +308,6 @@ export const Project = () => {
           ?.setAttribute("content", projectDetails.snippet);
       }
 
-      // Подменяем заголовки для превью мессенджеров
       document
         .querySelector('meta[property="og:title"]')
         ?.setAttribute("content", projectDetails.title);
@@ -322,15 +316,14 @@ export const Project = () => {
         ?.setAttribute("content", projectDetails.title);
     }
 
-    // При размонтировании компонента (уходе со страницы) сбрасываем всё обратно в дефолт
     return () => {
       document.title = "Веб-разработчик и дизайнер – Александр Тихонович";
       document
         .querySelector('meta[property="og:image"]')
-        ?.setAttribute("content", "https://tihonovich.vercel.app/");
+        ?.setAttribute("content", "https://vercel.app");
       document
         .querySelector('meta[name="twitter:image"]')
-        ?.setAttribute("content", "https://tihonovich.vercel.app/");
+        ?.setAttribute("content", "https://vercel.app");
     };
   }, [projectDetails, currentLang]);
 
