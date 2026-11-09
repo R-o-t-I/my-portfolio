@@ -14,18 +14,18 @@ const supabase =
 export default async function handler(req, res) {
   const { slug } = req.query;
 
-  // ИСПРАВЛЕНО ДЛЯ VERCEL: В продакшене папка dist компилируется прямо в корень деплоя,
-  // поэтому файл index.html ищется непосредственно в корневом каталоге процесса
-  const htmlPath = path.join(process.cwd(), "index.html");
+  // ИСПРАВЛЕНО ДЛЯ VERCEL БЭКЕНДА: Читаем шаблон index.html, который лежит
+  // в одной папке с этой серверной функцией. Это убирает ошибку "File not found" на сервере.
+  const htmlPath = path.join(__dirname, "index.html");
   let htmlContent = "";
 
   try {
     htmlContent = fs.readFileSync(htmlPath, "utf8");
   } catch (e) {
-    console.error("Failed to read index.html from root folder:", e);
+    console.error("Failed to read index.html from api folder:", e);
     return res
       .status(500)
-      .send("Internal Server Error: Static HTML template not found");
+      .send("Internal Server Error: Meta-template not found");
   }
 
   // Если клиент базы данных не инициализировался, отдаем стандартную страницу
