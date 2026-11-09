@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     // Извлекаем мультиязычные поля (делаем фолбэк на 'ru', если язык не определен)
     const titleRu = project.title?.ru || "Проект";
     const descRu = project.description_mini?.ru || "";
-    const image = project.snippet_url || "https://vercel.app";
+    const image = project.snippet_url || "https://tihonovich.vercel.app/";
 
     // 2. На сервере жестко подменяем теги регулярными выражениями до отправки парсеру Telegram
     htmlContent = htmlContent

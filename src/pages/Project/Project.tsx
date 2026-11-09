@@ -327,10 +327,10 @@ export const Project = () => {
       document.title = "Веб-разработчик и дизайнер – Александр Тихонович";
       document
         .querySelector('meta[property="og:image"]')
-        ?.setAttribute("content", "https://vercel.app");
+        ?.setAttribute("content", "https://tihonovich.vercel.app/");
       document
         .querySelector('meta[name="twitter:image"]')
-        ?.setAttribute("content", "https://vercel.app");
+        ?.setAttribute("content", "https://tihonovich.vercel.app/");
     };
   }, [projectDetails, currentLang]);
 
