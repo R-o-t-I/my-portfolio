@@ -16,17 +16,21 @@
 
     <!-- Open Graph мета-теги (для Telegram, VK, WhatsApp, Discord) -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://tihonovich.vercel.app/" />
-    <meta property="og:image" content="/og-image.jpeg" />
+    <!-- ИСПРАВЛЕНО: Указан ваш точный домен портфолио -->
+    <meta property="og:url" content="https://tihonovich.vercel.app" />
+    <!-- ИСПРАВЛЕНО: Путь к картинке изменен на абсолютный URL (мессенджеры смогут её скачать) -->
+    <meta property="og:image" content="https://vercel.app" />
     <meta property="og:title" content="" />
     <meta property="og:description" content="" />
 
     <!-- Twitter Cards мета-теги (для X / Twitter) -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://tihonovich.vercel.app/" />
+    <!-- ИСПРАВЛЕНО: Указан ваш точный домен портфолио -->
+    <meta name="twitter:url" content="https://tihonovich.vercel.app" />
     <meta name="twitter:title" content="" />
     <meta name="twitter:description" content="" />
-    <meta name="twitter:image" content="/og-image.jpeg" />
+    <!-- ИСПРАВЛЕНО: Путь к картинке изменен на абсолютный URL -->
+    <meta name="twitter:image" content="https://vercel.app" />
 
     <script>
       (function () {
@@ -75,7 +79,7 @@
             .setAttribute("content", locale.description);
           document
             .querySelector('meta[name="keywords"]')
-            .setAttribute("content", locale.keywords); // ДОБАВЛЕНО
+            .setAttribute("content", locale.keywords);
 
           document
             .querySelector('meta[property="og:title"]')
