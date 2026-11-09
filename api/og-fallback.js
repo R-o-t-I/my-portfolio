@@ -9,6 +9,38 @@ const supabaseKey =
 const supabase =
   supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+// === ХЕЛПЕРЫ (на уровне модуля, вне handler) ===
+
+const escapeHtml = (s = "") =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+
+// Замена мета-тега, нечувствительная к переносам строк и порядку атрибутов
+const setMeta = (html, attr, key, content) => {
+  const re = new RegExp(`<meta[^>]*${attr}=["']${key}["'][^>]*>`, "i");
+  return html.replace(
+    re,
+    () => `<meta ${attr}="${key}" content="${content}" />`,
+  );
+};
+
+// Локализованные поля могут прийти строкой или JSON-объектом {ru, en}
+const pick = (v) =>
+  v ?
+    typeof v === "string" ?
+      v
+    : v.ru || v.en || ""
+  : "";
+
+const getTemplatePath = () => {
+  const candidates = [
+    path.join(process.cwd(), "dist", "index.html"),
+    path.join(__dirname, "dist", "index.html"),
+    path.join(process.cwd(), "index.html"),
+    path.join(__dirname, "index.html"),
+  ];
+  return candidates.find((p) => fs.existsSync(p)) || null;
+};
+
 export default async function handler(req, res) {
   const { slug } = req.query;
   const host =
@@ -18,22 +50,15 @@ export default async function handler(req, res) {
   const protocol = req.headers["x-forwarded-proto"] || "https";
   const baseUrl = `${protocol}://${host}`;
 
-  let htmlContent = "";
-
-  try {
-    const htmlPath = path.join(process.cwd(), "index.html");
-    if (fs.existsSync(htmlPath)) {
-      htmlContent = fs.readFileSync(htmlPath, "utf8");
-    } else {
-      const fallbackLocalPath = path.join(process.cwd(), "dist", "index.html");
-      htmlContent = fs.readFileSync(fallbackLocalPath, "utf8");
-    }
-  } catch (e) {
-    console.error("Critical Error reading index.html:", e);
+  // === ЧТЕНИЕ ШАБЛОНА: сначала собранный dist, потом исходник ===
+  const templatePath = getTemplatePath();
+  if (!templatePath) {
+    console.error("Meta-template not found in function bundle");
     return res
       .status(500)
       .send("Internal Server Error: Meta-template inaccessible");
   }
+  const htmlContent = fs.readFileSync(templatePath, "utf8");
 
   if (!supabase) {
     return res.status(200).send(htmlContent);
@@ -50,42 +75,26 @@ export default async function handler(req, res) {
       return res.status(200).send(htmlContent);
     }
 
-    const titleRu = project.title?.ru || "Проект";
-    const descRu = project.description_mini?.ru || "";
-    const image = project.snippet_url || `${baseUrl}/og-image.jpeg`;
+    const title = escapeHtml(pick(project.title) || "Проект");
+    const desc = escapeHtml(pick(project.description_mini));
+    const image = escapeHtml(
+      pick(project.snippet_url) || `${baseUrl}/og-image.jpeg`,
+    );
 
-    htmlContent = htmlContent
-      .replace(
-        /<title>.*?<\/title>/,
-        `<title>${titleRu} | Александр Тихонович</title>`,
-      )
-      .replace(
-        /<meta property="og:title" content=".*?"\s*\/?>/,
-        `<meta property="og:title" content="${titleRu}" />`,
-      )
-      .replace(
-        /<meta property="og:description" content=".*?"\s*\/?>/,
-        `<meta property="og:description" content="${descRu}" />`,
-      )
-      .replace(
-        /<meta property="og:image" content=".*?"\s*\/?>/,
-        `<meta property="og:image" content="${image}" />`,
-      )
-      .replace(
-        /<meta name="twitter:title" content=".*?"\s*\/?>/,
-        `<meta name="twitter:title" content="${titleRu}" />`,
-      )
-      .replace(
-        /<meta name="twitter:description" content=".*?"\s*\/?>/,
-        `<meta name="twitter:description" content="${descRu}" />`,
-      )
-      .replace(
-        /<meta name="twitter:image" content=".*?"\s*\/?>/,
-        `<meta name="twitter:image" content="${image}" />`,
-      );
+    let html = htmlContent;
+    html = html.replace(
+      /<title>.*?<\/title>/,
+      () => `<title>${title} | Александр Тихонович</title>`,
+    );
+    html = setMeta(html, "property", "og:title", title);
+    html = setMeta(html, "property", "og:description", desc);
+    html = setMeta(html, "property", "og:image", image);
+    html = setMeta(html, "name", "twitter:title", title);
+    html = setMeta(html, "name", "twitter:description", desc);
+    html = setMeta(html, "name", "twitter:image", image);
 
-    res.setHeader("Content-Type", "text/html");
-    return res.status(200).send(htmlContent);
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    return res.status(200).send(html);
   } catch (err) {
     console.error("API OG Fallback Error:", err);
     return res.status(200).send(htmlContent);

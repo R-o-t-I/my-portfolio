@@ -8,7 +8,7 @@
       content="width=device-width, initial-scale=1, maximum-scale=1"
     />
 
-    <!-- Базовые SEO мета-теги — ИСПРАВЛЕНО: Текст прописан статически, чтобы ленивые роботы (WhatsApp) сразу его видели -->
+    <!-- Базовые SEO мета-теги: прописаны статически, чтобы краулеры видели их без JS -->
     <title>Веб-разработчик и дизайнер – Александр Тихонович</title>
     <meta
       name="description"
@@ -22,12 +22,13 @@
 
     <!-- Open Graph мета-теги (для Telegram, VK, WhatsApp, Discord) -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://tihonovich.vercel.app" />
-    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный URL вашей главной картинки -->
+    <meta property="og:url" content="https://tihonovich.vercel.app/" />
     <meta
       property="og:image"
       content="https://tihonovich.vercel.app/og-image.jpeg"
     />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta
       property="og:title"
       content="Веб-разработчик и дизайнер – Александр Тихонович"
@@ -39,7 +40,7 @@
 
     <!-- Twitter Cards мета-теги (для X / Twitter) -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://tihonovich.vercel.app" />
+    <meta name="twitter:url" content="https://tihonovich.vercel.app/" />
     <meta
       name="twitter:title"
       content="Веб-разработчик и дизайнер – Александр Тихонович"
@@ -48,7 +49,6 @@
       name="twitter:description"
       content="Портфолио Александра Тихоновича – современная веб-разработка, верстка сайтов и дизайн интерфейсов UI/UX."
     />
-    <!-- ИСПРАВЛЕНО: Изменено на полный абсолютный URL вашей главной картинки -->
     <meta
       name="twitter:image"
       content="https://tihonovich.vercel.app/og-image.jpeg"
@@ -57,7 +57,8 @@
     <script>
       (function () {
         try {
-          // JSON-КОНФИГ ДЛЯ АНГЛИЙСКОЙ ЛОКАЛИ (Русская уже вшита в HTML выше)
+          // Английская локаль: русская уже вшита в HTML выше,
+          // поэтому теги трогаем только если язык английский
           const metaConfig = {
             en: {
               title: "Web Developer & Designer – Alexander Tihonovich",
@@ -85,8 +86,6 @@
 
           document.documentElement.setAttribute("lang", currentLng);
 
-          // ИСПРАВЛЕНО: Меняем теги динамически ТОЛЬКО если выбран английский язык.
-          // Если язык русский, ничего не трогаем — роботы прочитают готовую статическую вёрстку.
           if (currentLng === "en") {
             const locale = metaConfig.en;
             document.title = locale.title;

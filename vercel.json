@@ -1,17 +1,13 @@
 {
-  "version": 2,
+  "functions": {
+    "api/og-fallback.js": {
+      "includeFiles": "dist/index.html"
+    }
+  },
   "rewrites": [
     {
       "source": "/project/:slug",
       "destination": "/api/og-fallback?slug=:slug"
-    },
-    {
-      "source": "/index.html",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/og-image.jpeg",
-      "destination": "/og-image.jpeg"
     },
     {
       "source": "/(.*)",

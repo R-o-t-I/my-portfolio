@@ -112,6 +112,14 @@ interface ProjectItem {
   gallery: GalleryItem[] | null;
 }
 
+const BASE_TITLE = {
+  ru: "Веб-разработчик и дизайнер – Александр Тихонович",
+  en: "Web Developer & Designer – Alexander Tikhonovich",
+} as const;
+
+// Дефолтная OG-картинка (общая для всего сайта)
+const DEFAULT_OG_IMAGE = "https://tihonovich.vercel.app/og-image.jpeg";
+
 export const Project = () => {
   const { id: slug } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -125,6 +133,10 @@ export const Project = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    // Флаг актуальности: защищает от гонки, когда ответ старого
+    // запроса приходит позже нового и перезаписывает данные
+    let isActual = true;
 
     const getProject = async () => {
       try {
@@ -147,6 +159,8 @@ export const Project = () => {
           .eq("slug", slug)
           .single();
 
+        if (!isActual) return;
+
         if (error || !data) {
           navigate("/");
           return;
@@ -156,19 +170,22 @@ export const Project = () => {
         setActiveCategory("all");
       } catch (err) {
         console.error(err);
-        navigate("/");
+        if (isActual) navigate("/");
       } finally {
-        setIsLoading(false);
+        if (isActual) setIsLoading(false);
       }
     };
 
     if (slug) getProject();
+
+    return () => {
+      isActual = false;
+    };
   }, [slug, navigate]);
 
   const projectDetails = useMemo(() => {
     if (!project) return null;
 
-    // 1. Мапим стек технологий, очищая вложенную структуру от Supabase
     const techStack =
       project.project_skills
         ?.map((item) => {
@@ -186,8 +203,6 @@ export const Project = () => {
             color: item.skill.skill_icon_color,
           };
         })
-        // ИСПРАВЛЕНО: Вместо .filter(Boolean) используем Type Guard предикат,
-        // который на уровне типов гарантирует TS, что null элементов внутри больше нет
         .filter((item): item is NonNullable<typeof item> => item !== null) ||
       [];
 
@@ -206,7 +221,7 @@ export const Project = () => {
           icon: config.icon,
         };
       })
-      .filter(Boolean);
+      .filter((link): link is NonNullable<typeof link> => link !== null);
 
     const rawGallery = project.gallery ?? [];
     const gallery = rawGallery.map((item) => ({
@@ -268,15 +283,10 @@ export const Project = () => {
     };
   }, [project, currentLang]);
 
-  // УПРАВЛЕНИЕ ЗАГОЛОВКОМ И ДИНАМИЧЕСКИМИ МЕТА-ТЕГАМИ ДЛЯ ПОИСКОВИКОВ И КЭША
+  // === УПРАВЛЕНИЕ ЗАГОЛОВКОМ И МЕТА-ТЕГАМИ ===
   useEffect(() => {
     if (projectDetails?.title) {
-      const baseTitle =
-        currentLang === "ru" ?
-          "Веб-разработчик и дизайнер – Александр Тихонович"
-        : "Web Developer & Designer – Alexander Tikhonovich";
-
-      document.title = `${projectDetails.title} | ${baseTitle}`;
+      document.title = `${projectDetails.title} | ${BASE_TITLE[currentLang]}`;
 
       const metaDescription = document.querySelector(
         'meta[name="description"]',
@@ -314,16 +324,27 @@ export const Project = () => {
       document
         .querySelector('meta[name="twitter:title"]')
         ?.setAttribute("content", projectDetails.title);
+
+      // ИСПРАВЛЕНО: описание тоже подменяем под проект
+      if (projectDetails.description_mini) {
+        document
+          .querySelector('meta[property="og:description"]')
+          ?.setAttribute("content", projectDetails.description_mini);
+        document
+          .querySelector('meta[name="twitter:description"]')
+          ?.setAttribute("content", projectDetails.description_mini);
+      }
     }
 
+    // При уходе со страницы возвращаем дефолты, с учётом текущего языка
     return () => {
-      document.title = "Веб-разработчик и дизайнер – Александр Тихонович";
+      document.title = BASE_TITLE[currentLang];
       document
         .querySelector('meta[property="og:image"]')
-        ?.setAttribute("content", "https://vercel.app");
+        ?.setAttribute("content", DEFAULT_OG_IMAGE);
       document
         .querySelector('meta[name="twitter:image"]')
-        ?.setAttribute("content", "https://vercel.app");
+        ?.setAttribute("content", DEFAULT_OG_IMAGE);
     };
   }, [projectDetails, currentLang]);
 
@@ -374,10 +395,10 @@ export const Project = () => {
                 </div>
                 {projectDetails.links && (
                   <ButtonGroup className={styles.links_container}>
-                    {projectDetails.links.map((link, index) => (
+                    {projectDetails.links.map((link) => (
                       <Button
                         before={link?.icon}
-                        key={index}
+                        key={link.url}
                         href={link?.url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -418,7 +439,7 @@ export const Project = () => {
                     : "Tech Stack"}
                   </Title>
                   <div className={styles.tech_list}>
-                    {projectDetails.techStack.map((tech: any) => (
+                    {projectDetails.techStack.map((tech) => (
                       <div key={tech.id} className={styles.tech_item}>
                         <SkillCard
                           icon={
@@ -445,7 +466,11 @@ export const Project = () => {
 
               {projectDetails.history && (
                 <div className={styles.content_item}>
-                  <Title size="sm">История проекта</Title>
+                  <Title size="sm">
+                    {currentLang === "ru" ?
+                      "История проекта"
+                    : "Project history"}
+                  </Title>
                   <Text align="justify">{projectDetails.history}</Text>
                 </div>
               )}
