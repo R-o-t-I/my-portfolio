@@ -118,10 +118,14 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--color-text-primary) !important;
+
   text-align: left;
   cursor: pointer;
   transition: background-color 0.15s ease;
+
+  .text {
+    color: var(--color-text-primary);
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -129,6 +133,9 @@
 
   &.sort_option_active {
     background: var(--background-tab-primary--active);
-    color: #fff;
+
+    .text {
+      color: var(--color-text-button-primary);
+    }
   }
 }

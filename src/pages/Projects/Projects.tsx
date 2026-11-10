@@ -170,73 +170,75 @@ export const Projects = () => {
         <Title>{t("page.projects.title")}</Title>
       </div>
 
-      <div className={styles.filters_row}>
-        {categories.length > 0 && (
-          <Tabs
-            selectedId={selectedCategorySlug}
-            onSelectedIdChange={(id) => setSelectedCategorySlug(id)}
-            layoutFillMode="auto"
-            withScrollToSelectedTab
-          >
-            <TabsItem id="all">
-              {currentLang === "ru" ? "Все проекты" : "All projects"}
-            </TabsItem>
-
-            {categories.map((cat) => {
-              const categoryName =
-                cat.name?.[currentLang] ?? cat.name?.ru ?? "";
-              return (
-                <TabsItem key={cat.id} id={cat.slug}>
-                  {categoryName}
-                </TabsItem>
-              );
-            })}
-          </Tabs>
-        )}
-
-        {/* Сортировка справа от табов, на базе общего Dropdown.
-            На мобильных — на всю ширину блока */}
-        <div className={styles.sort_wrapper}>
-          <Dropdown
-            align="right"
-            fullWidth={isMobile}
-            onOpenChange={setIsSortOpen}
-            dropdownContent={(closeMenu) => (
-              <div className={styles.sort_menu}>
-                {(Object.keys(sortLabels) as SortOption[]).map((option) => (
-                  <button
-                    key={option}
-                    className={`${styles.sort_option} ${sortOption === option ? styles.sort_option_active : ""}`}
-                    onClick={() => {
-                      setSortOption(option);
-                      closeMenu();
-                    }}
-                    role="option"
-                    aria-selected={sortOption === option}
-                    type="button"
-                  >
-                    <Text>{sortLabels[option]}</Text>
-                  </button>
-                ))}
-              </div>
-            )}
-          >
-            <button
-              className={`${styles.sort_button} ${isSortOpen ? styles.sort_button_open : ""}`}
-              type="button"
-              aria-haspopup="listbox"
-              aria-expanded={isSortOpen}
+      {!isLoading ?
+        <div className={styles.filters_row}>
+          {categories.length > 0 && (
+            <Tabs
+              selectedId={selectedCategorySlug}
+              onSelectedIdChange={(id) => setSelectedCategorySlug(id)}
+              layoutFillMode="auto"
+              withScrollToSelectedTab
             >
-              <div className={styles.title}>
-                <span className={styles.text}>{sortLabels[sortOption]}</span>
-                <span className={styles.icon}>
-                  <span className={styles.sort_arrow} aria-hidden="true" />
-                </span>
-              </div>
-            </button>
-          </Dropdown>
+              <TabsItem id="all">
+                {currentLang === "ru" ? "Все проекты" : "All projects"}
+              </TabsItem>
+
+              {categories.map((cat) => {
+                const categoryName =
+                  cat.name?.[currentLang] ?? cat.name?.ru ?? "";
+                return (
+                  <TabsItem key={cat.id} id={cat.slug}>
+                    {categoryName}
+                  </TabsItem>
+                );
+              })}
+            </Tabs>
+          )}
+
+          {/* Сортировка справа от табов, на базе общего Dropdown.
+            На мобильных — на всю ширину блока */}
+          <div className={styles.sort_wrapper}>
+            <Dropdown
+              align="right"
+              fullWidth={isMobile}
+              onOpenChange={setIsSortOpen}
+              dropdownContent={(closeMenu) => (
+                <div className={styles.sort_menu}>
+                  {(Object.keys(sortLabels) as SortOption[]).map((option) => (
+                    <button
+                      key={option}
+                      className={`${styles.sort_option} ${sortOption === option ? styles.sort_option_active : ""}`}
+                      onClick={() => {
+                        setSortOption(option);
+                        closeMenu();
+                      }}
+                      role="option"
+                      aria-selected={sortOption === option}
+                      type="button"
+                    >
+                      <Text className={styles.text}>{sortLabels[option]}</Text>
+                    </button>
+                  ))}
+                </div>
+              )}
+            >
+              <button
+                className={`${styles.sort_button} ${isSortOpen ? styles.sort_button_open : ""}`}
+                type="button"
+                aria-haspopup="listbox"
+                aria-expanded={isSortOpen}
+              >
+                <div className={styles.title}>
+                  <span className={styles.text}>{sortLabels[sortOption]}</span>
+                  <span className={styles.icon}>
+                    <span className={styles.sort_arrow} aria-hidden="true" />
+                  </span>
+                </div>
+              </button>
+            </Dropdown>
+          </div>
         </div>
-      </div>
+      : ""}
 
       {/* Сетка проектов */}
       <div className={styles.projects_grid}>
