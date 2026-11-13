@@ -1,4 +1,5 @@
 .card {
+  position: relative;
   @include glass-effect($padding: 4px);
 
   display: flex;
@@ -84,6 +85,28 @@
 
     .description {
       @include text-truncate($lines: 3);
+    }
+  }
+
+  .actions_overlay {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  &:hover .actions_overlay {
+    opacity: 1;
+  }
+
+  // На тач-устройствах hover нет — показываем экшены всегда
+  @media (hover: none) {
+    .actions_overlay {
+      opacity: 1;
     }
   }
 }

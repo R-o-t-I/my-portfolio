@@ -11,6 +11,12 @@ interface ProjectCardProps {
   description: string;
   category?: string;
   slug: string;
+  // Публичный список: карточка — ссылка на проект (по умолчанию).
+  // Админка: link={false} — карточка не навигирует, а href оставляем
+  // для явного «открыть проект», если он понадобится
+  link?: boolean;
+  // Кнопки поверх карточки (админка): рендерятся в правом верхнем углу
+  actions?: React.ReactNode;
 }
 
 export const ProjectCard = ({
@@ -20,9 +26,13 @@ export const ProjectCard = ({
   description,
   category,
   slug,
+  link = true,
+  actions,
 }: ProjectCardProps) => {
-  return (
-    <Link to={`/project/${slug}`} className={styles.card}>
+  const card = (
+    <>
+      {actions && <div className={styles.actions_overlay}>{actions}</div>}
+
       <div className={styles.snippet_wrapper}>
         {snippet && (
           <img
@@ -59,6 +69,20 @@ export const ProjectCard = ({
           </Text>
         )}
       </div>
+    </>
+  );
+
+  if (!link) {
+    return (
+      <div className={styles.card} data-slug={slug}>
+        {card}
+      </div>
+    );
+  }
+
+  return (
+    <Link to={`/project/${slug}`} className={styles.card}>
+      {card}
     </Link>
   );
 };

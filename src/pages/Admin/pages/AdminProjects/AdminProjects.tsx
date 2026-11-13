@@ -1,19 +1,29 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { getSlugError, supabase } from "@/utils";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+
+import { useTranslation } from "react-i18next";
+
+import type { TFunction } from "i18next";
+
+import { supabase } from "@/utils";
 
 import {
   GALLERY_FALLBACK_CATEGORY,
-  sanitizeSlug,
+  getSlugError,
+  getErrorMessage,
   moveStorageFiles,
   revertStorageMoves,
+  sanitizeSlug,
   type StorageMove,
   type StorageMoveResult,
 } from "@/utils";
 
 import {
+  Button,
   FormItem,
   ImageUploadField,
   Input,
+  ProjectCard,
+  Select,
   Text,
   Textarea,
   Title,
@@ -114,6 +124,16 @@ type FormData = {
   snippetUrl: string;
 };
 
+// Ошибки по полям формы; ошибки ссылок адресуются индексом строки
+type FieldErrors = {
+  slug?: string;
+  titleRu?: string;
+  titleEn?: string;
+  links: Record<number, string>;
+};
+
+const EMPTY_ERRORS: FieldErrors = { links: {} };
+
 // Собираем jsonb из пары полей; если оба пусты — пустой объект, как в базе
 const toJsonb = (ru: string, en: string): Record<string, string> => {
   const value: Record<string, string> = {};
@@ -168,7 +188,64 @@ const EMPTY_FORM: FormData = {
   snippetUrl: "",
 };
 
+// ─── Валидация ──────────────────────────────────────────────────────────
+
+// Ссылка: непустое поле должно быть валидным http(s)-URL.
+// Пустое поле не ошибка — такие строки отфильтруются при сохранении
+const getLinkUrlError = (url: string, t: TFunction): string | null => {
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return t(
+        "admin.error.link_url_protocol",
+        "Ссылка должна начинаться с http:// или https://",
+      );
+    }
+    return null;
+  } catch {
+    return t("admin.error.link_url_invalid", "Некорректный URL");
+  }
+};
+
+const validateForm = (
+  form: FormData,
+  links: LinkForm[],
+  t: TFunction,
+): FieldErrors => {
+  const errors: FieldErrors = { links: {} };
+
+  // Слаг: пустое поле на сабмите — ошибка, непустое — проверка правилами
+  const slugTrimmed = form.slug.trim();
+  if (!slugTrimmed) {
+    errors.slug = t("admin.error.slug_required", "Укажите слаг проекта");
+  } else {
+    errors.slug = getSlugError(slugTrimmed, t) ?? undefined;
+  }
+
+  if (!form.titleRu.trim()) {
+    errors.titleRu = t("admin.error.title_required", "Укажите название");
+  }
+  if (!form.titleEn.trim()) {
+    errors.titleEn = t("admin.error.title_required", "Укажите название");
+  }
+
+  links.forEach((link, index) => {
+    const linkError = getLinkUrlError(link.url, t);
+    if (linkError) errors.links[index] = linkError;
+  });
+
+  return errors;
+};
+
+const hasErrors = (errors: FieldErrors): boolean =>
+  Boolean(errors.slug || errors.titleRu || errors.titleEn) ||
+  Object.keys(errors.links).length > 0;
+
 export const AdminProjects = () => {
+  const { t } = useTranslation();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -185,6 +262,25 @@ export const AdminProjects = () => {
     new Set(),
   );
   const [isSaving, setIsSaving] = useState(false);
+
+  const [errors, setErrors] = useState<FieldErrors>(EMPTY_ERRORS);
+  // Ошибки показываем после первой попытки сохранения — до этого не мешаем
+  const [submitted, setSubmitted] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Опции селекта категорий: value — id в базе, пустая строка = «без категории»
+  const categoryOptions = [
+    { value: "", label: t("admin.category_none", "Без категории") },
+    ...categories.map((category) => ({
+      value: category.id,
+      label: category.name?.ru ?? category.slug,
+    })),
+  ];
+
+  const linkTypeOptions = LINK_TYPES.map(({ value }) => ({
+    value,
+    label: t(`admin.link_type.${value}`),
+  }));
 
   useEffect(() => {
     const fetchData = async () => {
@@ -216,7 +312,9 @@ export const AdminProjects = () => {
         skillsRes.error ||
         skillCategoriesRes.error
       ) {
-        setError("Не удалось загрузить данные");
+        setError(
+          t("admin.error.data_load_failed", "Не удалось загрузить данные"),
+        );
         setIsLoading(false);
         return;
       }
@@ -251,9 +349,13 @@ export const AdminProjects = () => {
     setLinks([]);
     setGallery([]);
     setSelectedSkillIds(new Set());
+    setErrors(EMPTY_ERRORS);
+    setSubmitted(false);
   };
 
   const startEdit = async (project: Project) => {
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
     setEditingId(project.id);
     setOriginalSlug(project.slug);
     setForm({
@@ -301,20 +403,57 @@ export const AdminProjects = () => {
       })),
     );
     setSelectedSkillIds(await loadProjectSkills(project.id));
+    setErrors(EMPTY_ERRORS);
+    setSubmitted(false);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Обновление полей формы с живой ревалидацией после первой попытки сабмита
+  const updateForm = (patch: Partial<FormData>) => {
+    setForm((prev) => {
+      const next = { ...prev, ...patch };
+      if (submitted) {
+        setLinks((currentLinks) => {
+          setErrors(validateForm(next, currentLinks, t));
+          return currentLinks;
+        });
+      }
+      return next;
+    });
+  };
+
+  const updateLinks = (
+    next: LinkForm[] | ((prev: LinkForm[]) => LinkForm[]),
+  ) => {
+    setLinks((prev) => {
+      const resolved =
+        typeof next === "function" ?
+          (next as (p: LinkForm[]) => LinkForm[])(prev)
+        : next;
+      if (submitted) setErrors(validateForm(form, resolved, t));
+      return resolved;
+    });
+  };
+
   const handleSave = async (e: FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
     setError(null);
+
+    const validation = validateForm(form, links, t);
+    if (hasErrors(validation)) {
+      setErrors(validation);
+      setSubmitted(true);
+      return;
+    }
+
+    setIsSaving(true);
 
     let slug: string;
     try {
       slug = sanitizeSlug(form.slug);
     } catch {
-      setError("Укажите корректный slug");
+      setError(t("admin.error.slug_invalid", "Укажите корректный слаг"));
       setIsSaving(false);
       return;
     }
@@ -373,7 +512,10 @@ export const AdminProjects = () => {
         applied = result.applied;
       } catch (e) {
         setError(
-          e instanceof Error ? e.message : "Не удалось переместить файлы",
+          getErrorMessage(
+            e,
+            t("admin.error.move_failed", "Не удалось переместить файлы"),
+          ),
         );
         setIsSaving(false);
         return;
@@ -428,13 +570,24 @@ export const AdminProjects = () => {
     if (saveError) {
       // Откат перемещений, чтобы файлы не остались в новых папках
       if (applied.length > 0) {
-        await revertStorageMoves(applied);
+        const revert = await revertStorageMoves(applied);
+        if (revert.failed.length > 0) {
+          setError(
+            t("admin.error.revert_failed", {
+              defaultValue:
+                "Сохранение не удалось, и {{count}} файл(ов) не вернулись на прежнее место — проверьте хранилище",
+              count: revert.failed.length,
+            }),
+          );
+          setIsSaving(false);
+          return;
+        }
       }
 
       setError(
         saveError.code === "23505" ?
-          "Такой slug уже занят"
-        : "Не удалось сохранить проект",
+          t("admin.error.slug_taken", "Такой slug уже занят")
+        : t("admin.error.save_failed", "Не удалось сохранить проект"),
       );
       setIsSaving(false);
       return;
@@ -472,7 +625,10 @@ export const AdminProjects = () => {
   const handleDelete = async (project: Project) => {
     if (
       !window.confirm(
-        `Удалить проект «${fromJsonb(project.title, "ru") || project.slug}»?`,
+        t("admin.error.delete_confirm", {
+          defaultValue: "Удалить проект «{{name}}»?",
+          name: fromJsonb(project.title, "ru") || project.slug,
+        }),
       )
     ) {
       return;
@@ -486,7 +642,7 @@ export const AdminProjects = () => {
       .eq("id", project.id);
 
     if (deleteError) {
-      setError("Не удалось удалить проект");
+      setError(t("admin.error.delete_failed", "Не удалось удалить проект"));
       return;
     }
 
@@ -511,234 +667,251 @@ export const AdminProjects = () => {
 
   return (
     <section className={styles.wrapper}>
-      <Title>Проекты</Title>
+      <Title>{t("admin.projects_title", "Проекты")}</Title>
 
       {error && <Text className={styles.error}>{error}</Text>}
 
       {isLoading ?
         <Text size="xs" mode="secondary">
-          Загружаем...
+          {t("admin.loading", "Загружаем...")}
         </Text>
       : <>
-          <form onSubmit={handleSave} className={styles.form}>
+          <form
+            ref={formRef}
+            onSubmit={handleSave}
+            className={styles.form}
+            noValidate
+          >
             <div className={styles.row}>
-              <FormItem id="slug" top="Ссылка на проект*" error="error">
+              <FormItem
+                id="slug"
+                top={t("admin.field.slug", "Ссылка на проект*")}
+                error={errors.slug}
+              >
                 <Input
                   type="text"
-                  placeholder="slug (например, my_portfolio)"
+                  placeholder="slug"
                   value={form.slug}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, slug: e.target.value }))
-                  }
-                  required
+                  onChange={(e) => updateForm({ slug: e.target.value })}
                 />
               </FormItem>
-              <FormItem id="createdAt" top="Дата выхода проекта" error="error">
+              <FormItem
+                id="createdAt"
+                top={t("admin.field.created_at", "Дата выхода проекта")}
+              >
                 <Input
                   type="date"
                   value={form.createdAt}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, createdAt: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ createdAt: e.target.value })}
                 />
               </FormItem>
-              <FormItem id="categoryId" top="Категория" error="error">
-                <select
+              <FormItem
+                id="categoryId"
+                top={t("admin.field.category", "Категория")}
+              >
+                <Select
+                  options={categoryOptions}
                   value={form.categoryId}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, categoryId: e.target.value }))
-                  }
-                >
-                  <option value="">— без категории —</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name?.ru ?? category.slug}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(categoryId) => updateForm({ categoryId })}
+                  label={t("admin.field.category", "Категория проекта")}
+                />
               </FormItem>
             </div>
 
             <div className={styles.row}>
-              <FormItem id="titleRu" top="Название проекта (RU)*" error="error">
+              <FormItem
+                id="titleRu"
+                top={t("admin.field.title_ru", "Название проекта (RU)*")}
+                error={errors.titleRu}
+              >
                 <Input
                   type="text"
-                  placeholder="Название (RU)"
+                  placeholder={t("admin.field.title_ru", "Название (RU)")}
                   value={form.titleRu}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, titleRu: e.target.value }))
-                  }
-                  required
+                  onChange={(e) => updateForm({ titleRu: e.target.value })}
                 />
               </FormItem>
-              <FormItem id="titleEn" top="Название проекта (EN)*" error="error">
+              <FormItem
+                id="titleEn"
+                top={t("admin.field.title_en", "Название проекта (EN)*")}
+                error={errors.titleEn}
+              >
                 <Input
                   type="text"
-                  placeholder="Название (EN)"
+                  placeholder={t("admin.field.title_en", "Название (EN)")}
                   value={form.titleEn}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, titleEn: e.target.value }))
-                  }
-                  required
+                  onChange={(e) => updateForm({ titleEn: e.target.value })}
                 />
               </FormItem>
             </div>
 
             <div className={styles.row}>
-              <FormItem id="miniRu" top="Короткое описание (RU)" error="error">
+              <FormItem
+                id="miniRu"
+                top={t("admin.field.mini_ru", "Короткое описание (RU)")}
+              >
                 <Textarea
-                  placeholder="Короткое описание (RU)"
+                  placeholder={t(
+                    "admin.field.mini_ru",
+                    "Короткое описание (RU)",
+                  )}
                   value={form.miniRu}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, miniRu: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ miniRu: e.target.value })}
                 />
               </FormItem>
-              <FormItem id="miniEn" top="Короткое описание (EN)" error="error">
+              <FormItem
+                id="miniEn"
+                top={t("admin.field.mini_en", "Короткое описание (EN)")}
+              >
                 <Textarea
-                  placeholder="Короткое описание (EN)"
+                  placeholder={t(
+                    "admin.field.mini_en",
+                    "Короткое описание (EN)",
+                  )}
                   value={form.miniEn}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, miniEn: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ miniEn: e.target.value })}
                 />
               </FormItem>
             </div>
 
             <div className={styles.row}>
-              <FormItem id="descriptionRu" top="Описание (RU)" error="error">
+              <FormItem
+                id="descriptionRu"
+                top={t("admin.field.description_ru", "Описание (RU)")}
+              >
                 <Textarea
                   rows={4}
-                  placeholder="Описание (RU)"
+                  placeholder={t("admin.field.description_ru", "Описание (RU)")}
                   value={form.descriptionRu}
                   onChange={(e) =>
-                    setForm((p) => ({ ...p, descriptionRu: e.target.value }))
+                    updateForm({ descriptionRu: e.target.value })
                   }
                 />
               </FormItem>
-              <FormItem id="descriptionEn" top="Описание (EN)" error="error">
+              <FormItem
+                id="descriptionEn"
+                top={t("admin.field.description_en", "Описание (EN)")}
+              >
                 <Textarea
                   rows={4}
-                  placeholder="Описание (EN)"
+                  placeholder={t("admin.field.description_en", "Описание (EN)")}
                   value={form.descriptionEn}
                   onChange={(e) =>
-                    setForm((p) => ({ ...p, descriptionEn: e.target.value }))
+                    updateForm({ descriptionEn: e.target.value })
                   }
                 />
               </FormItem>
             </div>
 
             <div className={styles.row}>
-              <FormItem id="historyRu" top="История (RU)" error="error">
+              <FormItem
+                id="historyRu"
+                top={t("admin.field.history_ru", "История (RU)")}
+              >
                 <Textarea
                   rows={4}
-                  placeholder="История (RU)"
+                  placeholder={t("admin.field.history_ru", "История (RU)")}
                   value={form.historyRu}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, historyRu: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ historyRu: e.target.value })}
                 />
               </FormItem>
-              <FormItem id="historyEn" top="История (EN)" error="error">
+              <FormItem
+                id="historyEn"
+                top={t("admin.field.history_en", "История (EN)")}
+              >
                 <Textarea
                   rows={4}
-                  placeholder="История (EN)"
+                  placeholder={t("admin.field.history_en", "История (EN)")}
                   value={form.historyEn}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, historyEn: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ historyEn: e.target.value })}
                 />
               </FormItem>
             </div>
 
             <div className={styles.row}>
-              <FormItem id="roleRu" top="Роль (RU)" error="error">
+              <FormItem id="roleRu" top={t("admin.field.role_ru", "Роль (RU)")}>
                 <Input
                   type="text"
-                  placeholder="Роль (RU)"
+                  placeholder={t("admin.field.role_ru", "Роль (RU)")}
                   value={form.roleRu}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, roleRu: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ roleRu: e.target.value })}
                 />
               </FormItem>
-              <FormItem id="roleEn" top="Роль (EN)" error="error">
+              <FormItem id="roleEn" top={t("admin.field.role_en", "Роль (EN)")}>
                 <Input
                   type="text"
-                  placeholder="Роль (EN)"
+                  placeholder={t("admin.field.role_en", "Роль (EN)")}
                   value={form.roleEn}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, roleEn: e.target.value }))
-                  }
+                  onChange={(e) => updateForm({ roleEn: e.target.value })}
                 />
               </FormItem>
             </div>
 
             <div className={styles.row}>
-              <FormItem id="logoUrl" top="Логотип" error="error">
+              <FormItem id="logoUrl" top={t("admin.field.logo", "Логотип")}>
                 <ImageUploadField
                   value={form.logoUrl}
                   folder={form.slug}
                   fileName="Logo"
-                  onChange={(url) => setForm((p) => ({ ...p, logoUrl: url }))}
+                  onChange={(url) => updateForm({ logoUrl: url })}
                 />
               </FormItem>
               <FormItem
                 id="snippetUrl"
-                top="Сниппет (превью-картинка)"
-                error="error"
+                top={t("admin.field.snippet", "Сниппет (превью-картинка)")}
               >
                 <ImageUploadField
                   value={form.snippetUrl}
                   folder={form.slug}
                   fileName="Snippet"
-                  onChange={(url) =>
-                    setForm((p) => ({ ...p, snippetUrl: url }))
-                  }
+                  onChange={(url) => updateForm({ snippetUrl: url })}
                 />
               </FormItem>
             </div>
 
             <div className={styles.editorBlock}>
-              <Title size="sm">Ссылки</Title>
+              <Title size="sm">{t("admin.section.links", "Ссылки")}</Title>
               {links.map((link, index) => (
-                <div key={index} className={styles.row}>
-                  <Input
-                    type="url"
-                    placeholder="URL"
-                    value={link.url}
-                    onChange={(e) =>
-                      setLinks((prev) =>
-                        prev.map((item, i) =>
-                          i === index ? { ...item, url: e.target.value } : item,
-                        ),
-                      )
-                    }
-                  />
-                  <select
+                <div key={index} className={styles.links_form}>
+                  <FormItem
+                    id={`link-url-${index}`}
+                    error={errors.links[index]}
+                  >
+                    <Input
+                      type="url"
+                      placeholder={t("admin.field.link_url", "URL")}
+                      value={link.url}
+                      onChange={(e) =>
+                        updateLinks((prev) =>
+                          prev.map((item, i) =>
+                            i === index ?
+                              { ...item, url: e.target.value }
+                            : item,
+                          ),
+                        )
+                      }
+                    />
+                  </FormItem>
+                  <Select
+                    options={linkTypeOptions}
                     value={link.type}
-                    onChange={(e) =>
-                      setLinks((prev) =>
+                    onChange={(type) =>
+                      updateLinks((prev) =>
                         prev.map((item, i) =>
                           i === index ?
-                            { ...item, type: e.target.value as LinkType }
+                            { ...item, type: type as LinkType }
                           : item,
                         ),
                       )
                     }
-                  >
-                    {LINK_TYPES.map(({ value, label }) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                    label={t("admin.field.link_type", "Тип ссылки")}
+                  />
                   <Input
                     type="text"
-                    placeholder="Подпись (RU)"
+                    placeholder={t("admin.field.link_text_ru", "Подпись (RU)")}
                     value={link.textRu}
                     onChange={(e) =>
-                      setLinks((prev) =>
+                      updateLinks((prev) =>
                         prev.map((item, i) =>
                           i === index ?
                             { ...item, textRu: e.target.value }
@@ -749,10 +922,10 @@ export const AdminProjects = () => {
                   />
                   <Input
                     type="text"
-                    placeholder="Подпись (EN)"
+                    placeholder={t("admin.field.link_text_en", "Подпись (EN)")}
                     value={link.textEn}
                     onChange={(e) =>
-                      setLinks((prev) =>
+                      updateLinks((prev) =>
                         prev.map((item, i) =>
                           i === index ?
                             { ...item, textEn: e.target.value }
@@ -765,30 +938,34 @@ export const AdminProjects = () => {
                     type="button"
                     className={styles.secondaryButton}
                     onClick={() =>
-                      setLinks((prev) => prev.filter((_, i) => i !== index))
+                      updateLinks((prev) => prev.filter((_, i) => i !== index))
                     }
                   >
                     ✕
                   </button>
                 </div>
               ))}
-              <button
+              <Button
                 type="button"
                 className={styles.secondaryButton}
-                onClick={() => setLinks((prev) => [...prev, { ...EMPTY_LINK }])}
+                onClick={() =>
+                  updateLinks((prev) => [...prev, { ...EMPTY_LINK }])
+                }
               >
-                + Ссылка
-              </button>
+                {t("admin.action.add_link", "+ Ссылка")}
+              </Button>
             </div>
 
             <div className={styles.editorBlock}>
-              <Title size="sm">Галерея</Title>
+              <Title size="sm">{t("admin.section.gallery", "Галерея")}</Title>
               {gallery.map((item, index) => (
                 <div key={index} className={styles.galleryItem}>
                   <FormItem
-                    id="url"
-                    top={`Изображение ${index + 1}`}
-                    error="error"
+                    id={`gallery-image-${index}`}
+                    top={t("admin.field.gallery_image", {
+                      defaultValue: "Изображение {{number}}",
+                      number: index + 1,
+                    })}
                   >
                     <ImageUploadField
                       value={item.url}
@@ -810,7 +987,10 @@ export const AdminProjects = () => {
                   <div className={styles.row}>
                     <Input
                       type="text"
-                      placeholder="Подпись (RU)"
+                      placeholder={t(
+                        "admin.field.gallery_title_ru",
+                        "Подпись (RU)",
+                      )}
                       value={item.titleRu}
                       onChange={(e) =>
                         updateGalleryItem(index, { titleRu: e.target.value })
@@ -818,7 +998,10 @@ export const AdminProjects = () => {
                     />
                     <Input
                       type="text"
-                      placeholder="Подпись (EN)"
+                      placeholder={t(
+                        "admin.field.gallery_title_en",
+                        "Подпись (EN)",
+                      )}
                       value={item.titleEn}
                       onChange={(e) =>
                         updateGalleryItem(index, { titleEn: e.target.value })
@@ -829,7 +1012,10 @@ export const AdminProjects = () => {
                   <div className={styles.row}>
                     <Input
                       type="text"
-                      placeholder="Категория (id, например ios)"
+                      placeholder={t(
+                        "admin.field.gallery_category_id",
+                        "Категория (id, например ios)",
+                      )}
                       value={item.categoryId}
                       onChange={(e) =>
                         updateGalleryItem(index, { categoryId: e.target.value })
@@ -837,7 +1023,10 @@ export const AdminProjects = () => {
                     />
                     <Input
                       type="text"
-                      placeholder="Категория (RU)"
+                      placeholder={t(
+                        "admin.field.gallery_category_ru",
+                        "Категория (RU)",
+                      )}
                       value={item.categoryNameRu}
                       onChange={(e) =>
                         updateGalleryItem(index, {
@@ -847,7 +1036,10 @@ export const AdminProjects = () => {
                     />
                     <Input
                       type="text"
-                      placeholder="Категория (EN)"
+                      placeholder={t(
+                        "admin.field.gallery_category_en",
+                        "Категория (EN)",
+                      )}
                       value={item.categoryNameEn}
                       onChange={(e) =>
                         updateGalleryItem(index, {
@@ -857,30 +1049,33 @@ export const AdminProjects = () => {
                     />
                   </div>
 
-                  <button
+                  <Button
                     type="button"
                     className={styles.secondaryButton}
                     onClick={() =>
                       setGallery((prev) => prev.filter((_, i) => i !== index))
                     }
+                    mode="secondary"
                   >
-                    ✕ Убрать изображение
-                  </button>
+                    {t("admin.action.remove_image", "✕ Убрать изображение")}
+                  </Button>
                 </div>
               ))}
-              <button
+              <Button
                 type="button"
                 className={styles.secondaryButton}
                 onClick={() =>
                   setGallery((prev) => [...prev, emptyGalleryItem()])
                 }
               >
-                + Изображение
-              </button>
+                {t("admin.action.add_image", "+ Изображение")}
+              </Button>
             </div>
 
             <div className={styles.editorBlock}>
-              <Title size="sm">Навыки проекта</Title>
+              <Title size="sm">
+                {t("admin.section.skills", "Навыки проекта")}
+              </Title>
               {skillCategories.map((category) => (
                 <div key={category.id} className={styles.skillGroup}>
                   <span className={styles.skillGroupTitle}>
@@ -905,59 +1100,92 @@ export const AdminProjects = () => {
             </div>
 
             <div className={styles.actions}>
-              <button
+              <Button
                 type="submit"
                 className={styles.primaryButton}
                 disabled={isSaving}
               >
-                {editingId === null ? "Добавить проект" : "Сохранить"}
-              </button>
+                {editingId === null ?
+                  t("admin.action.add_project", "Добавить проект")
+                : t("admin.action.save", "Сохранить")}
+              </Button>
               {editingId !== null && (
-                <button
+                <Button
                   type="button"
                   className={styles.secondaryButton}
                   onClick={startCreate}
+                  mode="secondary"
                 >
-                  Отменить
-                </button>
+                  {t("admin.action.cancel", "Отменить")}
+                </Button>
               )}
             </div>
           </form>
 
           {projects.length === 0 ?
             <Text size="xs" mode="secondary">
-              Проектов пока нет
+              {t("admin.empty_projects", "Проектов пока нет")}
             </Text>
-          : <ul className={styles.list}>
-              {projects.map((project) => (
-                <li key={project.id} className={styles.item}>
-                  <div className={styles.itemInfo}>
-                    <span className={styles.itemName}>
-                      {fromJsonb(project.title, "ru") || project.slug}
-                    </span>
-                    <span className={styles.itemMeta}>
-                      {project.slug} · {project.created_at}
-                    </span>
-                  </div>
-                  <div className={styles.itemActions}>
-                    <button
-                      type="button"
-                      className={styles.secondaryButton}
-                      onClick={() => startEdit(project)}
-                    >
-                      Изменить
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.dangerButton}
-                      onClick={() => handleDelete(project)}
-                    >
-                      Удалить
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          : <div className={styles.projects_grid}>
+              {projects.map((project) => {
+                const title = fromJsonb(project.title, "ru") || project.slug;
+                const description = fromJsonb(project.description, "ru");
+                const logo =
+                  fromJsonb(project.logo_url, "ru") ||
+                  fromJsonb(project.logo_url, "en");
+                const snippet =
+                  fromJsonb(project.snippet_url, "ru") ||
+                  fromJsonb(project.snippet_url, "en");
+
+                const category = categories.find(
+                  (item) => item.id === project.category_id,
+                );
+                const categoryName =
+                  category ? (category.name?.ru ?? category.slug) : "";
+
+                return (
+                  <ProjectCard
+                    key={project.id}
+                    slug={project.slug}
+                    logo={logo}
+                    snippet={snippet}
+                    title={title}
+                    description={description}
+                    category={categoryName}
+                    link={true}
+                    actions={
+                      <>
+                        <Button
+                          type="button"
+                          mode="secondary"
+                          className={styles.cardButton}
+                          onClick={(e: React.MouseEvent) => {
+                            // Гасим событие, чтобы клик по кнопке не дошёл до Link
+                            e.preventDefault();
+                            e.stopPropagation();
+                            startEdit(project);
+                          }}
+                        >
+                          {t("admin.action.edit", "Изменить")}
+                        </Button>
+                        <Button
+                          type="button"
+                          mode="secondary"
+                          className={styles.cardButton}
+                          onClick={(e: React.MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDelete(project);
+                          }}
+                        >
+                          {t("admin.action.delete", "Удалить")}
+                        </Button>
+                      </>
+                    }
+                  />
+                );
+              })}
+            </div>
           }
         </>
       }

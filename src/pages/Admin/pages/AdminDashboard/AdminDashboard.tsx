@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { pluralize, supabase, describeAuditAction } from "@/utils";
+import { useTranslation } from "react-i18next";
+import { supabase, describeAuditAction } from "@/utils";
 
 import styles from "./AdminDashboard.module.scss";
 import { Text, Title } from "@/components";
@@ -16,10 +17,13 @@ type LogEntry = {
   actor_role: string | null;
   action: string;
   table_name: string;
+  record_id: string | null;
+  record_label: string | null;
   created_at: string;
 };
 
 export const AdminDashboard = () => {
+  const { t, i18n } = useTranslation();
   const [counts, setCounts] = useState<Counts>({
     projects: null,
     skills: null,
@@ -36,7 +40,9 @@ export const AdminDashboard = () => {
         supabase.from("contacts").select("id", { count: "exact", head: true }),
         supabase
           .from("admin_audit_log")
-          .select("id, actor_role, action, table_name, created_at")
+          .select(
+            "id, actor_role, action, table_name, record_id, record_label, created_at",
+          )
           .order("created_at", { ascending: false })
           .limit(5),
       ]);
@@ -47,7 +53,7 @@ export const AdminDashboard = () => {
         contactsRes.error ||
         logsRes.error
       ) {
-        setError("Не удалось загрузить сводку");
+        setError(t("admin.dashboard.error", "Не удалось загрузить сводку"));
         return;
       }
 
@@ -60,19 +66,25 @@ export const AdminDashboard = () => {
     };
 
     fetchSummary();
-  }, []);
+  }, [t]);
 
   const formatTime = (iso: string) =>
-    new Date(iso).toLocaleString("ru-RU", {
+    new Date(iso).toLocaleString(i18n.language, {
       day: "2-digit",
       month: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
     });
 
+  const formatObject = (entry: LogEntry): string => {
+    if (entry.record_label) return entry.record_label;
+    if (!entry.record_id) return entry.table_name;
+    return `${entry.table_name} #${entry.record_id}`;
+  };
+
   return (
     <section className={styles.wrapper}>
-      <Title>Главная</Title>
+      <Title>{t("admin.dashboard.title", "Главная")}</Title>
 
       {error && <Text className={styles.error}>{error}</Text>}
 
@@ -80,36 +92,40 @@ export const AdminDashboard = () => {
         <Link to="/admin/projects" className={styles.card}>
           <Title>{counts.projects ?? "—"}</Title>
           <Text>
-            {pluralize(
-              Number(counts.projects),
-              "проект",
-              "проекта",
-              "проектов",
-            )}
+            {counts.projects !== null &&
+              t("admin.dashboard.cards.projects", {
+                count: counts.projects,
+              })}
           </Text>
         </Link>
 
         <Link to="/admin/skills" className={styles.card}>
           <Title>{counts.skills ?? "—"}</Title>
           <Text>
-            {pluralize(Number(counts.skills), "навык", "навыка", "навыков")}
+            {counts.skills !== null &&
+              t("admin.dashboard.cards.skills", { count: counts.skills })}
           </Text>
         </Link>
 
         <Link to="/admin/contacts" className={styles.card}>
           <Title>{counts.contacts ?? "—"}</Title>
           <Text>
-            {pluralize(Number(counts.contacts), "заявка", "заявки", "заявок")}
+            {counts.contacts !== null &&
+              t("admin.dashboard.cards.contacts", {
+                count: counts.contacts,
+              })}
           </Text>
         </Link>
       </div>
 
       <div className={styles.logs}>
-        <Title size="sm">Последние действия</Title>
+        <Title size="sm">
+          {t("admin.dashboard.recent_actions", "Последние действия")}
+        </Title>
 
         {recentLogs.length === 0 ?
           <Text size="xs" mode="secondary">
-            Журнал пока пуст
+            {t("admin.dashboard.logs_empty", "Журнал пока пуст")}
           </Text>
         : <ul className={styles.logList}>
             {recentLogs.map((entry) => (
@@ -118,7 +134,13 @@ export const AdminDashboard = () => {
                   {formatTime(entry.created_at)}
                 </span>
                 <span className={styles.logText}>
-                  {describeAuditAction(entry.action, entry.table_name)}
+                  {describeAuditAction(entry.action, entry.table_name, t)}
+                  {entry.record_id && (
+                    <span className={styles.logObject}>
+                      {" "}
+                      | {formatObject(entry)}
+                    </span>
+                  )}
                 </span>
                 <span className={styles.logActor}>
                   {entry.actor_role ?? "—"}
@@ -129,7 +151,9 @@ export const AdminDashboard = () => {
         }
 
         <Link to="/admin/logs" className={styles.logsLink}>
-          <Text size="sm">Весь журнал →</Text>
+          <Text size="sm">
+            {t("admin.dashboard.all_logs", "Весь журнал →")}
+          </Text>
         </Link>
       </div>
     </section>

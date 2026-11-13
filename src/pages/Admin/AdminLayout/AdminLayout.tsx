@@ -51,6 +51,7 @@ export const AdminLayout = () => {
       {
         code: "ru",
         flag: <IconLangRU size={20} />,
+        // эндоним: всегда на языке самого языка, не переводим
         label: "Русский",
         onClick: () => i18n.changeLanguage("ru"),
       },
@@ -88,17 +89,43 @@ export const AdminLayout = () => {
 
   type NavItem = {
     to: string;
-    label: string;
+    labelKey: string;
+    fallback: string;
     // доступ: "all" — всем, "editor" — админ или редактор, "admin" — только админ
     access: "all" | "editor" | "admin";
   };
 
   const NAV_ITEMS: NavItem[] = [
-    { to: "/admin", label: "Главная", access: "all" },
-    { to: "/admin/projects", label: "Проекты", access: "editor" },
-    { to: "/admin/skills", label: "Навыки", access: "editor" },
-    { to: "/admin/contacts", label: "Заявки", access: "admin" },
-    { to: "/admin/logs", label: "Журнал", access: "admin" },
+    {
+      to: "/admin",
+      labelKey: "admin.nav.home",
+      fallback: "Главная",
+      access: "all",
+    },
+    {
+      to: "/admin/projects",
+      labelKey: "admin.nav.projects",
+      fallback: "Проекты",
+      access: "editor",
+    },
+    {
+      to: "/admin/skills",
+      labelKey: "admin.nav.skills",
+      fallback: "Навыки",
+      access: "editor",
+    },
+    {
+      to: "/admin/contacts",
+      labelKey: "admin.nav.requests",
+      fallback: "Заявки",
+      access: "admin",
+    },
+    {
+      to: "/admin/logs",
+      labelKey: "admin.nav.logs",
+      fallback: "Журнал",
+      access: "admin",
+    },
   ];
 
   const NAV_ACCESS: Record<NavItem["access"], boolean> = {
@@ -116,11 +143,11 @@ export const AdminLayout = () => {
         isActive ? `${styles.link} ${styles.linkActive}` : styles.link
       }
     >
-      <Text size="sm">{item.label}</Text>
+      <Text size="sm">{t(item.labelKey, item.fallback)}</Text>
     </NavLink>
   );
 
-  const RenderControls = () => (
+  const renderControls = (
     <div className={styles.controls}>
       <Dropdown
         dropdownContent={(closeMenu) => (
@@ -144,7 +171,6 @@ export const AdminLayout = () => {
         <div className={styles.dropdown}>
           <div className={styles.title}>
             <span className={styles.icon}>{activeTheme.icon}</span>
-            {/* <Text className={styles.text}>{activeTheme.label}</Text> */}
           </div>
         </div>
       </Dropdown>
@@ -171,7 +197,6 @@ export const AdminLayout = () => {
         <div className={styles.dropdown}>
           <div className={styles.title}>
             <span className={styles.icon}>{currentLanguage.flag}</span>
-            {/* <Text className={styles.text}>{currentLanguage.label}</Text> */}
           </div>
         </div>
       </Dropdown>
@@ -182,7 +207,7 @@ export const AdminLayout = () => {
     <div className={styles.wrapper}>
       <aside className={styles.sidebar}>
         <div className={styles.logo}>
-          <Text size="lg">Админка</Text>
+          <Text size="lg">{t("admin.title", "Админка")}</Text>
         </div>
         <Separator />
 
@@ -195,20 +220,20 @@ export const AdminLayout = () => {
         <div className={styles.footer}>
           <Separator />
           <div className={styles.content_footer}>
-            <RenderControls />
+            {renderControls}
             <button
               type="button"
               className={styles.button}
               onClick={handleClick}
             >
-              <Text size="sm">На главную</Text>
+              <Text size="sm">{t("admin.nav.back_to_site", "На главную")}</Text>
             </button>
             <button
               type="button"
               className={styles.button}
               onClick={handleLogout}
             >
-              <Text size="sm">Выйти</Text>
+              <Text size="sm">{t("admin.nav.logout", "Выйти")}</Text>
             </button>
           </div>
         </div>

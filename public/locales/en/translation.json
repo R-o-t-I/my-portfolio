@@ -41,7 +41,7 @@
       "greeting": "Hi! I'm",
       "first_name": "Alexander",
       "last_name": "Tihonovich",
-      "description": "Web-developer, designer and founder <0>SkyReglis Studio</0>. I create modern websites and applications.",
+      "description": "Web-developer, designer and founder <0>SkyReglis Studio</0>. I create modern websites and applications.",
       "job": "Web-development and design",
       "info": {
         "experience": "Experience",
@@ -176,8 +176,11 @@
   "admin": {
     "login": {
       "title": "Admin Panel",
+      "back_to_home": "Go to homepage",
       "email": "Email",
       "password": "Password",
+      "placeholder_email": "Email",
+      "placeholder_password": "Password",
       "submit": "Sign in",
       "submitting": "Signing in...",
       "error": {
@@ -186,13 +189,131 @@
         "generic": "Couldn't sign in. Please try again later."
       }
     },
+    "checking_access": "Checking access...",
+    "title": "Admin",
+    "nav": {
+      "home": "Home",
+      "projects": "Projects",
+      "skills": "Skills",
+      "requests": "Requests",
+      "logs": "Logs",
+      "back_to_site": "Go to homepage",
+      "logout": "Sign out"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "error": "Failed to load summary",
+      "cards": {
+        "projects_one": "project",
+        "projects_other": "projects",
+        "skills_one": "skill",
+        "skills_other": "skills",
+        "contacts_one": "request",
+        "contacts_other": "requests"
+      },
+      "recent_actions": "Recent actions",
+      "logs_empty": "The log is empty",
+      "all_logs": "View all logs →"
+    },
+    "audit": {
+      "entry": "{{op}} — {{table}}",
+      "ops": {
+        "insert": "Create",
+        "update": "Update",
+        "delete": "Delete"
+      },
+      "tables": {
+        "projects": "project",
+        "projects_categories": "project category",
+        "skills": "skill",
+        "skills_categories": "skill category",
+        "contacts": "request",
+        "project_skills": "project-skill link",
+        "admin_users": "administrator"
+      }
+    },
+    "logs": {
+      "title": "Audit log",
+      "loading": "Loading...",
+      "empty": "The log is empty",
+      "error": "Failed to load the log",
+      "col": {
+        "time": "Time",
+        "role": "Role",
+        "action": "Action",
+        "object": "Object",
+        "changed_fields": "Changed fields"
+      }
+    },
+    "projects_title": "Projects",
+    "loading": "Loading...",
+    "empty_projects": "No projects yet",
+    "category_none": "No category",
+    "link_type": {
+      "website": "Website",
+      "telegram": "Telegram",
+      "vk": "VK",
+      "ok": "Odnoklassniki",
+      "github": "GitHub"
+    },
+    "field": {
+      "slug": "Project slug*",
+      "created_at": "Release date",
+      "category": "Category",
+      "title_ru": "Project title (RU)*",
+      "title_en": "Project title (EN)*",
+      "mini_ru": "Short description (RU)",
+      "mini_en": "Short description (EN)",
+      "description_ru": "Description (RU)",
+      "description_en": "Description (EN)",
+      "history_ru": "History (RU)",
+      "history_en": "History (EN)",
+      "role_ru": "Role (RU)",
+      "role_en": "Role (EN)",
+      "logo": "Logo",
+      "snippet": "Snippet (preview image)",
+      "link_url": "URL",
+      "link_type": "Link type",
+      "link_text_ru": "Caption (RU)",
+      "link_text_en": "Caption (EN)",
+      "gallery_image": "Image {{number}}",
+      "gallery_title_ru": "Caption (RU)",
+      "gallery_title_en": "Caption (EN)",
+      "gallery_category_id": "Category (id, e.g. ios)",
+      "gallery_category_ru": "Category (RU)",
+      "gallery_category_en": "Category (EN)"
+    },
+    "section": {
+      "links": "Links",
+      "gallery": "Gallery",
+      "skills": "Project skills"
+    },
+    "action": {
+      "add_link": "+ Link",
+      "remove_image": "✕ Remove image",
+      "add_image": "+ Image",
+      "add_project": "Add project",
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "delete_confirm": "Delete project \"{{name}}\"?"
+    },
     "error": {
-      "slug_required": "Please enter the project slug",
-      "slug_cyrillic": "The slug cannot contain Cyrillic — use Latin letters, digits, and hyphens",
-      "slug_invalid": "The slug must contain only Latin letters, digits, hyphens, and underscores",
-      "file_type": "Supported formats: PNG, JPEG, WebP and SVG",
-      "file_size": "File is larger than {{maxMb}} MB — please choose a smaller one",
-      "file_upload": "Upload failed"
+      "slug_required": "Enter the project slug",
+      "slug_cyrillic": "Cyrillic is not allowed in the slug — use Latin letters, digits, hyphens",
+      "slug_invalid": "The slug may contain only Latin letters, digits, hyphens and underscores",
+      "slug_taken": "This slug is already taken",
+      "title_required": "Enter the project title",
+      "link_url_invalid": "Invalid URL",
+      "link_url_protocol": "The link must start with http:// or https://",
+      "data_load_failed": "Failed to load data",
+      "save_failed": "Failed to save the project",
+      "delete_failed": "Failed to delete the project",
+      "move_failed": "Failed to move files",
+      "revert_failed_one": "Save failed and {{count}} file was not restored — check the storage",
+      "revert_failed_other": "Save failed and {{count}} files were not restored — check the storage",
+      "delete_confirm": "Delete project \"{{name}}\"?"
     },
     "upload": {
       "label_remove": "Remove image",

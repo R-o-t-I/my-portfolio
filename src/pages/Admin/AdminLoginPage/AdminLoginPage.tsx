@@ -45,9 +45,6 @@ export const AdminLoginPage = () => {
     });
 
     if (authError) {
-      // временно, для диагностики — посмотри, какой code приходит
-      console.log("auth error:", authError.code, authError.message);
-
       setFormError(getAuthErrorMessage(authError.code));
       setIsSubmitting(false);
       return;
@@ -57,8 +54,22 @@ export const AdminLoginPage = () => {
     navigate(from?.pathname ?? "/admin", { replace: true });
   };
 
+  const handleClick = () => {
+    navigate("/");
+  };
+
   return (
     <div className={styles.wrapper}>
+      <div className={styles.button_main_wrapper}>
+        <Button
+          type="button"
+          mode="secondary"
+          className={styles.button}
+          onClick={handleClick}
+        >
+          {t("admin.login.back_to_home", "На главную")}
+        </Button>
+      </div>
       <form onSubmit={handleSubmit} className={styles.form}>
         <Title size="md" align="center">
           {t("admin.login.title", "Панель администратора")}
@@ -73,6 +84,7 @@ export const AdminLoginPage = () => {
                 setFormError(null); // вводим заново — ошибка гаснет
               }}
               autoComplete="email"
+              placeholder={t("admin.login.placeholder_email", "Email")}
               required
               disabled={isSubmitting}
             />
@@ -91,6 +103,7 @@ export const AdminLoginPage = () => {
                 setFormError(null);
               }}
               autoComplete="current-password"
+              placeholder={t("admin.login.placeholder_password", "Пароль")}
               required
               disabled={isSubmitting}
             />

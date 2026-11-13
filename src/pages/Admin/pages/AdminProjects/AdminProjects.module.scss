@@ -2,58 +2,80 @@
   display: flex;
   flex-direction: column;
   gap: 36px;
-}
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.editorBlock {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  .galleryItem {
+  .form {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 12px;
+    z-index: 0;
+    @include glass-effect;
+    scroll-margin-top: 24px;
 
     .row {
       display: flex;
       gap: 12px;
-      align-items: center;
+      align-items: flex-start;
     }
-  }
-}
 
-.skillGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    .editorBlock {
+      @include glass-effect;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
 
-  .skillGroupTitle {
-  }
+      .links_form {
+        display: flex;
+        align-items: center;
+        align-content: center;
+        gap: 12px;
+      }
 
-  .skillList {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+      .galleryItem {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
 
-    .skillLabel {
+        .row {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+      }
+    }
+
+    .skillGroup {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .skillGroupTitle {
+      }
+
+      .skillList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        .skillLabel {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+      }
+    }
+
+    .actions {
       display: flex;
       align-items: center;
-      gap: 6px;
+      align-content: center;
+      gap: 12px;
     }
+  }
+
+  .projects_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
   }
 }

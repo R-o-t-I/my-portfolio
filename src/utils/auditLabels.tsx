@@ -1,24 +1,21 @@
-export const OP_LABELS: Record<string, string> = {
-  insert: "Создание",
-  update: "Изменение",
-  delete: "Удаление",
-};
+import { type TFunction } from "i18next";
 
-export const TABLE_LABELS: Record<string, string> = {
-  projects: "проект",
-  projects_categories: "категория проекта",
-  skills: "навык",
-  skills_categories: "категория навыков",
-  contacts: "заявка",
-  project_skills: "связка проект-навык",
-  admin_users: "администратор",
-};
+// ─── Журнал аудита: человекочитаемое описание записи ────────────────────
+// Словари: admin.audit.ops.* (действия) и admin.audit.tables.* (таблицы).
+// Формат строки — admin.audit.entry, чтобы каждая локаль задавала свой порядок слов.
 
 export const describeAuditAction = (
   action: string,
   tableName: string,
+  t: TFunction,
 ): string => {
-  const op = OP_LABELS[action] ?? action;
-  const table = TABLE_LABELS[tableName] ?? tableName;
-  return `${op} — ${table}`;
+  const op = t(`admin.audit.ops.${action}`, { defaultValue: action });
+  const table = t(`admin.audit.tables.${tableName}`, {
+    defaultValue: tableName,
+  });
+  return t("admin.audit.entry", {
+    defaultValue: "{{op}} – {{table}}",
+    op,
+    table,
+  });
 };

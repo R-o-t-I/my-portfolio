@@ -8,6 +8,12 @@
 
   background: $background-primary;
 
+  .button_main_wrapper {
+    position: absolute;
+    top: $padding-section-y;
+    left: $padding-section-x;
+  }
+
   .form {
     display: flex;
     flex-direction: column;

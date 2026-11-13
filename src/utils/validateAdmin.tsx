@@ -152,6 +152,24 @@ const STORAGE_URL_MARKERS = [
   "/storage/v1/object/sign/",
 ] as const;
 
+// Ошибка перемещения: несёт адрес сбойного файла, чтобы в интерфейсе
+// показать, с чем именно случилась беда, а не только общий текст
+export class StorageMoveError extends Error {
+  path: string;
+  step: "copy" | "remove";
+
+  constructor(path: string, step: "copy" | "remove", cause: string) {
+    super(
+      step === "copy" ?
+        `Не удалось скопировать файл: ${cause}`
+      : `Не удалось удалить исходный файл: ${cause}`,
+    );
+    this.name = "StorageMoveError";
+    this.path = path;
+    this.step = step;
+  }
+}
+
 /** Извлекает путь объекта внутри бакета из публичной или подписанной ссылки. */
 export const extractStoragePath = (
   url: string,
@@ -187,12 +205,20 @@ export interface StorageMoveResult {
  * Перемещает файлы внутри бакета: copy + remove, возвращает карту
  * «старый URL → новый». Ссылки, не распознанные как ссылки этого бакета
  * (например, сторонние), пропускает без изменений.
+ *
+ * При сбое на любом файле откатывает все уже применённые перемещения
+ * (включая частично сделанное текущее) и бросает StorageMoveError:
+ * либо вся серия переездов прошла, либо диск остался в исходном виде.
  */
 export const moveStorageFiles = async (
   moves: StorageMove[],
 ): Promise<{ urlMap: Map<string, string>; applied: StorageMoveResult[] }> => {
   const urlMap = new Map<string, string>();
   const applied: StorageMoveResult[] = [];
+
+  const rollbackAll = async () => {
+    await revertStorageMoves(applied);
+  };
 
   for (const { url, fromFolder, toFolder } of moves) {
     const source = url.trim();
@@ -213,10 +239,23 @@ export const moveStorageFiles = async (
     const { error: copyError } = await supabase.storage
       .from(STORAGE_BUCKET)
       .copy(oldPath, newPath);
+
     if (copyError) {
-      throw new Error(`Не удалось переместить файл: ${copyError.message}`);
+      await rollbackAll();
+      throw new StorageMoveError(oldPath, "copy", copyError.message);
     }
-    await supabase.storage.from(STORAGE_BUCKET).remove([oldPath]);
+
+    const { error: removeError } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .remove([oldPath]);
+
+    if (removeError) {
+      // Копия уже создана, оригинал не удалён: сам этот переезд откатываем
+      // здесь (копия ещё не записана в applied), остальные — через revert
+      await supabase.storage.from(STORAGE_BUCKET).remove([newPath]);
+      await rollbackAll();
+      throw new StorageMoveError(oldPath, "remove", removeError.message);
+    }
 
     const { data } = supabase.storage
       .from(STORAGE_BUCKET)
@@ -228,18 +267,40 @@ export const moveStorageFiles = async (
   return { urlMap, applied };
 };
 
-/** Откатывает перемещения в обратном порядке — если запись в базе не сохранилась. */
+export interface StorageRevertReport {
+  // Откаченные переезды — по ним можно показать пользователю, что вернулось
+  restored: StorageMoveResult[];
+  // Не откаченные: файлы остались в новых папках, диск расходится с базой
+  failed: StorageMoveResult[];
+}
+
+/**
+ * Откатывает перемещения в обратном порядке — если запись в базе не сохранилась.
+ * Один сбой не мешает откату остальных; отчёт позволяет показать, что не вернулось.
+ */
 export const revertStorageMoves = async (
   applied: StorageMoveResult[],
-): Promise<void> => {
+): Promise<StorageRevertReport> => {
+  const restored: StorageMoveResult[] = [];
+  const failed: StorageMoveResult[] = [];
+
   for (const move of [...applied].reverse()) {
     try {
-      await supabase.storage
+      const { error: copyError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .copy(move.toPath, move.fromPath);
-      await supabase.storage.from(STORAGE_BUCKET).remove([move.toPath]);
+      if (copyError) throw new Error(copyError.message);
+
+      const { error: removeError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .remove([move.toPath]);
+      if (removeError) throw new Error(removeError.message);
+
+      restored.push(move);
     } catch {
-      // лучшее усилие: файл останется в новом месте, это не блокирует работу
+      failed.push(move);
     }
   }
+
+  return { restored, failed };
 };

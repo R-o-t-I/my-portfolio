@@ -1,0 +1,10 @@
+.wrapper {
+  cursor: pointer;
+  padding: 12px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .wrapper:hover {
+    opacity: 0.8;
+  }
+}
