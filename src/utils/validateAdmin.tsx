@@ -21,7 +21,7 @@ export const CYRILLIC_PATTERN = /[а-яё]/i;
 
 const SLUG_MAX_LENGTH = 64;
 
-export const FILE_MAX_SIZE_MB = 5;
+export const FILE_MAX_SIZE_MB = 20;
 
 export const FILE_MAX_SIZE_BYTES = FILE_MAX_SIZE_MB * 1024 * 1024;
 
