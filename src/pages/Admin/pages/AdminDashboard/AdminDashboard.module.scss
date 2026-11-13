@@ -1,0 +1,70 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+
+  .cards {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    min-width: 160px;
+    text-decoration: none;
+    @include glass-effect;
+  }
+
+  .logs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .logList {
+    display: flex;
+    flex-direction: column;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .logItem {
+    display: flex;
+    gap: 16px;
+    align-items: baseline;
+
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+    font-size: 14px;
+  }
+
+  .logTime {
+    flex-shrink: 0;
+
+    color: rgba(255, 255, 255, 0.5);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .logText {
+    flex: 1;
+  }
+
+  .logActor {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .error {
+    margin: 0;
+
+    color: #f66;
+    font-size: 14px;
+  }
+}

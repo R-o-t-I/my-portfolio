@@ -52,27 +52,54 @@
         }
       }
 
-      .file_badge {
-        @include glass-effect;
+      .file_badges {
         display: flex;
-        align-content: center;
-        align-items: center;
-        gap: 12px;
-        width: fit-content;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 8px;
 
-        .name {
-          @include text-truncate($lines: 2);
-        }
+        .file_badge {
+          @include glass-effect;
+          padding: 6px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: fit-content;
+          max-width: 100%;
 
-        .remove_file_btn {
-          background: none;
-          border: none;
-          color: $color-text-error;
-          cursor: pointer;
-          padding: 2px 4px;
+          .preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: $border-glass;
+          }
 
-          &:hover {
-            opacity: 0.8;
+          .preview_fallback {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .name {
+            @include text-truncate($lines: 2);
+          }
+
+          .remove_file_btn {
+            background: none;
+            border: none;
+            color: $color-text-error;
+            cursor: pointer;
+            padding: 8px;
+
+            &:hover {
+              opacity: 0.8;
+            }
           }
         }
       }

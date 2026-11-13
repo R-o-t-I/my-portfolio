@@ -55,4 +55,8 @@
   &.uppercase {
     text-transform: uppercase;
   }
+
+  &.noWrap {
+    text-wrap: nowrap;
+  }
 }

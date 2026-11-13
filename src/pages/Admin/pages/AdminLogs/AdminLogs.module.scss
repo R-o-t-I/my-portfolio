@@ -1,0 +1,54 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+
+  .error {
+    margin: 0;
+
+    color: #f66;
+    font-size: 14px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    font-size: 14px;
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      opacity: 0.6;
+      font-weight: 600;
+    }
+  }
+
+  .time {
+    white-space: nowrap;
+
+    color: rgba(255, 255, 255, 0.5);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .actor {
+    font-weight: 600;
+  }
+
+  .changes {
+    max-width: 480px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-family: monospace;
+    font-size: 13px;
+  }
+}

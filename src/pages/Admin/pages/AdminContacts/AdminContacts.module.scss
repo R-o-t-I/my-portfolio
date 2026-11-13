@@ -1,0 +1,70 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+
+  .error {
+    margin: 0;
+
+    color: #f66;
+    font-size: 14px;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+
+    font-size: 14px;
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      opacity: 0.6;
+      font-weight: 600;
+    }
+
+    a {
+      color: inherit;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .unprocessed {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .name {
+    font-weight: 600;
+  }
+
+  .message {
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .toggle {
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}

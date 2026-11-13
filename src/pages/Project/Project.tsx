@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { supabase } from "../../utils";
+import { supabase, sanitizeIcon } from "@/utils";
 import styles from "./Project.module.scss";
 
 import {
@@ -131,6 +131,19 @@ export const Project = () => {
 
   const currentLang = i18n.language.startsWith("ru") ? "ru" : "en";
 
+  const handleBack = () => {
+    // idx — позиция текущей записи в стеке истории (её ставит React Router).
+    // idx > 0: внутри приложения есть куда возвращаться — идём назад.
+    // idx === 0 или undefined: страница открыта по прямой ссылке,
+    // «Назад» увёл бы с сайта — ведём на главную с заменой записи.
+    const idx = window.history.state?.idx;
+    if (typeof idx === "number" && idx > 0) {
+      navigate(-1);
+    } else {
+      navigate("/", { replace: true });
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -161,8 +174,24 @@ export const Project = () => {
 
         if (!isActual) return;
 
-        if (error || !data) {
-          navigate("/");
+        // Несуществующий проект → страница 404 с вариантом сообщения.
+        // PGRST116 = запись не найдена, остальные коды — сбой запроса
+        if (error) {
+          if (isActual) {
+            navigate("/404", {
+              replace: true,
+              state: {
+                variant: error.code === "PGRST116" ? "project" : "error",
+              },
+            });
+          }
+          return;
+        }
+
+        if (!data) {
+          if (isActual) {
+            navigate("/404", { replace: true, state: { variant: "project" } });
+          }
           return;
         }
 
@@ -170,7 +199,9 @@ export const Project = () => {
         setActiveCategory("all");
       } catch (err) {
         console.error(err);
-        if (isActual) navigate("/");
+        if (isActual) {
+          navigate("/404", { replace: true, state: { variant: "error" } });
+        }
       } finally {
         if (isActual) setIsLoading(false);
       }
@@ -192,10 +223,12 @@ export const Project = () => {
           if (!item?.skill) return null;
           const name =
             item.skill.name?.[currentLang] ?? item.skill.name?.ru ?? "";
-          const icon =
+          // ИСПРАВЛЕНО: иконка санитизируется до того, как попадёт в стейт
+          const icon = sanitizeIcon(
             item.skill.skill_icon?.[currentLang] ??
-            item.skill.skill_icon?.ru ??
-            "";
+              item.skill.skill_icon?.ru ??
+              "",
+          );
           return {
             id: item.skill.id,
             name,
@@ -322,7 +355,6 @@ export const Project = () => {
         .querySelector('meta[name="twitter:title"]')
         ?.setAttribute("content", projectDetails.title);
 
-      // ИСПРАВЛЕНО: описание тоже подменяем под проект
       if (projectDetails.description) {
         document
           .querySelector('meta[property="og:description"]')
@@ -358,7 +390,7 @@ export const Project = () => {
             <Button
               mode="secondary"
               className={styles.back_btn}
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
             >
               {currentLang === "ru" ? "← Назад" : "← Back"}
             </Button>
@@ -428,7 +460,7 @@ export const Project = () => {
                 </div>
               )}
 
-              {(project?.project_skills?.length ?? 0) > 0 && (
+              {projectDetails.techStack.length > 0 && (
                 <div className={styles.content_item}>
                   <Title size="sm">
                     {currentLang === "ru" ?
@@ -440,11 +472,7 @@ export const Project = () => {
                       <div key={tech.id} className={styles.tech_item}>
                         <SkillCard
                           icon={
-                            (
-                              tech.icon &&
-                              typeof tech.icon === "string" &&
-                              tech.icon.trim() !== ""
-                            ) ?
+                            tech.icon ?
                               <div
                                 className={styles.tech_icon_wrapper}
                                 style={{ color: tech.color || undefined }}
@@ -472,7 +500,7 @@ export const Project = () => {
                 </div>
               )}
 
-              {projectDetails.gallery?.length > 0 && (
+              {projectDetails.gallery.length > 0 && (
                 <div className={styles.content_item}>
                   <Title size="sm">
                     {currentLang === "ru" ? "Галерея" : "Gallery"}

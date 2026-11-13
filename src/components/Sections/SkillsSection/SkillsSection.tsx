@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { supabase } from "../../../utils";
+import { supabase, sanitizeIcon } from "@/utils";
 
 import styles from "./SkillsSection.module.scss";
 
@@ -105,15 +105,17 @@ export const SkillsSection = ({ id }: SkillsSectionProps) => {
           // Извлекаем локализованные данные категории на клиенте
           const categoryName = info.name[currentLang] || info.name.ru;
           const categoryIcon = info.icon[currentLang] || info.icon.ru;
+          // ИСПРАВЛЕНО: SVG из базы проходит через санитайзер перед вставкой
+          const safeCategoryIcon = sanitizeIcon(categoryIcon);
 
           return (
             <div key={info.id} className={styles.category_block}>
               <div className={styles.category_header}>
-                {categoryIcon && (
+                {safeCategoryIcon && (
                   <div
                     className={styles.category_icon_wrapper}
                     style={{ color: info.icon_color || undefined }}
-                    dangerouslySetInnerHTML={{ __html: categoryIcon }}
+                    dangerouslySetInnerHTML={{ __html: safeCategoryIcon }}
                   />
                 )}
                 <Text className={styles.title}>{categoryName}</Text>
@@ -125,18 +127,20 @@ export const SkillsSection = ({ id }: SkillsSectionProps) => {
                   const skillName = item.name[currentLang] || item.name.ru;
                   const skillIcon =
                     item.skill_icon[currentLang] || item.skill_icon.ru;
+                  // ИСПРАВЛЕНО: и иконки навыков тоже санитизируем
+                  const safeSkillIcon = sanitizeIcon(skillIcon);
 
                   return (
                     <SkillCard
                       key={item.id}
                       icon={
-                        skillIcon ?
+                        safeSkillIcon ?
                           <div
                             className={styles.skill_icon_wrapper}
                             style={{
                               color: item.skill_icon_color || undefined,
                             }}
-                            dangerouslySetInnerHTML={{ __html: skillIcon }}
+                            dangerouslySetInnerHTML={{ __html: safeSkillIcon }}
                           />
                         : null
                       }

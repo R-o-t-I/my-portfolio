@@ -1,0 +1,59 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.editorBlock {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .galleryItem {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+  }
+}
+
+.skillGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .skillGroupTitle {
+  }
+
+  .skillList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .skillLabel {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+}

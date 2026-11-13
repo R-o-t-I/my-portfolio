@@ -25,6 +25,7 @@ export const ContactsSection = ({ id }: ContactsSectionProps) => {
 
   const {
     formData,
+    previews,
     errors,
     isSubmitting,
     cooldownLeft,
@@ -34,10 +35,15 @@ export const ContactsSection = ({ id }: ContactsSectionProps) => {
     handleRemoveFile,
     handleSubmit,
   } = useContactsForm(
-    () => alert(t("Сообщение отправлено")),
+    () => alert(t("notification.success")),
     (err) => {
       console.error("Ошибка отправки формы:", err);
-      alert(t("Произошла ошибка при отправке. Пожалуйста, попробуйте позже."));
+      alert(
+        t(
+          "notification.error",
+          "Произошла ошибка при отправке. Попробуйте позже.",
+        ),
+      );
     },
   );
 
@@ -132,29 +138,46 @@ export const ContactsSection = ({ id }: ContactsSectionProps) => {
             </FormItem>
           </div>
 
+          {/* ИЗМЕНЕНО: multiple — выбор сразу нескольких файлов */}
           <input
             type="file"
             ref={fileInputRef}
             onChange={handleFileChange}
+            multiple
             style={{ display: "none" }}
             disabled={isSubmitting}
           />
 
-          {formData.file && (
-            <div className={styles.file_badge}>
-              <Text size="xs" className={styles.name}>
-                📎 {formData.file.name}
-              </Text>
-              <button
-                type="button"
-                onClick={handleRemoveFile}
-                disabled={isSubmitting}
-                aria-label={t("form.file.remove_aria", "Удалить файл")}
-              >
-                <Text size="xs" className={styles.remove_file_btn}>
-                  ✕
-                </Text>
-              </button>
+          {/* ИЗМЕНЕНО: список бейджей с превью вместо одного */}
+          {formData.files.length > 0 && (
+            <div className={styles.file_badges}>
+              {formData.files.map((file, index) => (
+                <div
+                  key={`${file.name}-${file.lastModified}`}
+                  className={styles.file_badge}
+                >
+                  {previews[index] ?
+                    <img
+                      src={previews[index]}
+                      alt={file.name}
+                      className={styles.preview}
+                    />
+                  : <span className={styles.preview_fallback}>📎</span>}
+                  <Text size="xs" className={styles.name}>
+                    {file.name}
+                  </Text>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(index)}
+                    disabled={isSubmitting}
+                    aria-label={t("form.button.remove_aria", "Удалить файл")}
+                  >
+                    <Text size="xs" className={styles.remove_file_btn}>
+                      ✕
+                    </Text>
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 

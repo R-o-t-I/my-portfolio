@@ -5,7 +5,8 @@ export interface FormDataState {
   email: string;
   social: string;
   message: string;
-  file: File | null;
+  // ИЗМЕНЕНО: массив файлов вместо одного файла
+  files: File[];
 }
 
 export interface FormErrorsState {
@@ -15,9 +16,34 @@ export interface FormErrorsState {
   file?: string;
 }
 
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+/**
+ * Валидация ссылки через встроенный парсер URL вместо regex.
+ * Принимает адреса с "?", "#", заглавными буквами и кириллическими
+ * доменами (сайт.рф) и не уходит в бэктрекинг, как старая регулярка.
+ */
+const isValidUrl = (value: string): boolean => {
+  if (!value) return false;
+
+  try {
+    // Нормализация: допускаем ввод без протокола
+    const normalized = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+
+    const url = new URL(normalized);
+
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      url.hostname.includes(".")
+    );
+  } catch {
+    return false;
+  }
+};
+
 export const validateContactsForm = (
   data: FormDataState,
-  t: TFunction, // Безопасная типизация для i18next, убирающая ошибки компиляции TS
+  t: TFunction,
 ): FormErrorsState => {
   const errors: FormErrorsState = {};
 
@@ -35,40 +61,35 @@ export const validateContactsForm = (
   const emailTrimmed = data.email.trim();
   const socialTrimmed = data.social.trim();
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const urlRegex =
-    /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/;
-
   const isEmailValid = emailRegex.test(emailTrimmed);
-  const isSocialValid = urlRegex.test(socialTrimmed);
+  const isSocialValid = isValidUrl(socialTrimmed);
 
-  // Сценарий А: Оба поля абсолютно пустые
+  const emailError =
+    emailTrimmed && !isEmailValid ?
+      t(
+        "form.error.email_invalid",
+        "Адрес электронной почты должен содержать символ «@» и доменную зону",
+      )
+    : null;
+  const socialError =
+    socialTrimmed && !isSocialValid ?
+      t("form.error.social_invalid", "Введите корректную ссылку (URL)")
+    : null;
+
   if (!emailTrimmed && !socialTrimmed) {
     errors.contacts = t(
       "form.error.contacts_empty",
       "Заполните хотя бы одно поле: Email или Ссылку",
     );
-  }
-  // Сценарий Б: Пользователь пытался заполнить оба поля, но оба содержат ошибки
-  else if (emailTrimmed && !isEmailValid && socialTrimmed && !isSocialValid) {
+  } else if (emailError && socialError) {
     errors.contacts = t(
       "form.error.contacts_invalid_both",
       "Некорректный формат email и ссылки",
     );
-  }
-  // Сценарий В: Заполнено только поле Email, но с ошибкой
-  else if (emailTrimmed && !isEmailValid && !socialTrimmed) {
-    errors.contacts = t(
-      "form.error.email_invalid",
-      "Адрес электронной почты должен содержать символ «@» и доменную зону",
-    );
-  }
-  // Сценарий Г: Заполнено только поле Ссылки, но с ошибкой
-  else if (socialTrimmed && !isSocialValid && !emailTrimmed) {
-    errors.contacts = t(
-      "form.error.social_invalid",
-      "Введите корректную ссылку (URL)",
-    );
+  } else if (emailError) {
+    errors.contacts = emailError;
+  } else if (socialError) {
+    errors.contacts = socialError;
   }
 
   // 3. Валидация сообщения

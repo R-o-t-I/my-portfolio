@@ -4,43 +4,44 @@ import { useTranslation } from "react-i18next";
 
 import { Footer, Navbar, Wrapper } from "@/components";
 
+const META_CONFIG = {
+  ru: {
+    title: "Веб-разработчик и дизайнер – Александр Тихонович",
+    description:
+      "Портфолио Александра Тихоновича – современная веб-разработка и дизайн интерфейсов.",
+  },
+  en: {
+    title: "Web Developer & Designer – Alexander Tihonovich",
+    description:
+      "Alexander Tihonovich – modern web development and UI/UX design portfolio.",
+  },
+};
+
 export const App = () => {
-  const { hash, pathname } = useLocation(); // Добавили pathname
+  const { hash, pathname } = useLocation();
   const { i18n } = useTranslation();
 
-  // 1. СМУЗ-СКРОЛЛ К СЕКЦИЯМ
+  // Скроллим после двух кадров: к этому моменту секция гарантированно отрендерена
   useEffect(() => {
-    if (hash) {
-      const id = hash.replace("#", "");
-      const element = document.getElementById(id);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
-    }
+    if (!hash) return;
+
+    const id = hash.replace("#", "");
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        element.scrollIntoView({ behavior: "smooth" });
+      });
+    });
   }, [hash]);
 
+  // Метаданные нужны только главной — остальные страницы управляют title сами
   useEffect(() => {
-    if (pathname !== "/") {
-      return;
-    }
-
-    const metaConfig = {
-      ru: {
-        title: "Веб-разработчик и дизайнер – Александр Тихонович",
-        description:
-          "Портфолио Александра Тихоновича – современная веб-разработка и дизайн интерфейсов.",
-      },
-      en: {
-        title: "Web Developer & Designer – Alexander Tihonovich",
-        description:
-          "Alexander Tihonovich – modern web development and UI/UX design portfolio.",
-      },
-    };
+    if (pathname !== "/") return;
 
     const currentLng = i18n.language.startsWith("ru") ? "ru" : "en";
-    const locale = metaConfig[currentLng];
+    const locale = META_CONFIG[currentLng];
 
     document.title = locale.title;
     document.documentElement.setAttribute("lang", currentLng);
@@ -49,7 +50,7 @@ export const App = () => {
     if (metaDescription) {
       metaDescription.setAttribute("content", locale.description);
     }
-  }, [i18n.language, pathname]); // Добавили pathname в зависимости
+  }, [i18n.language, pathname]);
 
   return (
     <Wrapper>

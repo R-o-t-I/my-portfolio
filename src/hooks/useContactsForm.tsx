@@ -12,23 +12,44 @@ const INITIAL_FORM_STATE: FormDataState = {
   email: "",
   social: "",
   message: "",
-  file: null,
+  files: [],
 };
 
 const COOLDOWN_MS = 60 * 1000;
 const STORAGE_KEY = "last_submit_timestamp";
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 МБ на файл
+const MAX_FILES = 10;
+
+// Превью создаём только для изображений; для остальных файлов — null
+const createPreview = (file: File): string | null =>
+  file.type.startsWith("image/") ? URL.createObjectURL(file) : null;
 
 export const useContactsForm = (
   onSuccess: () => void,
   onError: (err: unknown) => void,
 ) => {
-  const { t } = useTranslation(); // Инициализируем перевод внутри хука
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<FormDataState>(INITIAL_FORM_STATE);
+  // Параллельно файлам: blob-ссылка на миниатюру или null
+  const [previews, setPreviews] = useState<(string | null)[]>([]);
   const [errors, setErrors] = useState<FormErrorsState>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cooldownLeft, setCooldownLeft] = useState<number>(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Ссылка на актуальные превью для очистки при размонтировании
+  const previewsRef = useRef<(string | null)[]>([]);
+  previewsRef.current = previews;
+
+  // Отзываем все blob-ссылки, когда форма уходит со страницы
+  useEffect(() => {
+    return () => {
+      previewsRef.current.forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+  }, []);
 
   // Управление кулдауном через единый интервал
   useEffect(() => {
@@ -76,28 +97,63 @@ export const useContactsForm = (
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (!selectedFile) return;
+    const selectedFiles = Array.from(e.target.files ?? []);
+    // ИСПРАВЛЕНО: сбрасываем input сразу, чтобы повторный выбор
+    // тех же файлов снова вызвал onChange
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (!selectedFiles.length) return;
 
-    if (selectedFile.size > 10 * 1024 * 1024) {
-      setErrors((prev) => ({
-        ...prev,
-        // ИСПРАВЛЕНО: Текст ошибки размера файла теперь переводится
-        file: t(
-          "form.error.file_too_large",
-          "Файл слишком большой. Максимум 10 МБ",
-        ),
-      }));
-      return;
+    const tooLarge: string[] = [];
+    const valid: File[] = [];
+
+    for (const file of selectedFiles) {
+      if (file.size > MAX_FILE_SIZE) tooLarge.push(file.name);
+      else valid.push(file);
     }
 
-    setFormData((prev) => ({ ...prev, file: selectedFile }));
-    setErrors((prev) => ({ ...prev, file: undefined }));
+    // Не даём превысить лимит количества: лишнее отбрасываем
+    const remaining = Math.max(0, MAX_FILES - formData.files.length);
+    const accepted = valid.slice(0, remaining);
+    const overflow = valid.slice(remaining);
+
+    if (accepted.length) {
+      setFormData((prev) => ({ ...prev, files: [...prev.files, ...accepted] }));
+      setPreviews((prev) => [...prev, ...accepted.map(createPreview)]);
+    }
+
+    if (tooLarge.length) {
+      setErrors((prev) => ({
+        ...prev,
+        file: t("form.error.file_too_large_multi", {
+          names: tooLarge.join(", "),
+          defaultValue: `Слишком большие файлы (максимум 10 МБ): {{names}}`,
+        }),
+      }));
+    } else if (overflow.length) {
+      setErrors((prev) => ({
+        ...prev,
+        file: t("form.error.file_too_many", {
+          count: MAX_FILES,
+          defaultValue: `Можно прикрепить не более ${MAX_FILES} файлов`,
+        }),
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, file: undefined }));
+    }
   };
 
-  const handleRemoveFile = () => {
-    setFormData((prev) => ({ ...prev, file: null }));
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleRemoveFile = (index: number) => {
+    // Отзываем blob-ссылку удалённого файла, чтобы не течь памятью
+    setPreviews((prev) => {
+      const url = prev[index];
+      if (url) URL.revokeObjectURL(url);
+      return prev.filter((_, i) => i !== index);
+    });
+    setFormData((prev) => ({
+      ...prev,
+      files: prev.files.filter((_, i) => i !== index),
+    }));
+    setErrors((prev) => ({ ...prev, file: undefined }));
   };
 
   const generateFastId = (): string => {
@@ -139,7 +195,6 @@ export const useContactsForm = (
 
     if (cooldownLeft > 0) return;
 
-    // ИСПРАВЛЕНО: Передаем функцию t вторым аргументом в валидатор полей формы
     const formErrors = validateContactsForm(formData, t);
 
     if (Object.keys(formErrors).length > 0 || errors.file) {
@@ -151,11 +206,12 @@ export const useContactsForm = (
 
     try {
       setIsSubmitting(true);
-      let uploadedFileUrl = null;
 
-      if (currentFormData.file) {
-        uploadedFileUrl = await uploadFile(currentFormData.file);
-      }
+      // ИЗМЕНЕНО: грузим все файлы параллельно
+      const uploadedFileUrls =
+        currentFormData.files.length ?
+          await Promise.all(currentFormData.files.map(uploadFile))
+        : null;
 
       const { error: insertError } = await supabase.from("contacts").insert([
         {
@@ -163,7 +219,7 @@ export const useContactsForm = (
           email: currentFormData.email.trim() || null,
           social: currentFormData.social.trim() || null,
           message: currentFormData.message.trim(),
-          file_url: uploadedFileUrl,
+          file_url: uploadedFileUrls, // массив URL или null
         },
       ]);
 
@@ -172,7 +228,12 @@ export const useContactsForm = (
       localStorage.setItem(STORAGE_KEY, Date.now().toString());
       setCooldownLeft(COOLDOWN_MS / 1000);
 
+      // Отзываем превью успешно отправленных файлов
+      previewsRef.current.forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
       setFormData(INITIAL_FORM_STATE);
+      setPreviews([]);
       setErrors({});
       if (fileInputRef.current) fileInputRef.current.value = "";
 
@@ -186,6 +247,7 @@ export const useContactsForm = (
 
   return {
     formData,
+    previews,
     errors,
     isSubmitting,
     cooldownLeft,

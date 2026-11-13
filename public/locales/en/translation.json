@@ -107,6 +107,23 @@
     }
   },
 
+  "not_found": {
+    "button": "Go to homepage",
+    "page": {
+      "title": "Page not found",
+      "text": "This page doesn't exist, check the link",
+      "alt": "Page not found"
+    },
+    "project": {
+      "title": "Project not found",
+      "text": "The link may be outdated or the project was removed"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "text": "We couldn't load the project. Please try again later"
+    }
+  },
+
   "form": {
     "error": {
       "name_required": "Please enter your name",
@@ -117,7 +134,9 @@
       "social_invalid": "Enter a valid link (URL)",
       "message_required": "Please enter your message",
       "message_short": "Message must be at least 10 characters long",
-      "file_too_large": "The file is too large. Maximum 10 MB"
+      "file_too_large": "The file is too large. Maximum 10 MB",
+      "file_too_large_multi": "Files too large (max 10 MB): {{names}}",
+      "file_too_many": "You can attach up to {{count}} files"
     },
     "input": {
       "title": {
@@ -145,11 +164,41 @@
   },
 
   "notification": {
-    "success": "Message sent"
+    "success": "Message sent",
+    "error": "An error occurred while sending. Please try again later"
   },
 
   "other": {
     "and": "and",
     "or": "or"
+  },
+
+  "admin": {
+    "login": {
+      "title": "Admin Panel",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "error": {
+        "credentials": "Incorrect email or password",
+        "not_confirmed": "Confirm your email before signing in",
+        "generic": "Couldn't sign in. Please try again later."
+      }
+    },
+    "error": {
+      "slug_required": "Please enter the project slug",
+      "slug_cyrillic": "The slug cannot contain Cyrillic — use Latin letters, digits, and hyphens",
+      "slug_invalid": "The slug must contain only Latin letters, digits, hyphens, and underscores",
+      "file_type": "Supported formats: PNG, JPEG, WebP and SVG",
+      "file_size": "File is larger than {{maxMb}} MB — please choose a smaller one",
+      "file_upload": "Upload failed"
+    },
+    "upload": {
+      "label_remove": "Remove image",
+      "button_upload": "Upload",
+      "button_replace": "Replace",
+      "button_uploading": "Uploading..."
+    }
   }
 }
