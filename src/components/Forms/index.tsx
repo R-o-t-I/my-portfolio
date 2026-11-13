@@ -1,3 +1,4 @@
+export * from "./ColorField/ColorField";
 export * from "./FormItem/FormItem";
 export * from "./ImageUploadField/ImageUploadField";
 export * from "./Input/Input";

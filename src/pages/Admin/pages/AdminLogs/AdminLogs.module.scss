@@ -23,6 +23,8 @@
 
       text-align: left;
       vertical-align: top;
+      min-width: 120px;
+      max-width: 300px;
     }
 
     th {
@@ -45,10 +47,21 @@
   .changes {
     max-width: 480px;
     overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
 
-    font-family: monospace;
-    font-size: 13px;
+    &:hover {
+      // Подсказываем, что ячейка кликабельна
+      color: var(--color_text_accent, #8ab4ff);
+    }
+  }
+
+  .changesExpanded {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    overflow-wrap: anywhere; // длинные uuid переносятся посимвольно
   }
 }

@@ -18,7 +18,7 @@ export const Tabs = ({
   onSelectedIdChange,
   mode = "accent",
   layoutFillMode = "auto",
-  withScrollToSelectedTab = true,
+  withScrollToSelectedTab = false,
   getRootRef,
   children,
   className = "",
@@ -31,12 +31,14 @@ export const Tabs = ({
   });
 
   const prevLeftRef = useRef<number | null>(null);
+  const prevSelectedRef = useRef<string | undefined>(undefined);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!selectedId) {
       setIndicatorStyle({ opacity: 0 });
       prevLeftRef.current = null;
+      prevSelectedRef.current = undefined;
       return;
     }
 
@@ -94,13 +96,26 @@ export const Tabs = ({
 
       prevLeftRef.current = currentLeft;
 
-      if (withScrollToSelectedTab) {
-        activeTab.scrollIntoView({
+      // Скролл только при реальной смене таба после монтирования.
+      // scrollIntoView прокручивает всех скроллируемых предков и уносит
+      // страницу вниз, поэтому двигаем только сам контейнер по горизонтали
+      if (
+        withScrollToSelectedTab &&
+        prevSelectedRef.current !== undefined &&
+        prevSelectedRef.current !== selectedId
+      ) {
+        const containerRect = currentContainer.getBoundingClientRect();
+        const tabRect = activeTab.getBoundingClientRect();
+        const target =
+          currentContainer.scrollLeft +
+          (tabRect.left - containerRect.left) -
+          (containerRect.width - tabRect.width) / 2;
+        currentContainer.scrollTo({
+          left: Math.max(0, target),
           behavior: "smooth",
-          block: "nearest",
-          inline: "nearest",
         });
       }
+      prevSelectedRef.current = selectedId;
     }
 
     return () => {

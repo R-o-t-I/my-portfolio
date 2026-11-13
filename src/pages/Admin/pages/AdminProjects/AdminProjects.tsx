@@ -24,6 +24,8 @@ import {
   Input,
   ProjectCard,
   Select,
+  Tabs,
+  TabsItem,
   Text,
   Textarea,
   Title,
@@ -32,6 +34,8 @@ import {
 import styles from "./AdminProjects.module.scss";
 
 type Localized = { ru?: string; en?: string } | null;
+
+type ProjectStatus = "draft" | "published";
 
 type LinkItem = { url: string; type: string | null; text: Localized };
 type GalleryCategory = { id: string; name: Localized };
@@ -45,6 +49,7 @@ type Project = {
   id: string;
   slug: string;
   created_at: string;
+  status?: ProjectStatus;
   title: Localized;
   description: Localized;
   description_mini: Localized;
@@ -78,12 +83,12 @@ type SkillCategory = {
 type LinkType = "website" | "telegram" | "vk" | "ok" | "github";
 
 // В базу пишется value (ключ), в селекте показывается label
-const LINK_TYPES: { value: LinkType; label: string }[] = [
-  { value: "website", label: "Сайт" },
-  { value: "telegram", label: "Telegram" },
-  { value: "vk", label: "ВКонтакте" },
-  { value: "ok", label: "Одноклассники" },
-  { value: "github", label: "GitHub" },
+const LINK_TYPES: { value: LinkType }[] = [
+  { value: "website" },
+  { value: "telegram" },
+  { value: "vk" },
+  { value: "ok" },
+  { value: "github" },
 ];
 
 type LinkForm = {
@@ -102,7 +107,7 @@ type GalleryForm = {
   categoryNameRu: string;
   categoryNameEn: string;
   // Папка, в которую файл реально загружен в Storage: id категории или "other".
-  // null = файл ещё не загружен или это старая запись без категории.
+  // null = файл ещё не загружен или это старая запись без категории
   uploadedCategoryId: string | null;
 };
 
@@ -110,6 +115,7 @@ type FormData = {
   slug: string;
   createdAt: string;
   categoryId: string;
+  status: ProjectStatus;
   titleRu: string;
   titleEn: string;
   miniRu: string;
@@ -131,6 +137,9 @@ type FieldErrors = {
   titleEn?: string;
   links: Record<number, string>;
 };
+
+// Табы статусов списка проектов
+type StatusTab = "all" | ProjectStatus;
 
 const EMPTY_ERRORS: FieldErrors = { links: {} };
 
@@ -174,6 +183,7 @@ const EMPTY_FORM: FormData = {
   slug: "",
   createdAt: today(),
   categoryId: "",
+  status: "draft",
   titleRu: "",
   titleEn: "",
   miniRu: "",
@@ -209,14 +219,17 @@ const getLinkUrlError = (url: string, t: TFunction): string | null => {
   }
 };
 
+// isPublishing: публикация требует заполненных названий; черновик — нет
 const validateForm = (
   form: FormData,
   links: LinkForm[],
   t: TFunction,
+  isPublishing: boolean,
 ): FieldErrors => {
   const errors: FieldErrors = { links: {} };
 
-  // Слаг: пустое поле на сабмите — ошибка, непустое — проверка правилами
+  // Слаг нужен всегда: он определяет папку проекта в Storage.
+  // Пустое поле на сабмите — ошибка, непустое — проверка правилами
   const slugTrimmed = form.slug.trim();
   if (!slugTrimmed) {
     errors.slug = t("admin.error.slug_required", "Укажите слаг проекта");
@@ -224,11 +237,13 @@ const validateForm = (
     errors.slug = getSlugError(slugTrimmed, t) ?? undefined;
   }
 
-  if (!form.titleRu.trim()) {
-    errors.titleRu = t("admin.error.title_required", "Укажите название");
-  }
-  if (!form.titleEn.trim()) {
-    errors.titleEn = t("admin.error.title_required", "Укажите название");
+  if (isPublishing) {
+    if (!form.titleRu.trim()) {
+      errors.titleRu = t("admin.error.title_required", "Укажите название");
+    }
+    if (!form.titleEn.trim()) {
+      errors.titleEn = t("admin.error.title_required", "Укажите название");
+    }
   }
 
   links.forEach((link, index) => {
@@ -266,7 +281,55 @@ export const AdminProjects = () => {
   const [errors, setErrors] = useState<FieldErrors>(EMPTY_ERRORS);
   // Ошибки показываем после первой попытки сохранения — до этого не мешаем
   const [submitted, setSubmitted] = useState(false);
+
+  // Активный таб статусов: все / опубликованные / черновики
+  const [statusTab, setStatusTab] = useState<StatusTab>("all");
+
   const formRef = useRef<HTMLFormElement>(null);
+  const errorRef = useRef<HTMLDivElement | null>(null);
+
+  // При открытии вкладки всегда стартуем сверху: иначе браузер
+  // восстанавливает прежнюю позицию скролла или прыгает к сфокусированному
+  // элементу в нижней части формы
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Скролл на следующий кадр и ручным расчётом координат:
+  // в тот же тик, что и setState, цели в DOM ещё нет, а scrollIntoView
+  // может быть прерван перерендером; расчёт через getBoundingClientRect
+  // работает и при скролле окна, и внутри контейнера с overflow
+  const scrollToRef = (ref: React.RefObject<HTMLElement | null>) => {
+    requestAnimationFrame(() => {
+      const el = ref.current;
+      if (!el) return;
+
+      // Читаем scroll-margin-top из CSS: при ручном scrollTo браузер
+      // его не применяет, поэтому учитываем сами
+      const marginTop =
+        parseFloat(window.getComputedStyle(el).scrollMarginTop) || 0;
+
+      // Если у родителя есть собственный скролл — прокручиваем его,
+      // иначе окно
+      let scrollParent: HTMLElement | null = el.parentElement;
+      while (scrollParent) {
+        const style = window.getComputedStyle(scrollParent);
+        if (style.overflowY === "auto" || style.overflowY === "scroll") {
+          const target =
+            scrollParent.scrollTop +
+            (el.getBoundingClientRect().top -
+              scrollParent.getBoundingClientRect().top) -
+            marginTop;
+          scrollParent.scrollTo({ top: target, behavior: "smooth" });
+          return;
+        }
+        scrollParent = scrollParent.parentElement;
+      }
+
+      const top = el.getBoundingClientRect().top + window.scrollY - marginTop;
+      window.scrollTo({ top, behavior: "smooth" });
+    });
+  };
 
   // Опции селекта категорий: value — id в базе, пустая строка = «без категории»
   const categoryOptions = [
@@ -281,6 +344,23 @@ export const AdminProjects = () => {
     value,
     label: t(`admin.link_type.${value}`),
   }));
+
+  // Фильтрация по активному табу статусов
+  const visibleProjects =
+    statusTab === "all" ? projects : (
+      projects.filter((project) => project.status === statusTab)
+    );
+
+  const publishedCount = projects.filter(
+    (project) => project.status === "published",
+  ).length;
+  const draftCount = projects.length - publishedCount;
+
+  useEffect(() => {
+    if (error && errorRef.current) {
+      scrollToRef(errorRef);
+    }
+  }, [error]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -354,7 +434,8 @@ export const AdminProjects = () => {
   };
 
   const startEdit = async (project: Project) => {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Скроллим сразу, не дожидаясь загрузки навыков из базы
+    scrollToRef(formRef);
 
     setEditingId(project.id);
     setOriginalSlug(project.slug);
@@ -362,6 +443,7 @@ export const AdminProjects = () => {
       slug: project.slug,
       createdAt: project.created_at ?? today(),
       categoryId: project.category_id ?? "",
+      status: project.status ?? "draft",
       titleRu: fromJsonb(project.title, "ru"),
       titleEn: fromJsonb(project.title, "en"),
       miniRu: fromJsonb(project.description_mini, "ru"),
@@ -405,45 +487,57 @@ export const AdminProjects = () => {
     setSelectedSkillIds(await loadProjectSkills(project.id));
     setErrors(EMPTY_ERRORS);
     setSubmitted(false);
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Обновление полей формы с живой ревалидацией после первой попытки сабмита
+  // Обновление полей формы с живой ревалидацией после первой попытки сабмита.
+  // Апдейтеры без вложенных setState: сайд-эффекты внутри функций-обновлений
+  // могут выполняться дважды в StrictMode и усиливают ререндеры
   const updateForm = (patch: Partial<FormData>) => {
-    setForm((prev) => {
-      const next = { ...prev, ...patch };
-      if (submitted) {
-        setLinks((currentLinks) => {
-          setErrors(validateForm(next, currentLinks, t));
-          return currentLinks;
-        });
-      }
-      return next;
-    });
+    const next = { ...form, ...patch };
+    setForm(next);
+    if (submitted) {
+      setErrors(validateForm(next, links, t, next.status === "published"));
+    }
   };
 
   const updateLinks = (
     next: LinkForm[] | ((prev: LinkForm[]) => LinkForm[]),
   ) => {
-    setLinks((prev) => {
-      const resolved =
-        typeof next === "function" ?
-          (next as (p: LinkForm[]) => LinkForm[])(prev)
-        : next;
-      if (submitted) setErrors(validateForm(form, resolved, t));
-      return resolved;
-    });
+    const resolved =
+      typeof next === "function" ?
+        (next as (p: LinkForm[]) => LinkForm[])(links)
+      : next;
+    setLinks(resolved);
+    if (submitted) {
+      setErrors(validateForm(form, resolved, t, form.status === "published"));
+    }
   };
 
-  const handleSave = async (e: FormEvent) => {
-    e.preventDefault();
+  // Показ ошибки со скроллом: на момент setState блок ошибки ещё не
+  // отрендерен, поэтому scrollToRef откладывает прокрутку на следующий кадр
+  const showError = (message: string) => {
+    setError(message);
+    scrollToRef(errorRef);
+  };
+
+  // Сохранение с явным статусом: "draft" — черновик, "published" — публикация.
+  // Статус передаётся кнопкой, а не берётся из формы: иначе кнопка
+  // «Опубликовать» на черновике сохраняла бы его снова как черновик
+  const handleSave = async (finalStatus: ProjectStatus) => {
     setError(null);
 
-    const validation = validateForm(form, links, t);
+    const validation = validateForm(
+      form,
+      links,
+      t,
+      finalStatus === "published",
+    );
     if (hasErrors(validation)) {
       setErrors(validation);
       setSubmitted(true);
+      // Поднимаем форму: ошибки подсвечены в полях, а сам блок ошибок
+      // вверху не показывается, поэтому скроллим к форме целиком
+      scrollToRef(formRef);
       return;
     }
 
@@ -453,7 +547,7 @@ export const AdminProjects = () => {
     try {
       slug = sanitizeSlug(form.slug);
     } catch {
-      setError(t("admin.error.slug_invalid", "Укажите корректный слаг"));
+      showError(t("admin.error.slug_invalid", "Укажите корректный слаг"));
       setIsSaving(false);
       return;
     }
@@ -464,7 +558,7 @@ export const AdminProjects = () => {
     // Собираем перемещения файлов.
     // Смена слага: логотип и сниппет меняют корневую папку; у галереи
     // файл идёт из своей исходной подпапки в новую папку проекта.
-    // Смена категории галереи: файл уезжает в новую подпапку.
+    // Смена категории галереи: файл уезжает в новую подпапку
     const moves: StorageMove[] = [];
 
     if (slugChanged) {
@@ -511,7 +605,7 @@ export const AdminProjects = () => {
         urlMap = result.urlMap;
         applied = result.applied;
       } catch (e) {
-        setError(
+        showError(
           getErrorMessage(
             e,
             t("admin.error.move_failed", "Не удалось переместить файлы"),
@@ -528,6 +622,7 @@ export const AdminProjects = () => {
       slug,
       created_at: form.createdAt || today(),
       category_id: form.categoryId || null,
+      status: finalStatus,
       title: toJsonb(form.titleRu, form.titleEn),
       description_mini: toJsonb(form.miniRu, form.miniEn),
       description: toJsonb(form.descriptionRu, form.descriptionEn),
@@ -572,7 +667,7 @@ export const AdminProjects = () => {
       if (applied.length > 0) {
         const revert = await revertStorageMoves(applied);
         if (revert.failed.length > 0) {
-          setError(
+          showError(
             t("admin.error.revert_failed", {
               defaultValue:
                 "Сохранение не удалось, и {{count}} файл(ов) не вернулись на прежнее место — проверьте хранилище",
@@ -584,7 +679,7 @@ export const AdminProjects = () => {
         }
       }
 
-      setError(
+      showError(
         saveError.code === "23505" ?
           t("admin.error.slug_taken", "Такой slug уже занят")
         : t("admin.error.save_failed", "Не удалось сохранить проект"),
@@ -593,22 +688,114 @@ export const AdminProjects = () => {
       return;
     }
 
-    const projectId = saved?.id ?? editingId;
+    // ID проекта: из ответа базы, из редактирования или refetch по slug,
+    // если RLS скрыл строку после insert
+    let projectId: string | null = saved?.id ?? editingId;
 
-    // Синхронизация навыков: чистим связки и пишем заново
-    if (projectId) {
-      await supabase
+    if (!projectId) {
+      const { data: row, error: refetchError } = await supabase
+        .from("projects")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+
+      if (refetchError) {
+        showError(
+          getErrorMessage(
+            refetchError,
+            t("admin.error.save_failed", "Не удалось сохранить проект"),
+          ),
+        );
+        setIsSaving(false);
+        return;
+      }
+      projectId = row?.id ?? null;
+    }
+
+    if (!projectId) {
+      // Не смогли определить проект — данные уже записаны, но доводить до
+      // пользователя лучше честно, чем терять навыки молча
+      showError(
+        t(
+          "admin.error.skills_no_project",
+          "Проект сохранён, но не удалось определить его ID — свяжите навыки вручную",
+        ),
+      );
+      setIsSaving(false);
+      return;
+    }
+
+    // Синхронизация навыков: дельта вместо wipe-and-replace.
+    // Так сбой insert не стирает существующие связки
+    const { data: existingRows, error: existingError } = await supabase
+      .from("project_skills")
+      .select("skill_id")
+      .eq("project_id", projectId);
+
+    if (existingError) {
+      showError(
+        getErrorMessage(
+          existingError,
+          t(
+            "admin.error.skills_sync_failed",
+            "Не удалось синхронизировать навыки",
+          ),
+        ),
+      );
+      setIsSaving(false);
+      return;
+    }
+
+    const existing = new Set(
+      ((existingRows as { skill_id: string }[]) ?? []).map(
+        (row) => row.skill_id,
+      ),
+    );
+    const toDelete = [...existing].filter((id) => !selectedSkillIds.has(id));
+    const toInsert = [...selectedSkillIds].filter((id) => !existing.has(id));
+
+    if (toDelete.length > 0) {
+      const { error: delError } = await supabase
         .from("project_skills")
         .delete()
-        .eq("project_id", projectId);
+        .eq("project_id", projectId)
+        .in("skill_id", toDelete);
 
-      if (selectedSkillIds.size > 0) {
-        await supabase.from("project_skills").insert(
-          [...selectedSkillIds].map((skillId) => ({
-            project_id: projectId,
-            skill_id: skillId,
-          })),
+      if (delError) {
+        showError(
+          getErrorMessage(
+            delError,
+            t(
+              "admin.error.skills_sync_failed",
+              "Не удалось синхронизировать навыки",
+            ),
+          ),
         );
+        setIsSaving(false);
+        return;
+      }
+    }
+
+    if (toInsert.length > 0) {
+      const { error: insError } = await supabase.from("project_skills").insert(
+        toInsert.map((skillId) => ({
+          project_id: projectId,
+          skill_id: skillId,
+        })),
+      );
+
+      if (insError) {
+        showError(
+          getErrorMessage(
+            insError,
+            t(
+              "admin.error.skills_sync_failed",
+              "Не удалось синхронизировать навыки",
+            ),
+          ),
+        );
+        setIsSaving(false);
+        return;
       }
     }
 
@@ -642,7 +829,7 @@ export const AdminProjects = () => {
       .eq("id", project.id);
 
     if (deleteError) {
-      setError(t("admin.error.delete_failed", "Не удалось удалить проект"));
+      showError(t("admin.error.delete_failed", "Не удалось удалить проект"));
       return;
     }
 
@@ -669,7 +856,11 @@ export const AdminProjects = () => {
     <section className={styles.wrapper}>
       <Title>{t("admin.projects_title", "Проекты")}</Title>
 
-      {error && <Text className={styles.error}>{error}</Text>}
+      {error && (
+        <div ref={errorRef} className={styles.error_wrapper}>
+          <Text className={styles.error}>{error}</Text>
+        </div>
+      )}
 
       {isLoading ?
         <Text size="xs" mode="secondary">
@@ -678,7 +869,10 @@ export const AdminProjects = () => {
       : <>
           <form
             ref={formRef}
-            onSubmit={handleSave}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSave(form.status);
+            }}
             className={styles.form}
             noValidate
           >
@@ -690,6 +884,8 @@ export const AdminProjects = () => {
               >
                 <Input
                   type="text"
+                  name="project-slug"
+                  autoComplete="off"
                   placeholder="slug"
                   value={form.slug}
                   onChange={(e) => updateForm({ slug: e.target.value })}
@@ -721,11 +917,12 @@ export const AdminProjects = () => {
             <div className={styles.row}>
               <FormItem
                 id="titleRu"
-                top={t("admin.field.title_ru", "Название проекта (RU)*")}
+                top={t("admin.field.title_ru", "Название проекта (RU)")}
                 error={errors.titleRu}
               >
                 <Input
                   type="text"
+                  autoComplete="off"
                   placeholder={t("admin.field.title_ru", "Название (RU)")}
                   value={form.titleRu}
                   onChange={(e) => updateForm({ titleRu: e.target.value })}
@@ -733,11 +930,12 @@ export const AdminProjects = () => {
               </FormItem>
               <FormItem
                 id="titleEn"
-                top={t("admin.field.title_en", "Название проекта (EN)*")}
+                top={t("admin.field.title_en", "Название проекта (EN)")}
                 error={errors.titleEn}
               >
                 <Input
                   type="text"
+                  autoComplete="off"
                   placeholder={t("admin.field.title_en", "Название (EN)")}
                   value={form.titleEn}
                   onChange={(e) => updateForm({ titleEn: e.target.value })}
@@ -832,6 +1030,7 @@ export const AdminProjects = () => {
               <FormItem id="roleRu" top={t("admin.field.role_ru", "Роль (RU)")}>
                 <Input
                   type="text"
+                  autoComplete="off"
                   placeholder={t("admin.field.role_ru", "Роль (RU)")}
                   value={form.roleRu}
                   onChange={(e) => updateForm({ roleRu: e.target.value })}
@@ -840,6 +1039,7 @@ export const AdminProjects = () => {
               <FormItem id="roleEn" top={t("admin.field.role_en", "Роль (EN)")}>
                 <Input
                   type="text"
+                  autoComplete="off"
                   placeholder={t("admin.field.role_en", "Роль (EN)")}
                   value={form.roleEn}
                   onChange={(e) => updateForm({ roleEn: e.target.value })}
@@ -879,6 +1079,7 @@ export const AdminProjects = () => {
                   >
                     <Input
                       type="url"
+                      autoComplete="off"
                       placeholder={t("admin.field.link_url", "URL")}
                       value={link.url}
                       onChange={(e) =>
@@ -908,6 +1109,7 @@ export const AdminProjects = () => {
                   />
                   <Input
                     type="text"
+                    autoComplete="off"
                     placeholder={t("admin.field.link_text_ru", "Подпись (RU)")}
                     value={link.textRu}
                     onChange={(e) =>
@@ -922,6 +1124,7 @@ export const AdminProjects = () => {
                   />
                   <Input
                     type="text"
+                    autoComplete="off"
                     placeholder={t("admin.field.link_text_en", "Подпись (EN)")}
                     value={link.textEn}
                     onChange={(e) =>
@@ -987,6 +1190,7 @@ export const AdminProjects = () => {
                   <div className={styles.row}>
                     <Input
                       type="text"
+                      autoComplete="off"
                       placeholder={t(
                         "admin.field.gallery_title_ru",
                         "Подпись (RU)",
@@ -998,6 +1202,7 @@ export const AdminProjects = () => {
                     />
                     <Input
                       type="text"
+                      autoComplete="off"
                       placeholder={t(
                         "admin.field.gallery_title_en",
                         "Подпись (EN)",
@@ -1012,6 +1217,7 @@ export const AdminProjects = () => {
                   <div className={styles.row}>
                     <Input
                       type="text"
+                      autoComplete="off"
                       placeholder={t(
                         "admin.field.gallery_category_id",
                         "Категория (id, например ios)",
@@ -1023,6 +1229,7 @@ export const AdminProjects = () => {
                     />
                     <Input
                       type="text"
+                      autoComplete="off"
                       placeholder={t(
                         "admin.field.gallery_category_ru",
                         "Категория (RU)",
@@ -1036,6 +1243,7 @@ export const AdminProjects = () => {
                     />
                     <Input
                       type="text"
+                      autoComplete="off"
                       placeholder={t(
                         "admin.field.gallery_category_en",
                         "Категория (EN)",
@@ -1100,15 +1308,31 @@ export const AdminProjects = () => {
             </div>
 
             <div className={styles.actions}>
+              {/* Черновик: сохраняем без публикации, валидация мягче */}
               <Button
-                type="submit"
+                type="button"
+                className={styles.secondaryButton}
+                mode="secondary"
+                disabled={isSaving}
+                onClick={() => handleSave("draft")}
+              >
+                {editingId !== null && form.status === "published" ?
+                  t("admin.action.revert_to_draft", "Вернуть в черновик")
+                : t("admin.action.save_draft", "Сохранить черновик")}
+              </Button>
+
+              {/* Публикация: статус жёсткий, полная валидация */}
+              <Button
+                type="button"
                 className={styles.primaryButton}
                 disabled={isSaving}
+                onClick={() => handleSave("published")}
               >
-                {editingId === null ?
-                  t("admin.action.add_project", "Добавить проект")
-                : t("admin.action.save", "Сохранить")}
+                {form.status === "published" ?
+                  t("admin.action.save", "Сохранить")
+                : t("admin.action.publish", "Опубликовать проект")}
               </Button>
+
               {editingId !== null && (
                 <Button
                   type="button"
@@ -1126,66 +1350,111 @@ export const AdminProjects = () => {
             <Text size="xs" mode="secondary">
               {t("admin.empty_projects", "Проектов пока нет")}
             </Text>
-          : <div className={styles.projects_grid}>
-              {projects.map((project) => {
-                const title = fromJsonb(project.title, "ru") || project.slug;
-                const description = fromJsonb(project.description, "ru");
-                const logo =
-                  fromJsonb(project.logo_url, "ru") ||
-                  fromJsonb(project.logo_url, "en");
-                const snippet =
-                  fromJsonb(project.snippet_url, "ru") ||
-                  fromJsonb(project.snippet_url, "en");
-
-                const category = categories.find(
-                  (item) => item.id === project.category_id,
-                );
-                const categoryName =
-                  category ? (category.name?.ru ?? category.slug) : "";
-
-                return (
-                  <ProjectCard
-                    key={project.id}
-                    slug={project.slug}
-                    logo={logo}
-                    snippet={snippet}
-                    title={title}
-                    description={description}
-                    category={categoryName}
-                    link={true}
-                    actions={
-                      <>
-                        <Button
-                          type="button"
-                          mode="secondary"
-                          className={styles.cardButton}
-                          onClick={(e: React.MouseEvent) => {
-                            // Гасим событие, чтобы клик по кнопке не дошёл до Link
-                            e.preventDefault();
-                            e.stopPropagation();
-                            startEdit(project);
-                          }}
-                        >
-                          {t("admin.action.edit", "Изменить")}
-                        </Button>
-                        <Button
-                          type="button"
-                          mode="secondary"
-                          className={styles.cardButton}
-                          onClick={(e: React.MouseEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleDelete(project);
-                          }}
-                        >
-                          {t("admin.action.delete", "Удалить")}
-                        </Button>
-                      </>
+          : <>
+              <div className={styles.tabs_row}>
+                <Tabs
+                  selectedId={statusTab}
+                  onSelectedIdChange={(id: string | number) => {
+                    const next = id as StatusTab;
+                    if (
+                      next === "all" ||
+                      next === "published" ||
+                      next === "draft"
+                    ) {
+                      setStatusTab(next);
                     }
-                  />
-                );
-              })}
-            </div>
+                  }}
+                  layoutFillMode="auto"
+                  withScrollToSelectedTab
+                >
+                  <TabsItem id="all">
+                    {t("admin.status.all", "Все проекты")} ({projects.length})
+                  </TabsItem>
+                  <TabsItem id="published">
+                    {t("admin.status.published_tab", "Опубликованные")} (
+                    {publishedCount})
+                  </TabsItem>
+                  <TabsItem id="draft">
+                    {t("admin.status.draft_tab", "Черновики")} ({draftCount})
+                  </TabsItem>
+                </Tabs>
+              </div>
+
+              {visibleProjects.length === 0 ?
+                <Text size="xs" mode="secondary">
+                  {t(
+                    "admin.empty_projects_in_tab",
+                    "В этой вкладке проектов нет",
+                  )}
+                </Text>
+              : <div className={styles.projects_grid}>
+                  {visibleProjects.map((project) => {
+                    const title =
+                      fromJsonb(project.title, "ru") || project.slug;
+                    const description = fromJsonb(project.description, "ru");
+                    const logo =
+                      fromJsonb(project.logo_url, "ru") ||
+                      fromJsonb(project.logo_url, "en");
+                    const snippet =
+                      fromJsonb(project.snippet_url, "ru") ||
+                      fromJsonb(project.snippet_url, "en");
+
+                    const category = categories.find(
+                      (item) => item.id === project.category_id,
+                    );
+                    const categoryName =
+                      category ? (category.name?.ru ?? category.slug) : "";
+
+                    return (
+                      <ProjectCard
+                        key={project.id}
+                        slug={project.slug}
+                        logo={logo}
+                        snippet={snippet}
+                        title={title}
+                        badge={
+                          project.status === "draft" ?
+                            t("admin.status.draft", "черновик")
+                          : null
+                        }
+                        description={description}
+                        category={categoryName}
+                        link={true}
+                        actions={
+                          <>
+                            <Button
+                              type="button"
+                              mode="secondary"
+                              className={styles.cardButton}
+                              onClick={(e) => {
+                                // Гасим событие, чтобы клик по кнопке не дошёл до Link
+                                e.preventDefault();
+                                e.stopPropagation();
+                                startEdit(project);
+                              }}
+                            >
+                              {t("admin.action.edit", "Изменить")}
+                            </Button>
+                            <Button
+                              type="button"
+                              mode="secondary"
+                              className={styles.cardButton}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleDelete(project);
+                              }}
+                            >
+                              {t("admin.action.delete", "Удалить")}
+                            </Button>
+                          </>
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              }
+            </>
           }
         </>
       }

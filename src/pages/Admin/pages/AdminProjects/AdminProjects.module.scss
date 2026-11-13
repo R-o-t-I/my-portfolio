@@ -3,6 +3,14 @@
   flex-direction: column;
   gap: 36px;
 
+  .error_wrapper {
+    scroll-margin-top: 24px;
+
+    .error {
+      color: $color-text-error;
+    }
+  }
+
   .form {
     position: relative;
     display: flex;

@@ -17,6 +17,7 @@ interface ProjectCardProps {
   link?: boolean;
   // Кнопки поверх карточки (админка): рендерятся в правом верхнем углу
   actions?: React.ReactNode;
+  badge?: string | null;
 }
 
 export const ProjectCard = ({
@@ -28,6 +29,7 @@ export const ProjectCard = ({
   slug,
   link = true,
   actions,
+  badge,
 }: ProjectCardProps) => {
   const card = (
     <>
@@ -44,6 +46,7 @@ export const ProjectCard = ({
           />
         )}
         <div className={styles.category_wrapper}>{category}</div>
+        {badge && <span className={styles.badgeDraft}>{badge}</span>}
       </div>
 
       <div className={styles.middle}>

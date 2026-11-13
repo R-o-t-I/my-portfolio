@@ -47,6 +47,13 @@
       top: 6px;
       left: 6px;
     }
+
+    .badgeDraft {
+      position: absolute;
+      @include glass-effect($radius: 10px);
+      bottom: 6px;
+      right: 6px;
+    }
   }
 
   .middle {

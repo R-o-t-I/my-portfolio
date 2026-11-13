@@ -10,7 +10,14 @@ export {
 
 export { ProjectCard, ServiceCard, SkillCard } from "./Cards";
 
-export { FormItem, ImageUploadField, Input, Select, Textarea } from "./Forms";
+export {
+  ColorField,
+  FormItem,
+  ImageUploadField,
+  Input,
+  Select,
+  Textarea,
+} from "./Forms";
 
 export { Dropdown, Footer, Navbar, Section, Wrapper } from "./Layout";
 

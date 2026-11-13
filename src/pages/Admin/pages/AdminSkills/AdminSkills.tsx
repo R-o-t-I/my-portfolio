@@ -1,9 +1,21 @@
 import { useEffect, useState, type FormEvent } from "react";
+
+import { useTranslation } from "react-i18next";
+
 import { supabase } from "@/utils";
+
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 import styles from "./AdminSkills.module.scss";
-import { Input, Separator, Text, Textarea, Title } from "@/components";
+
+import {
+  ColorField,
+  Input,
+  Separator,
+  Text,
+  Textarea,
+  Title,
+} from "@/components";
 
 type SkillCategory = {
   id: string;
@@ -58,7 +70,9 @@ const EMPTY_SKILL_FORM: SkillFormData = {
 };
 
 export const AdminSkills = () => {
+  const { t } = useTranslation();
   const { role } = useAdminAuth();
+
   const [categories, setCategories] = useState<SkillCategory[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +111,9 @@ export const AdminSkills = () => {
       ]);
 
       if (categoriesRes.error || skillsRes.error) {
-        setError("Не удалось загрузить навыки");
+        setError(
+          t("admin.error.skills_load_failed", "Не удалось загрузить навыки"),
+        );
         setIsLoading(false);
         return;
       }
@@ -108,7 +124,7 @@ export const AdminSkills = () => {
     };
 
     fetchData();
-  }, []);
+  }, [t]);
 
   // ---- Категории ----
 
@@ -156,7 +172,9 @@ export const AdminSkills = () => {
     const { error: saveError } = await request.select();
 
     if (saveError) {
-      setError("Не удалось сохранить категорию");
+      setError(
+        t("admin.error.category_save_failed", "Не удалось сохранить категорию"),
+      );
       setIsSavingCategory(false);
       return;
     }
@@ -177,8 +195,16 @@ export const AdminSkills = () => {
 
     const confirmText =
       categorySkills.length > 0 ?
-        `В категории «${category.name?.ru ?? "—"}» ${categorySkills.length} навыков. Удалить категорию вместе с ними?`
-      : `Удалить категорию «${category.name?.ru ?? "—"}»?`;
+        t("admin.error.delete_category_with_skills", {
+          defaultValue:
+            "В категории «{{name}}» {{count}} навыков. Удалить категорию вместе с ними?",
+          name: category.name?.ru ?? "—",
+          count: categorySkills.length,
+        })
+      : t("admin.error.delete_category_confirm", {
+          defaultValue: "Удалить категорию «{{name}}»?",
+          name: category.name?.ru ?? "—",
+        });
 
     if (!window.confirm(confirmText)) return;
 
@@ -192,7 +218,12 @@ export const AdminSkills = () => {
         );
 
       if (skillsDeleteError) {
-        setError("Не удалось удалить навыки категории");
+        setError(
+          t(
+            "admin.error.skills_of_category_delete_failed",
+            "Не удалось удалить навыки категории",
+          ),
+        );
         return;
       }
     }
@@ -203,7 +234,9 @@ export const AdminSkills = () => {
       .eq("id", category.id);
 
     if (deleteError) {
-      setError("Не удалось удалить категорию");
+      setError(
+        t("admin.error.category_delete_failed", "Не удалось удалить категорию"),
+      );
       return;
     }
 
@@ -263,7 +296,9 @@ export const AdminSkills = () => {
     const { error: saveError } = await request.select();
 
     if (saveError) {
-      setError("Не удалось сохранить навык");
+      setError(
+        t("admin.error.skill_save_failed", "Не удалось сохранить навык"),
+      );
       setIsSavingSkill(false);
       return;
     }
@@ -282,7 +317,16 @@ export const AdminSkills = () => {
   };
 
   const handleDeleteSkill = async (skill: Skill) => {
-    if (!window.confirm(`Удалить навык «${skill.name?.ru ?? "—"}»?`)) return;
+    if (
+      !window.confirm(
+        t("admin.error.delete_skill_confirm", {
+          defaultValue: "Удалить навык «{{name}}»?",
+          name: skill.name?.ru ?? "—",
+        }),
+      )
+    ) {
+      return;
+    }
 
     const { error: deleteError } = await supabase
       .from("skills")
@@ -290,7 +334,9 @@ export const AdminSkills = () => {
       .eq("id", skill.id);
 
     if (deleteError) {
-      setError("Не удалось удалить навык");
+      setError(
+        t("admin.error.skill_delete_failed", "Не удалось удалить навык"),
+      );
       return;
     }
 
@@ -307,22 +353,25 @@ export const AdminSkills = () => {
 
   return (
     <section className={styles.wrapper}>
-      <Title>Навыки</Title>
+      <Title>{t("admin.skills_title", "Навыки")}</Title>
 
       {error && <Text className={styles.error}>{error}</Text>}
 
       {isLoading ?
         <Text size="xs" mode="secondary">
-          Загружаем...
+          {t("admin.loading", "Загружаем...")}
         </Text>
       : <div className={styles.columns}>
           <div className={styles.categories}>
-            <Title size="sm">Категории</Title>
+            <Title size="sm">{t("admin.skills.categories", "Категории")}</Title>
 
             <form onSubmit={handleCategorySubmit} className={styles.form}>
               <Input
                 type="text"
-                placeholder="id_name (например, dev)"
+                placeholder={t(
+                  "admin.field.id_name",
+                  "id_name (например, dev)",
+                )}
                 value={categoryForm.idName}
                 onChange={(e) =>
                   setCategoryForm((p) => ({ ...p, idName: e.target.value }))
@@ -331,7 +380,7 @@ export const AdminSkills = () => {
               />
               <Input
                 type="text"
-                placeholder="Название (RU)"
+                placeholder={t("admin.field.name_ru", "Название (RU)")}
                 value={categoryForm.nameRu}
                 onChange={(e) =>
                   setCategoryForm((p) => ({ ...p, nameRu: e.target.value }))
@@ -340,7 +389,7 @@ export const AdminSkills = () => {
               />
               <Input
                 type="text"
-                placeholder="Название (EN)"
+                placeholder={t("admin.field.name_en", "Название (EN)")}
                 value={categoryForm.nameEn}
                 onChange={(e) =>
                   setCategoryForm((p) => ({ ...p, nameEn: e.target.value }))
@@ -349,7 +398,7 @@ export const AdminSkills = () => {
               />
               <Input
                 type="number"
-                placeholder="Порядок"
+                placeholder={t("admin.field.order", "Порядок")}
                 value={categoryForm.displayOrder}
                 onChange={(e) =>
                   setCategoryForm((p) => ({
@@ -360,19 +409,24 @@ export const AdminSkills = () => {
               />
               <Textarea
                 rows={3}
-                placeholder="SVG-иконка категории (необязательно)"
+                placeholder={t(
+                  "admin.field.category_svg_icon",
+                  "SVG-иконка категории (необязательно)",
+                )}
                 value={categoryForm.icon}
                 onChange={(e) =>
                   setCategoryForm((p) => ({ ...p, icon: e.target.value }))
                 }
               />
-              <Input
-                type="text"
-                placeholder="Цвет иконки (#hex, необязательно)"
+              <ColorField
                 value={categoryForm.iconColor}
-                onChange={(e) =>
-                  setCategoryForm((p) => ({ ...p, iconColor: e.target.value }))
+                onChange={(iconColor) =>
+                  setCategoryForm((p) => ({ ...p, iconColor }))
                 }
+                placeholder={t(
+                  "admin.field.icon_color",
+                  "Цвет иконки (#hex, необязательно)",
+                )}
               />
               <div className={styles.actions}>
                 <button
@@ -380,7 +434,9 @@ export const AdminSkills = () => {
                   className={styles.primaryButton}
                   disabled={isSavingCategory}
                 >
-                  {editingCategoryId === null ? "Добавить" : "Сохранить"}
+                  {editingCategoryId === null ?
+                    t("admin.action.add", "Добавить")
+                  : t("admin.action.save", "Сохранить")}
                 </button>
                 {editingCategoryId !== null && (
                   <button
@@ -388,7 +444,7 @@ export const AdminSkills = () => {
                     className={styles.secondaryButton}
                     onClick={startCategoryCreate}
                   >
-                    Отменить
+                    {t("admin.action.cancel", "Отменить")}
                   </button>
                 )}
               </div>
@@ -398,7 +454,7 @@ export const AdminSkills = () => {
 
             {categories.length === 0 ?
               <Text size="xs" mode="secondary">
-                Категорий пока нет
+                {t("admin.skills.empty_categories", "Категорий пока нет")}
               </Text>
             : <ul className={styles.list_categories}>
                 {categories.map((category) => (
@@ -427,14 +483,14 @@ export const AdminSkills = () => {
                         className={styles.secondaryButton}
                         onClick={() => startCategoryEdit(category)}
                       >
-                        Изменить
+                        {t("admin.action.edit", "Изменить")}
                       </button>
                       <button
                         type="button"
                         className={styles.dangerButton}
                         onClick={() => handleDeleteCategory(category)}
                       >
-                        Удалить
+                        {t("admin.action.delete", "Удалить")}
                       </button>
                     </div>
                   </li>
@@ -444,16 +500,16 @@ export const AdminSkills = () => {
           </div>
 
           <div className={styles.skills}>
-            <Title size="sm">Навыки</Title>
+            <Title size="sm">{t("admin.skills.skills", "Навыки")}</Title>
             {!selectedCategoryId ?
               <Text size="xs" mode="secondary">
-                Выберите категорию слева
+                {t("admin.skills.select_category", "Выберите категорию слева")}
               </Text>
             : <>
                 <form onSubmit={handleSkillSubmit} className={styles.form}>
                   <Input
                     type="text"
-                    placeholder="Название (RU)"
+                    placeholder={t("admin.field.name_ru", "Название (RU)")}
                     value={skillForm.nameRu}
                     onChange={(e) =>
                       setSkillForm((p) => ({ ...p, nameRu: e.target.value }))
@@ -462,7 +518,7 @@ export const AdminSkills = () => {
                   />
                   <Input
                     type="text"
-                    placeholder="Название (EN)"
+                    placeholder={t("admin.field.name_en", "Название (EN)")}
                     value={skillForm.nameEn}
                     onChange={(e) =>
                       setSkillForm((p) => ({ ...p, nameEn: e.target.value }))
@@ -471,7 +527,7 @@ export const AdminSkills = () => {
                   />
                   <Input
                     type="number"
-                    placeholder="Порядок"
+                    placeholder={t("admin.field.order", "Порядок")}
                     value={skillForm.displayOrder}
                     onChange={(e) =>
                       setSkillForm((p) => ({
@@ -482,19 +538,24 @@ export const AdminSkills = () => {
                   />
                   <Textarea
                     rows={3}
-                    placeholder="SVG-иконка навыка (необязательно)"
+                    placeholder={t(
+                      "admin.field.skill_svg_icon",
+                      "SVG-иконка навыка (необязательно)",
+                    )}
                     value={skillForm.icon}
                     onChange={(e) =>
                       setSkillForm((p) => ({ ...p, icon: e.target.value }))
                     }
                   />
-                  <Input
-                    type="text"
-                    placeholder="Цвет иконки (#hex, необязательно)"
+                  <ColorField
                     value={skillForm.iconColor}
-                    onChange={(e) =>
-                      setSkillForm((p) => ({ ...p, iconColor: e.target.value }))
+                    onChange={(iconColor) =>
+                      setSkillForm((p) => ({ ...p, iconColor }))
                     }
+                    placeholder={t(
+                      "admin.field.icon_color",
+                      "Цвет иконки (#hex, необязательно)",
+                    )}
                   />
                   <div className={styles.actions}>
                     <button
@@ -502,7 +563,9 @@ export const AdminSkills = () => {
                       className={styles.primaryButton}
                       disabled={isSavingSkill}
                     >
-                      {editingSkillId === null ? "Добавить" : "Сохранить"}
+                      {editingSkillId === null ?
+                        t("admin.action.add", "Добавить")
+                      : t("admin.action.save", "Сохранить")}
                     </button>
                     {editingSkillId !== null && (
                       <button
@@ -510,7 +573,7 @@ export const AdminSkills = () => {
                         className={styles.secondaryButton}
                         onClick={startSkillCreate}
                       >
-                        Отменить
+                        {t("admin.action.cancel", "Отменить")}
                       </button>
                     )}
                   </div>
@@ -518,7 +581,10 @@ export const AdminSkills = () => {
                 <Separator />
                 {selectedCategorySkills.length === 0 ?
                   <Text size="xs" mode="secondary">
-                    В этой категории навыков пока нет
+                    {t(
+                      "admin.skills.empty_in_category",
+                      "В этой категории навыков пока нет",
+                    )}
                   </Text>
                 : <ul className={styles.list_skills}>
                     {selectedCategorySkills.map((skill) => (
@@ -551,14 +617,14 @@ export const AdminSkills = () => {
                             className={styles.secondaryButton}
                             onClick={() => startSkillEdit(skill)}
                           >
-                            Изменить
+                            {t("admin.action.edit", "Изменить")}
                           </button>
                           <button
                             type="button"
                             className={styles.dangerButton}
                             onClick={() => handleDeleteSkill(skill)}
                           >
-                            Удалить
+                            {t("admin.action.delete", "Удалить")}
                           </button>
                         </div>
                       </li>

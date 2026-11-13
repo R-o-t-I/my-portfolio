@@ -55,7 +55,7 @@
     },
     "services": {
       "title": "Services",
-      "subtitle": "What am I do",
+      "subtitle": "What I do",
       "card": {
         "code": {
           "title": "Layout of websites and applications",
@@ -200,6 +200,12 @@
       "back_to_site": "Go to homepage",
       "logout": "Sign out"
     },
+    "status": {
+      "all": "All projects",
+      "published_tab": "Published",
+      "draft_tab": "Drafts",
+      "draft": "draft"
+    },
     "dashboard": {
       "title": "Dashboard",
       "error": "Failed to load summary",
@@ -230,6 +236,29 @@
         "contacts": "request",
         "project_skills": "project-skill link",
         "admin_users": "administrator"
+      },
+      "fields": {
+        "slug": "slug",
+        "created_at": "created at",
+        "updated_at": "updated at",
+        "category_id": "category",
+        "status": "status",
+        "title": "title",
+        "description_mini": "short description",
+        "description": "description",
+        "history": "history",
+        "role": "role",
+        "logo_url": "logo",
+        "snippet_url": "snippet",
+        "links": "links",
+        "gallery": "gallery",
+        "name": "name",
+        "id_name": "id_name",
+        "display_order": "order",
+        "icon": "icon",
+        "icon_color": "icon color",
+        "skill_icon": "skill icon",
+        "skill_icon_color": "skill icon color"
       }
     },
     "logs": {
@@ -248,7 +277,16 @@
     "projects_title": "Projects",
     "loading": "Loading...",
     "empty_projects": "No projects yet",
+    "empty_projects_in_tab": "No projects in this tab",
     "category_none": "No category",
+    "skills_title": "Skills",
+    "skills": {
+      "categories": "Categories",
+      "skills": "Skills",
+      "empty_categories": "No categories yet",
+      "empty_in_category": "No skills in this category yet",
+      "select_category": "Select a category on the left"
+    },
     "link_type": {
       "website": "Website",
       "telegram": "Telegram",
@@ -281,7 +319,14 @@
       "gallery_title_en": "Caption (EN)",
       "gallery_category_id": "Category (id, e.g. ios)",
       "gallery_category_ru": "Category (RU)",
-      "gallery_category_en": "Category (EN)"
+      "gallery_category_en": "Category (EN)",
+      "id_name": "id_name (e.g. dev)",
+      "name_ru": "Name (RU)",
+      "name_en": "Name (EN)",
+      "order": "Order",
+      "category_svg_icon": "Category SVG icon (optional)",
+      "skill_svg_icon": "Skill SVG icon (optional)",
+      "icon_color": "Icon color (#hex, optional)"
     },
     "section": {
       "links": "Links",
@@ -289,6 +334,7 @@
       "skills": "Project skills"
     },
     "action": {
+      "add": "Add",
       "add_link": "+ Link",
       "remove_image": "✕ Remove image",
       "add_image": "+ Image",
@@ -297,9 +343,14 @@
       "cancel": "Cancel",
       "edit": "Edit",
       "delete": "Delete",
-      "delete_confirm": "Delete project \"{{name}}\"?"
+      "delete_confirm": "Delete project \"{{name}}\"?",
+      "save_draft": "Save draft",
+      "revert_to_draft": "Revert to draft",
+      "publish": "Publish project"
     },
     "error": {
+      "skills_sync_failed": "Failed to sync project skills",
+      "skills_no_project": "Project saved, but its ID could not be determined — link skills manually",
       "slug_required": "Enter the project slug",
       "slug_cyrillic": "Cyrillic is not allowed in the slug — use Latin letters, digits, hyphens",
       "slug_invalid": "The slug may contain only Latin letters, digits, hyphens and underscores",
@@ -313,7 +364,17 @@
       "move_failed": "Failed to move files",
       "revert_failed_one": "Save failed and {{count}} file was not restored — check the storage",
       "revert_failed_other": "Save failed and {{count}} files were not restored — check the storage",
-      "delete_confirm": "Delete project \"{{name}}\"?"
+      "delete_confirm": "Delete project \"{{name}}\"?",
+      "skills_load_failed": "Failed to load skills",
+      "category_save_failed": "Failed to save the category",
+      "category_delete_failed": "Failed to delete the category",
+      "skill_save_failed": "Failed to save the skill",
+      "skill_delete_failed": "Failed to delete the skill",
+      "skills_of_category_delete_failed": "Failed to delete the category's skills",
+      "delete_category_confirm": "Delete category “{{name}}”?",
+      "delete_skill_confirm": "Delete skill “{{name}}”?",
+      "delete_category_with_skills_one": "Category “{{name}}” has 1 skill. Delete the category along with it?",
+      "delete_category_with_skills_other": "Category “{{name}}” has {{count}} skills. Delete the category along with it?"
     },
     "upload": {
       "label_remove": "Remove image",

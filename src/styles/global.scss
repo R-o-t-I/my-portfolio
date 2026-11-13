@@ -5,16 +5,19 @@
 
   &[data-theme="light"] {
     @include light-palette;
+    color-scheme: light;
   }
 
   &[data-theme="dark"] {
     @include dark-palette;
+    color-scheme: dark;
   }
 
   // Если атрибута нет, и в системе включено светлое — переключаем
   @media (prefers-color-scheme: light) {
     &:not([data-theme="dark"]) {
       @include light-palette;
+      color-scheme: light;
     }
   }
 }
@@ -45,7 +48,7 @@ body {
   flex-direction: column;
   box-sizing: border-box;
 
-  color-scheme: light dark;
+  // color-scheme: light dark;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

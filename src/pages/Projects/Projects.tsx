@@ -17,7 +17,7 @@ import {
 
 // Строгие интерфейсы для TypeScript под JSONB структуру
 interface LocalizedField {
-  ru?: string | null; // Сделали опциональным, т.к. из БД может прийти NULL
+  ru?: string | null;
   en?: string | null;
 }
 
@@ -31,6 +31,7 @@ interface ProjectItem {
   id: string;
   slug: string;
   created_at: string;
+  status?: "draft" | "published";
   category_id: string | null;
   title: LocalizedField;
   description: LocalizedField;
@@ -119,11 +120,14 @@ export const Projects = () => {
     };
   }, []);
 
-  // Фильтрация по категории + сортировка по выбранному варианти
+  // Фильтрация по категории + сортировка по выбранному варианту
   const filteredProjects = useMemo(() => {
+    const publishedOnly = projects.filter(
+      (project) => project.status === "published",
+    );
     const filtered =
-      selectedCategorySlug === "all" ? projects : (
-        projects.filter(
+      selectedCategorySlug === "all" ? publishedOnly : (
+        publishedOnly.filter(
           (project) => project.category_info?.slug === selectedCategorySlug,
         )
       );
@@ -156,6 +160,19 @@ export const Projects = () => {
     return sorted;
   }, [projects, selectedCategorySlug, sortOption, currentLang]);
 
+  // Категории, в которых есть хотя бы один опубликованный проект.
+  // Фильтр по явному статусу, а не по факту наличия проекта: так
+  // поведение не зависит от того, кто смотрит страницу — RLS скроет
+  // черновики от анонима, а от залогиненного админа их отрежет этот фильтр
+  const visibleCategories = useMemo(() => {
+    const idsWithPublished = new Set(
+      projects
+        .filter((project) => project.status === "published")
+        .map((project) => project.category_id as string),
+    );
+    return categories.filter((cat) => idsWithPublished.has(cat.id));
+  }, [projects, categories]);
+
   // Порядок ключей = порядок пунктов в меню
   const sortLabels: Record<SortOption, string> = {
     date_desc: currentLang === "ru" ? "Сначала новые" : "Newest first",
@@ -172,10 +189,12 @@ export const Projects = () => {
 
       {!isLoading ?
         <div className={styles.filters_row}>
-          {categories.length > 0 && (
+          {projects.length > 0 && (
             <Tabs
               selectedId={selectedCategorySlug}
-              onSelectedIdChange={(id) => setSelectedCategorySlug(id)}
+              onSelectedIdChange={(id: string | number) =>
+                setSelectedCategorySlug(String(id))
+              }
               layoutFillMode="auto"
               withScrollToSelectedTab
             >
@@ -183,7 +202,7 @@ export const Projects = () => {
                 {currentLang === "ru" ? "Все проекты" : "All projects"}
               </TabsItem>
 
-              {categories.map((cat) => {
+              {visibleCategories.map((cat) => {
                 const categoryName =
                   cat.name?.[currentLang] ?? cat.name?.ru ?? "";
                 return (
@@ -253,7 +272,7 @@ export const Projects = () => {
             {currentLang === "ru" ? "Проекты не найдены" : "No projects found"}
           </Text>
         : filteredProjects.map((item) => {
-            // Безопасное_extraction локализованных данных с фолбэком
+            // Безопасное извлечение локализованных данных с фолбэком
             const title = item.title?.[currentLang] ?? item.title?.ru ?? "";
             const description =
               item.description?.[currentLang] ?? item.description?.ru ?? "";

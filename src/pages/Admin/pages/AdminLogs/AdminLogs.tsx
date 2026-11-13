@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+
 import { supabase } from "@/utils";
 import { describeAuditAction } from "@/utils/auditLabels";
 
@@ -53,8 +55,21 @@ const loadDisplayNames = async (
   // Собираем id по таблицам: одна таблица — один запрос вместо запроса на строку
   const idsByTable = new Map<string, Set<string>>();
 
+  // Для связок проект-навык record_id — составной: "projectId:skillId".
+  // Имя собираем из названий обеих таблиц
+  const linkPairs = new Map<string, { projectId: string; skillId: string }>();
+
   for (const entry of logs) {
     if (!entry.record_id) continue;
+
+    if (entry.table_name === "project_skills") {
+      const [projectId, skillId] = entry.record_id.split(":");
+      if (projectId && skillId) {
+        linkPairs.set(entry.record_id, { projectId, skillId });
+      }
+      continue;
+    }
+
     if (!LABEL_EXTRACTORS[entry.table_name]) continue;
 
     const ids = idsByTable.get(entry.table_name) ?? new Set();
@@ -78,13 +93,123 @@ const loadDisplayNames = async (
     }),
   );
 
+  // Связки: вытягиваем названия проектов и навыков, склеиваем «проект — навык»
+  if (linkPairs.size > 0) {
+    const projectIds = [
+      ...new Set([...linkPairs.values()].map((p) => p.projectId)),
+    ];
+    const skillIds = [
+      ...new Set([...linkPairs.values()].map((p) => p.skillId)),
+    ];
+
+    const [projectsRes, skillsRes] = await Promise.all([
+      supabase.from("projects").select("id, title, slug").in("id", projectIds),
+      supabase.from("skills").select("id, name").in("id", skillIds),
+    ]);
+
+    const projectLabel = new Map<string, string>();
+    for (const row of ((projectsRes.data ?? []) as Record<string, unknown>[]) ||
+      []) {
+      const label = LABEL_EXTRACTORS.projects(row);
+      if (label) projectLabel.set(String(row.id), label);
+    }
+
+    const skillLabel = new Map<string, string>();
+    for (const row of ((skillsRes.data ?? []) as Record<string, unknown>[]) ||
+      []) {
+      const label = LABEL_EXTRACTORS.skills(row);
+      if (label) skillLabel.set(String(row.id), label);
+    }
+
+    for (const [recordId, pair] of linkPairs) {
+      // Если имя не нашлось (запись удалена) — показываем короткий кусок id
+      const project =
+        projectLabel.get(pair.projectId) ?? pair.projectId.slice(0, 8);
+      const skill = skillLabel.get(pair.skillId) ?? pair.skillId.slice(0, 8);
+      names.set(`project_skills:${recordId}`, `${project} — ${skill}`);
+    }
+  }
+
   return names;
 };
 
-const describeChanges = (entry: LogEntry): string => {
+// Короткое представление значения: строки обрезаем,
+// jsonb с ru/en показываем ru, прочие объекты сворачиваем.
+// full = true — ячейка раскрыта, показываем значение целиком без обрезки
+const summarizeValue = (value: unknown, full = false): string => {
+  if (value === null || value === undefined) return "—";
+  if (typeof value === "string") {
+    return full || value.length <= 24 ? value : `${value.slice(0, 24)}…`;
+  }
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    if (typeof obj.ru === "string") {
+      return full || obj.ru.length <= 24 ? obj.ru : `${obj.ru.slice(0, 24)}…`;
+    }
+    return full ? JSON.stringify(obj) : "{…}";
+  }
+  return String(value);
+};
+
+type FieldChange = { field: string; from: string; to: string };
+
+const extractFieldChanges = (
+  changed: Record<string, unknown> | null,
+  full: boolean,
+): FieldChange[] => {
+  if (!changed) return [];
+
+  // Обёртка { new: {...}, old: {...} } — как пишет триггер аудита
+  if ("new" in changed || "old" in changed) {
+    const newRow = (changed.new ?? null) as Record<string, unknown> | null;
+    const oldRow = (changed.old ?? null) as Record<string, unknown> | null;
+
+    // insert: old нет; delete: new нет — показываем поля записи
+    if (!newRow || !oldRow) {
+      return Object.keys(newRow ?? oldRow ?? {}).map((field) => ({
+        field,
+        from: "—",
+        to: "—",
+      }));
+    }
+
+    return Object.keys(newRow)
+      .filter(
+        (field) =>
+          JSON.stringify(oldRow[field]) !== JSON.stringify(newRow[field]),
+      )
+      .map((field) => ({
+        field,
+        from: summarizeValue(oldRow[field], full),
+        to: summarizeValue(newRow[field], full),
+      }));
+  }
+
+  // Запасной вариант: диф лежит плоско { field: value }
+  return Object.keys(changed).map((field) => ({
+    field,
+    from: "—",
+    to: summarizeValue(changed[field], full),
+  }));
+};
+
+const describeChanges = (
+  entry: LogEntry,
+  t: TFunction,
+  full: boolean,
+): string => {
   if (entry.action !== "update") return "—";
-  if (!entry.changed_fields) return "—";
-  return Object.keys(entry.changed_fields).join(", ");
+
+  const changes = extractFieldChanges(entry.changed_fields, full);
+  if (changes.length === 0) return "—";
+
+  return changes
+    .map(({ field, from, to }) => {
+      // Название поля из локали, незнакомые — как есть
+      const label = t(`admin.audit.fields.${field}`, field);
+      return from !== "—" ? `${label}: ${from} → ${to}` : label;
+    })
+    .join(", ");
 };
 
 export const AdminLogs = () => {
@@ -93,6 +218,19 @@ export const AdminLogs = () => {
   const [names, setNames] = useState<Map<string, string>>(new Map());
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Раскрытые ячейки. Ключ составной: "id:object" или "id:changes",
+  // чтобы «Объект» и «Изменённые поля» раскрывались независимо
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (key: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -122,7 +260,10 @@ export const AdminLogs = () => {
     };
 
     fetchLogs();
-  }, [t]);
+    // Загружаем один раз: t в зависимостях заставлял бы перезапрашивать
+    // 200 записей при каждой смене языка
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatTime = (iso: string) =>
     new Date(iso).toLocaleString(i18n.language, {
@@ -133,17 +274,17 @@ export const AdminLogs = () => {
       minute: "2-digit",
     });
 
-  const formatObject = (entry: LogEntry): { label: string; hint?: string } => {
-    const idPart = entry.record_id !== null ? ` #${entry.record_id}` : "";
-    const raw = `${entry.table_name}${idPart}`;
+  const formatObject = (entry: LogEntry): { label: string; full: string } => {
+    const raw =
+      entry.record_id !== null ?
+        `${entry.table_name} #${entry.record_id}`
+      : entry.table_name;
 
-    if (!entry.record_id) return { label: entry.table_name };
+    if (!entry.record_id) return { label: entry.table_name, full: raw };
 
     const name =
       entry.record_label ?? names.get(`${entry.table_name}:${entry.record_id}`);
-    if (!name) return { label: raw, hint: raw };
-
-    return { label: name, hint: raw };
+    return { label: name ?? raw, full: raw };
   };
 
   return (
@@ -173,6 +314,8 @@ export const AdminLogs = () => {
           <tbody>
             {entries.map((entry) => {
               const object = formatObject(entry);
+              const isObjectExpanded = expanded.has(`${entry.id}:object`);
+              const isChangesExpanded = expanded.has(`${entry.id}:changes`);
 
               return (
                 <tr key={entry.id}>
@@ -183,10 +326,28 @@ export const AdminLogs = () => {
                   <td>
                     {describeAuditAction(entry.action, entry.table_name, t)}
                   </td>
-                  <td className={styles.changes} title={object.hint}>
-                    {object.label}
+                  <td
+                    className={
+                      isObjectExpanded ?
+                        `${styles.changes} ${styles.changesExpanded}`
+                      : styles.changes
+                    }
+                    title={object.full}
+                    onClick={() => toggleExpanded(`${entry.id}:object`)}
+                  >
+                    {isObjectExpanded ? object.full : object.label}
                   </td>
-                  <td className={styles.changes}>{describeChanges(entry)}</td>
+                  <td
+                    className={
+                      isChangesExpanded ?
+                        `${styles.changes} ${styles.changesExpanded}`
+                      : styles.changes
+                    }
+                    title={describeChanges(entry, t, isChangesExpanded)}
+                    onClick={() => toggleExpanded(`${entry.id}:changes`)}
+                  >
+                    {describeChanges(entry, t, isChangesExpanded)}
+                  </td>
                 </tr>
               );
             })}

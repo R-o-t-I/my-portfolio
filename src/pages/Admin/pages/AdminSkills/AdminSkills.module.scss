@@ -21,6 +21,7 @@
       display: flex;
       flex-direction: column;
       gap: 24px;
+      @include glass-effect;
 
       .list_categories {
         display: flex;
@@ -56,6 +57,7 @@
       display: flex;
       flex-direction: column;
       gap: 24px;
+      @include glass-effect;
 
       .list_skills {
         display: flex;

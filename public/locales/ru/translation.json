@@ -200,6 +200,12 @@
       "back_to_site": "На главную",
       "logout": "Выйти"
     },
+    "status": {
+      "all": "Все проекты",
+      "published_tab": "Опубликованные",
+      "draft_tab": "Черновики",
+      "draft": "черновик"
+    },
     "dashboard": {
       "title": "Главная",
       "error": "Не удалось загрузить сводку",
@@ -236,6 +242,29 @@
         "contacts": "заявка",
         "project_skills": "связка проект-навык",
         "admin_users": "администратор"
+      },
+      "fields": {
+        "slug": "слаг",
+        "created_at": "дата создания",
+        "updated_at": "дата обновления",
+        "category_id": "категория",
+        "status": "статус",
+        "title": "название",
+        "description_mini": "короткое описание",
+        "description": "описание",
+        "history": "история",
+        "role": "роль",
+        "logo_url": "логотип",
+        "snippet_url": "сниппет",
+        "links": "ссылки",
+        "gallery": "галерея",
+        "name": "название",
+        "id_name": "id_name",
+        "display_order": "порядок",
+        "icon": "иконка",
+        "icon_color": "цвет иконки",
+        "skill_icon": "иконка навыка",
+        "skill_icon_color": "цвет иконки навыка"
       }
     },
     "logs": {
@@ -254,7 +283,16 @@
     "projects_title": "Проекты",
     "loading": "Загружаем...",
     "empty_projects": "Проектов пока нет",
+    "empty_projects_in_tab": "В этой вкладке проектов нет",
     "category_none": "Без категории",
+    "skills_title": "Навыки",
+    "skills": {
+      "categories": "Категории",
+      "skills": "Навыки",
+      "empty_categories": "Категорий пока нет",
+      "empty_in_category": "В этой категории навыков пока нет",
+      "select_category": "Выберите категорию слева"
+    },
     "link_type": {
       "website": "Сайт",
       "telegram": "Telegram",
@@ -287,7 +325,14 @@
       "gallery_title_en": "Подпись (EN)",
       "gallery_category_id": "Категория (id, например ios)",
       "gallery_category_ru": "Категория (RU)",
-      "gallery_category_en": "Категория (EN)"
+      "gallery_category_en": "Категория (EN)",
+      "id_name": "id_name (например, dev)",
+      "name_ru": "Название (RU)",
+      "name_en": "Название (EN)",
+      "order": "Порядок",
+      "category_svg_icon": "SVG-иконка категории (необязательно)",
+      "skill_svg_icon": "SVG-иконка навыка (необязательно)",
+      "icon_color": "Цвет иконки (#hex, необязательно)"
     },
     "section": {
       "links": "Ссылки",
@@ -295,6 +340,7 @@
       "skills": "Навыки проекта"
     },
     "action": {
+      "add": "Добавить",
       "add_link": "+ Ссылка",
       "remove_image": "✕ Убрать изображение",
       "add_image": "+ Изображение",
@@ -303,9 +349,14 @@
       "cancel": "Отменить",
       "edit": "Изменить",
       "delete": "Удалить",
-      "delete_confirm": "Удалить проект «{{name}}»?"
+      "delete_confirm": "Удалить проект «{{name}}»?",
+      "save_draft": "Сохранить черновик",
+      "revert_to_draft": "Вернуть в черновик",
+      "publish": "Опубликовать проект"
     },
     "error": {
+      "skills_sync_failed": "Не удалось синхронизировать навыки",
+      "skills_no_project": "Проект сохранён, но не удалось определить его ID — свяжите навыки вручную",
       "slug_required": "Укажите слаг проекта",
       "slug_cyrillic": "В слаге не может быть кириллицы — используйте латиницу, цифры, дефис",
       "slug_invalid": "Слаг должен содержать только латинские буквы, цифры, дефис и подчёркивание",
@@ -321,7 +372,19 @@
       "revert_failed_few": "Сохранение не удалось, и {{count}} файла не вернулись на прежнее место — проверьте хранилище",
       "revert_failed_many": "Сохранение не удалось, и {{count}} файлов не вернулись на прежнее место — проверьте хранилище",
       "revert_failed_other": "Сохранение не удалось, и {{count}} файла не вернулись на прежнее место — проверьте хранилище",
-      "delete_confirm": "Удалить проект «{{name}}»?"
+      "delete_confirm": "Удалить проект «{{name}}»?",
+      "skills_load_failed": "Не удалось загрузить навыки",
+      "category_save_failed": "Не удалось сохранить категорию",
+      "category_delete_failed": "Не удалось удалить категорию",
+      "skill_save_failed": "Не удалось сохранить навык",
+      "skill_delete_failed": "Не удалось удалить навык",
+      "skills_of_category_delete_failed": "Не удалось удалить навыки категории",
+      "delete_category_confirm": "Удалить категорию «{{name}}»?",
+      "delete_skill_confirm": "Удалить навык «{{name}}»?",
+      "delete_category_with_skills_one": "В категории «{{name}}» {{count}} навык. Удалить категорию вместе с ними?",
+      "delete_category_with_skills_few": "В категории «{{name}}» {{count}} навыка. Удалить категорию вместе с ними?",
+      "delete_category_with_skills_many": "В категории «{{name}}» {{count}} навыков. Удалить категорию вместе с ними?",
+      "delete_category_with_skills_other": "В категории «{{name}}» {{count}} навыка. Удалить категорию вместе с ними?"
     },
     "upload": {
       "label_remove": "Убрать изображение",
